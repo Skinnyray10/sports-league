@@ -1,8 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
-/.pnp
+node_modules
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -11,18 +11,19 @@
 !.yarn/versions
 
 # testing
-/coverage
+coverage
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 
 # production
-/build
+build
 
 # env files
 .env*.local
 .env
+.env*
 
 # misc
 .DS_Store
@@ -34,12 +35,19 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local tool / agent noise
+.atl/
+.claude/
+.cursor/
+.worktrees/
+# Impeccable: solo la config compartida se versiona; sesiones, cachés y
+# preferencias locales no.
+.impeccable/*
+!.impeccable/config.json
