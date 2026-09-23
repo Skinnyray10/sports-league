@@ -51,3 +51,6 @@ next-env.d.ts
 # preferencias locales no.
 .impeccable/*
 !.impeccable/config.json
+!.impeccable/live/
+.impeccable/live/*
+!.impeccable/live/config.json
