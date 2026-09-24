@@ -55,9 +55,8 @@ export function DeleteTeamButton({
         <DialogHeader>
           <DialogTitle>¿Eliminar {teamName}?</DialogTitle>
           <DialogDescription>
-            El equipo sale de la organización y no se puede deshacer. Si ya está
-            inscrito en un torneo o tiene partidos registrados, primero tendrás
-            que quitarlo de ahí.
+            El equipo sale de la organización y no se puede deshacer. Si ya
+            tiene partidos registrados, primero tendrás que eliminarlos.
           </DialogDescription>
         </DialogHeader>
         {error ? (

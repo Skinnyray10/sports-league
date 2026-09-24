@@ -127,7 +127,9 @@ export async function createOrganization(input: {
  */
 export async function createInvite(input: {
   organizationId: string;
-  role: MembershipRole;
+  role: Extract<MembershipRole, "team_manager" | "referee">;
+  /** Obligatorio si role = team_manager. */
+  teamId?: string | null;
   /** ISO timestamp o Date. Default: 7 días. */
   expiresAt?: string | Date;
 }): Promise<OrganizationInvite> {
@@ -146,6 +148,7 @@ export async function createInvite(input: {
     .insert({
       organization_id: input.organizationId,
       role: input.role,
+      team_id: input.role === "team_manager" ? input.teamId ?? null : null,
       expires_at: expiresAt,
     })
     .select("*")
@@ -220,6 +223,67 @@ export async function listUserOrganizations(): Promise<Organization[]> {
   return orgs;
 }
 
+/**
+ * Destino post-login según rol en la org:
+ * admin → panel; delegado → jugadores; árbitro → mis partidos.
+ */
+export async function roleHomePath(orgSlug: string): Promise<string> {
+  const membership = await getMembership(orgSlug);
+  if (!membership) {
+    return "/onboarding";
+  }
+
+  const roles = await listMembershipRoles(
+    membership.organization_id,
+    membership.user_id
+  );
+
+  if (roles.includes("admin")) {
+    return `/${orgSlug}`;
+  }
+  if (roles.includes("team_manager")) {
+    return `/${orgSlug}/players`;
+  }
+  if (roles.includes("referee")) {
+    return `/${orgSlug}/referee`;
+  }
+
+  return `/${orgSlug}`;
+}
+
+/**
+ * Elige org (preferida si el usuario es miembro) y resuelve el home por rol.
+ * Sin membresías: si hay solicitud pendiente → /pending; si no → onboarding.
+ */
+export async function homePathAfterAuth(
+  preferredSlug?: string | null
+): Promise<string> {
+  const orgs = await listUserOrganizations();
+  if (orgs.length === 0) {
+    const user = await requireUser();
+    const supabase = await createClient();
+    const { data: pending } = await supabase
+      .from("membership_requests")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("status", "pendiente")
+      .limit(1)
+      .maybeSingle();
+
+    if (pending) {
+      return "/pending";
+    }
+    return "/onboarding";
+  }
+
+  const org =
+    (preferredSlug
+      ? orgs.find((o) => o.slug === preferredSlug)
+      : undefined) ?? orgs[0]!;
+
+  return roleHomePath(org.slug);
+}
+
 async function listMembershipRoles(
   organizationId: string,
   userId: string
@@ -242,12 +306,10 @@ function roleRank(role: MembershipRole): number {
   switch (role) {
     case "admin":
       return 0;
-    case "league_manager":
-      return 1;
     case "team_manager":
-      return 2;
+      return 1;
     case "referee":
-      return 3;
+      return 2;
     default:
       return 99;
   }

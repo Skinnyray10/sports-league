@@ -1,11 +1,27 @@
 import type { ReactNode } from "react";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 
-type ModuleBand = "teams" | "tournaments";
+type ModuleBand =
+  | "teams"
+  | "tournaments"
+  | "matches"
+  | "standings"
+  | "settings"
+  | "clubs"
+  | "players"
+  | "approvals"
+  | "referee";
 
 const bandClass: Record<ModuleBand, string> = {
   teams: "bg-[#FFD40D]",
   tournaments: "bg-[#FF2DA1]",
+  matches: "bg-[#00B7FF]",
+  standings: "bg-[#7C3AED]",
+  settings: "bg-[#5C6570]",
+  clubs: "bg-[#FFD40D]",
+  players: "bg-[#FF2DA1]",
+  approvals: "bg-[#00B7FF]",
+  referee: "bg-[#00B7FF]",
 };
 
 type ModulePageHeaderProps = {

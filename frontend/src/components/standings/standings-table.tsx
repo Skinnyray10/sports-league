@@ -10,27 +10,16 @@ import {
 export type StandingRow = {
   teamId: string;
   teamName: string;
-  pj: number;
-  g: number;
-  e: number;
-  p: number;
-  gf: number;
-  gc: number;
-  dg: number;
-  pts: number;
-};
-
-type StandingsViewRow = {
-  team_id: string | null;
-  team_name: string | null;
-  pj: number | null;
-  g: number | null;
-  e: number | null;
-  p: number | null;
-  gf: number | null;
-  gc: number | null;
-  dg: number | null;
-  pts: number | null;
+  jugados: number;
+  ganados: number;
+  perdidos: number;
+  empatados: number;
+  empates_ganados: number;
+  empates_perdidos: number;
+  a_favor: number;
+  en_contra: number;
+  diferencia: number;
+  puntos: number;
 };
 
 type StandingsTableProps = {
@@ -38,13 +27,41 @@ type StandingsTableProps = {
   hasTournament: boolean;
 };
 
+export function toStandingRow(row: {
+  team_id: string;
+  team_name: string;
+  jugados: number;
+  ganados: number;
+  perdidos: number;
+  empatados: number;
+  empates_ganados: number;
+  empates_perdidos: number;
+  a_favor: number;
+  en_contra: number;
+  diferencia: number;
+  puntos: number;
+}): StandingRow {
+  return {
+    teamId: row.team_id,
+    teamName: row.team_name,
+    jugados: Number(row.jugados),
+    ganados: Number(row.ganados),
+    perdidos: Number(row.perdidos),
+    empatados: Number(row.empatados),
+    empates_ganados: Number(row.empates_ganados),
+    empates_perdidos: Number(row.empates_perdidos),
+    a_favor: Number(row.a_favor),
+    en_contra: Number(row.en_contra),
+    diferencia: Number(row.diferencia),
+    puntos: Number(row.puntos),
+  };
+}
+
 export function StandingsTable({ rows, hasTournament }: StandingsTableProps) {
   if (!hasTournament) {
     return (
       <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">
-          Elige un torneo
-        </p>
+        <p className="text-base font-medium text-[#0A0A0A]">Elige un torneo</p>
         <p className="mt-1 text-sm text-[#5C6570]">
           La tabla se calcula por torneo, a partir de sus partidos finalizados.
         </p>
@@ -59,12 +76,31 @@ export function StandingsTable({ rows, hasTournament }: StandingsTableProps) {
           La tabla todavía está vacía
         </p>
         <p className="mt-1 text-sm text-[#5C6570]">
-          Aparecerá cuando este torneo tenga equipos inscritos y al menos un
-          partido marcado como finalizado.
+          Aparecerá cuando haya equipos en una división y al menos un partido
+          finalizado.
         </p>
       </div>
     );
   }
+
+  const sorted = [...rows].sort((a, b) => {
+    if (b.puntos !== a.puntos) return b.puntos - a.puntos;
+    if (b.diferencia !== a.diferencia) return b.diferencia - a.diferencia;
+    return a.teamName.localeCompare(b.teamName, "es");
+  });
+
+  const cols: { key: keyof StandingRow; label: string; title: string }[] = [
+    { key: "jugados", label: "J.J.", title: "Jugados" },
+    { key: "ganados", label: "J.G.", title: "Ganados" },
+    { key: "perdidos", label: "J.P.", title: "Perdidos" },
+    { key: "empatados", label: "J.E.", title: "Empatados" },
+    { key: "empates_ganados", label: "J.E.G.", title: "Empates ganados" },
+    { key: "empates_perdidos", label: "J.E.P.", title: "Empates perdidos" },
+    { key: "a_favor", label: "A.F.", title: "A favor" },
+    { key: "en_contra", label: "E.C.", title: "En contra" },
+    { key: "diferencia", label: "DIF.", title: "Diferencia" },
+    { key: "puntos", label: "PTS.", title: "Puntos" },
+  ];
 
   return (
     <div className="overflow-x-auto border border-[#D0D5DB] bg-white">
@@ -72,99 +108,38 @@ export function StandingsTable({ rows, hasTournament }: StandingsTableProps) {
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="bg-[#E6E9EC] w-12 text-[#0A0A0A]">#</TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
-              Equipo
-            </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
-              <abbr title="Partidos jugados" className="no-underline">
-                PJ
-              </abbr>
-            </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
-              <abbr title="Ganados" className="no-underline">
-                G
-              </abbr>
-            </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
-              <abbr title="Empatados" className="no-underline">
-                E
-              </abbr>
-            </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
-              <abbr title="Perdidos" className="no-underline">
-                P
-              </abbr>
-            </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
-              <abbr title="A favor" className="no-underline">
-                GF
-              </abbr>
-            </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
-              <abbr title="En contra" className="no-underline">
-                GC
-              </abbr>
-            </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
-              <abbr title="Diferencia" className="no-underline">
-                DG
-              </abbr>
-            </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
-              <abbr title="Puntos" className="no-underline">
-                Pts
-              </abbr>
-            </TableHead>
+            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Equipo</TableHead>
+            {cols.map((c) => (
+              <TableHead
+                key={c.key}
+                className="bg-[#E6E9EC] text-right text-[#0A0A0A]"
+              >
+                <abbr title={c.title} className="no-underline">
+                  {c.label}
+                </abbr>
+              </TableHead>
+            ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((row, index) => (
-            <TableRow key={row.teamId} className="hover:bg-[#E6E9EC]/40">
-              <TableCell className="font-mono text-sm tabular-nums text-[#5C6570]">
-                {index + 1}
+          {sorted.map((row, i) => (
+            <TableRow key={row.teamId}>
+              <TableCell className="font-mono text-muted-foreground">
+                {i + 1}
               </TableCell>
-              <TableCell className="font-medium text-[#0A0A0A]">
-                {row.teamName}
-              </TableCell>
-              <NumCell value={row.pj} />
-              <NumCell value={row.g} />
-              <NumCell value={row.e} />
-              <NumCell value={row.p} />
-              <NumCell value={row.gf} />
-              <NumCell value={row.gc} />
-              <NumCell value={row.dg} />
-              <TableCell className="text-right font-mono text-sm font-semibold tabular-nums text-[#0A0A0A]">
-                {row.pts}
-              </TableCell>
+              <TableCell className="font-medium">{row.teamName}</TableCell>
+              {cols.map((c) => (
+                <TableCell
+                  key={c.key}
+                  className="text-right font-mono tabular-nums"
+                >
+                  {row[c.key]}
+                </TableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </div>
   );
-}
-
-function NumCell({ value }: { value: number }) {
-  return (
-    <TableCell className="text-right font-mono text-sm tabular-nums text-[#0A0A0A]">
-      {value}
-    </TableCell>
-  );
-}
-
-/** Map a standings view row into UI numbers (null-safe). */
-export function toStandingRow(row: StandingsViewRow): StandingRow | null {
-  if (!row.team_id) return null;
-  return {
-    teamId: row.team_id,
-    teamName: row.team_name ?? "Equipo",
-    pj: Number(row.pj ?? 0),
-    g: Number(row.g ?? 0),
-    e: Number(row.e ?? 0),
-    p: Number(row.p ?? 0),
-    gf: Number(row.gf ?? 0),
-    gc: Number(row.gc ?? 0),
-    dg: Number(row.dg ?? 0),
-    pts: Number(row.pts ?? 0),
-  };
 }

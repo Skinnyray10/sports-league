@@ -7,10 +7,17 @@ import { ModulePageHeader } from "@/components/ops/module-page-header";
 import { DeleteTeamButton } from "@/components/teams/delete-team-button";
 import { TeamEditForm } from "@/components/teams/team-edit-form";
 import { Button } from "@/components/ui/button";
+import { BRANCH_LABELS, sportLabel } from "@/lib/labels";
+import type { Branch } from "@/types/database";
 
 type TeamDetailPageProps = {
   params: Promise<{ orgSlug: string; teamId: string }>;
 };
+
+function one<T>(value: T | T[] | null): T | null {
+  if (!value) return null;
+  return Array.isArray(value) ? value[0] ?? null : value;
+}
 
 export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
   const { orgSlug, teamId } = await params;
@@ -19,7 +26,9 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
 
   const { data: team, error } = await supabase
     .from("teams")
-    .select("*")
+    .select(
+      "id, name, logo_url, club:clubs(name), group:groups(name), division:divisions(name, branch, sport:sports(key, name), category:categories(name), tournament:tournaments(name))"
+    )
     .eq("id", teamId)
     .eq("organization_id", access.membership.organization_id)
     .maybeSingle();
@@ -31,7 +40,43 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
     notFound();
   }
 
+  const club = one(team.club as { name: string } | { name: string }[] | null);
+  const group = one(
+    team.group as { name: string } | { name: string }[] | null
+  );
+  const division = one(
+    team.division as
+      | {
+          name: string | null;
+          branch: Branch;
+          sport:
+            | { key: string; name: string }
+            | { key: string; name: string }[]
+            | null;
+          category: { name: string } | { name: string }[] | null;
+          tournament: { name: string } | { name: string }[] | null;
+        }
+      | {
+          name: string | null;
+          branch: Branch;
+          sport:
+            | { key: string; name: string }
+            | { key: string; name: string }[]
+            | null;
+          category: { name: string } | { name: string }[] | null;
+          tournament: { name: string } | { name: string }[] | null;
+        }[]
+      | null
+  );
+  const sport = division ? one(division.sport) : null;
+  const category = division ? one(division.category) : null;
+  const tournament = division ? one(division.tournament) : null;
+
   const canEdit = access.canUpdateTeam(team.id);
+  const divisionSummary =
+    sport && category && division
+      ? `${sportLabel(sport.key)} · ${BRANCH_LABELS[division.branch]} · ${category.name}`
+      : "—";
 
   return (
     <section className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
@@ -50,7 +95,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
         title={team.name}
         description={
           canEdit
-            ? "Los cambios se reflejan en todos sus torneos y partidos."
+            ? "Puedes actualizar el nombre y el logo. Club y división se definen al crear el equipo."
             : "Datos del equipo. Solo lectura con tu rol actual."
         }
         actions={
@@ -64,6 +109,25 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
         }
       />
 
+      <dl className="mb-6 grid max-w-lg gap-4 border border-[#D0D5DB] bg-white p-5 text-sm">
+        <div>
+          <dt className="font-medium text-[#5C6570]">Club</dt>
+          <dd className="mt-1 text-[#0A0A0A]">{club?.name ?? "—"}</dd>
+        </div>
+        <div>
+          <dt className="font-medium text-[#5C6570]">Torneo</dt>
+          <dd className="mt-1 text-[#0A0A0A]">{tournament?.name ?? "—"}</dd>
+        </div>
+        <div>
+          <dt className="font-medium text-[#5C6570]">División</dt>
+          <dd className="mt-1 text-[#0A0A0A]">{divisionSummary}</dd>
+        </div>
+        <div>
+          <dt className="font-medium text-[#5C6570]">Grupo</dt>
+          <dd className="mt-1 text-[#0A0A0A]">{group?.name ?? "—"}</dd>
+        </div>
+      </dl>
+
       {canEdit ? (
         <div className="border border-[#D0D5DB] bg-white p-5">
           <TeamEditForm
@@ -73,20 +137,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
             initialLogoUrl={team.logo_url}
           />
         </div>
-      ) : (
-        <dl className="grid max-w-lg gap-4 border border-[#D0D5DB] bg-white p-5 text-sm">
-          <div>
-            <dt className="font-medium text-[#5C6570]">Nombre</dt>
-            <dd className="mt-1 text-[#0A0A0A]">{team.name}</dd>
-          </div>
-          <div>
-            <dt className="font-medium text-[#5C6570]">Logo</dt>
-            <dd className="mt-1 break-all font-mono text-xs text-[#0A0A0A]">
-              {team.logo_url ?? "—"}
-            </dd>
-          </div>
-        </dl>
-      )}
+      ) : null}
     </section>
   );
 }

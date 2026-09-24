@@ -1,13 +1,22 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getMatchAccess } from "@/components/matches/access";
+import { getMatchAccess, isAssignedReferee } from "@/components/matches/access";
 import { MatchPageHeader } from "@/components/matches/page-header";
 import { MatchResultForm } from "@/components/matches/match-result-form";
 import { MatchSetsEditor } from "@/components/matches/match-sets-editor";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
+import {
+  ScheduleChangeHistory,
+  type ScheduleChangeRow,
+} from "@/components/matches/schedule-change-history";
 import { createClient } from "@/lib/supabase/server";
-import type { ScoreType } from "@/types/database";
-import { scoreNoun, sportLabel } from "@/lib/labels";
+import type { Branch, ScoreType } from "@/types/database";
+import {
+  BRANCH_LABELS,
+  MATCH_STAGE_LABELS,
+  scoreNoun,
+  sportLabel,
+} from "@/lib/labels";
 
 type PageProps = {
   params: Promise<{ orgSlug: string; matchId: string }>;
@@ -24,12 +33,14 @@ export default async function MatchDetailPage({ params }: PageProps) {
     .select(
       `
       *,
-      tournament:tournaments(
+      tournament:tournaments(id, name, season),
+      division:divisions(
         id,
-        name,
-        season,
-        sport:sports(name, score_type, allows_draws)
+        branch,
+        sport:sports(name, key, score_type, allows_draws),
+        category:categories(name)
       ),
+      group:groups(id, name),
       home_team:teams!matches_home_team_id_fkey(id, name),
       away_team:teams!matches_away_team_id_fkey(id, name)
     `
@@ -42,33 +53,117 @@ export default async function MatchDetailPage({ params }: PageProps) {
   if (!match) notFound();
 
   const tournament = unwrapOne(match.tournament);
-  const sport = tournament ? unwrapOne(tournament.sport) : null;
+  const division = unwrapOne(match.division);
+  const sport = division ? unwrapOne(division.sport) : null;
+  const category = division ? unwrapOne(division.category) : null;
+  const group = unwrapOne(match.group);
   const homeTeam = unwrapOne(match.home_team);
   const awayTeam = unwrapOne(match.away_team);
   const scoreType = (sport?.score_type ?? "goals") as ScoreType;
   const usesSets = scoreType === "sets";
   const scoreLabel = scoreNoun(scoreType);
+  const branch = division?.branch as Branch | undefined;
 
-  const { data: sets, error: setsError } = usesSets
-    ? await supabase
-        .from("match_sets")
-        .select("*")
-        .eq("match_id", matchId)
-        .eq("organization_id", orgId)
-        .order("set_number", { ascending: true })
-    : { data: [], error: null };
+  const [
+    { data: sets, error: setsError },
+    { data: changesRaw, error: changesError },
+    { data: refereeMemberships, error: refereesError },
+  ] = await Promise.all([
+    usesSets
+      ? supabase
+          .from("match_sets")
+          .select("*")
+          .eq("match_id", matchId)
+          .eq("organization_id", orgId)
+          .order("set_number", { ascending: true })
+      : Promise.resolve({ data: [] as never[], error: null }),
+    supabase
+      .from("match_schedule_changes")
+      .select(
+        "id, change_type, reason, previous_scheduled_at, new_scheduled_at, previous_venue, new_venue, previous_status, new_status, created_at"
+      )
+      .eq("match_id", matchId)
+      .eq("organization_id", orgId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("memberships")
+      .select("user_id")
+      .eq("organization_id", orgId)
+      .eq("role", "referee"),
+  ]);
 
   if (setsError) throw setsError;
+  if (changesError) throw changesError;
+  if (refereesError) throw refereesError;
+
+  const refereeIds = (refereeMemberships ?? []).map((m) => m.user_id);
+  const profileIds = Array.from(
+    new Set([
+      ...refereeIds,
+      ...(match.referee_id ? [match.referee_id] : []),
+    ])
+  );
+
+  const { data: profiles } =
+    profileIds.length > 0
+      ? await supabase
+          .from("profiles")
+          .select("id, nombre, apellido")
+          .in("id", profileIds)
+      : { data: [] };
+
+  const profileMap = new Map(
+    (profiles ?? []).map((p) => [
+      p.id,
+      `${p.nombre} ${p.apellido}`.trim() || "Árbitro",
+    ])
+  );
+
+  const referees = refereeIds.map((userId) => ({
+    userId,
+    label: profileMap.get(userId) ?? "Árbitro",
+  }));
+
+  const refereeName = match.referee_id
+    ? (profileMap.get(match.referee_id) ?? "Árbitro asignado")
+    : null;
+
+  const changes: ScheduleChangeRow[] = (changesRaw ?? []).map((c) => ({
+    id: c.id,
+    changeType: c.change_type,
+    reason: c.reason,
+    previousScheduledAt: c.previous_scheduled_at,
+    newScheduledAt: c.new_scheduled_at,
+    previousVenue: c.previous_venue,
+    newVenue: c.new_venue,
+    previousStatus: c.previous_status,
+    newStatus: c.new_status,
+    createdAt: c.created_at,
+  }));
+
+  const assigned =
+    isAssignedReferee(match, access.membership.user_id) &&
+    access.roles.includes("referee");
+  const canViewSheet =
+    assigned ||
+    access.roles.includes("admin") ||
+    access.roles.includes("team_manager");
+
+  const descriptionParts = [
+    tournament ? `${tournament.name} · ${tournament.season}` : null,
+    sport ? sportLabel(sport.key ?? sport.name) : null,
+    branch ? BRANCH_LABELS[branch] : null,
+    category?.name ?? null,
+    group?.name ?? null,
+  ].filter(Boolean);
 
   return (
     <div className="mx-auto max-w-3xl">
       <MatchPageHeader
         title={`${homeTeam?.name ?? "Local"} vs ${awayTeam?.name ?? "Visitante"}`}
         description={
-          tournament
-            ? `${tournament.name} · ${tournament.season}${
-                sport ? ` · ${sportLabel(sport.name)}` : ""
-              }`
+          descriptionParts.length > 0
+            ? descriptionParts.join(" · ")
             : "Detalle del partido"
         }
         actions={
@@ -84,18 +179,50 @@ export default async function MatchDetailPage({ params }: PageProps) {
       <div className="mb-8 flex flex-wrap items-center gap-3 border border-[#D0D5DB] bg-white px-5 py-4">
         <MatchStatusBadge status={match.status} />
         <p className="font-mono text-2xl font-semibold tabular-nums tracking-tight text-[#0A0A0A]">
-          {match.home_score}–{match.away_score}
+          {match.status === "finalizado"
+            ? `${match.home_score}–${match.away_score}`
+            : "vs"}
         </p>
-        <p className="text-sm text-[#5C6570]">
-          {scoreLabel} ·{" "}
-          {match.scheduled_at
-            ? new Intl.DateTimeFormat("es-MX", {
-                dateStyle: "medium",
-                timeStyle: "short",
-              }).format(new Date(match.scheduled_at))
-            : "Sin fecha"}
-          {match.court_info ? ` · ${match.court_info}` : ""}
-        </p>
+        <div className="text-sm text-[#5C6570]">
+          <p>
+            {match.scheduled_at
+              ? new Intl.DateTimeFormat("es-MX", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                }).format(new Date(match.scheduled_at))
+              : "Sin fecha"}
+            {match.venue ? ` · ${match.venue}` : ""}
+          </p>
+          <p className="mt-0.5">
+            {match.jornada != null ? `Jornada ${match.jornada}` : "Sin jornada"}
+            {" · "}
+            {MATCH_STAGE_LABELS[match.stage] ?? match.stage}
+            {refereeName ? ` · Árbitro: ${refereeName}` : " · Sin árbitro"}
+          </p>
+          {match.status_reason ? (
+            <p className="mt-0.5 italic">{match.status_reason}</p>
+          ) : null}
+          {assigned ? (
+            <p className="mt-1 text-[#0A0A0A]">
+              Estás asignado como árbitro.{" "}
+              <Link
+                href={`/${orgSlug}/referee/${match.id}`}
+                className="font-medium underline underline-offset-4"
+              >
+                Abrir cédula
+              </Link>
+            </p>
+          ) : canViewSheet ? (
+            <p className="mt-1">
+              <Link
+                href={`/${orgSlug}/referee/${match.id}`}
+                className="font-medium text-[#0A0A0A] underline underline-offset-4"
+              >
+                Ver cédula
+              </Link>
+            </p>
+          ) : null}
+        </div>
       </div>
 
       <div className="grid gap-6">
@@ -106,21 +233,25 @@ export default async function MatchDetailPage({ params }: PageProps) {
           awayScore={match.away_score}
           status={match.status}
           scoreLabel={scoreLabel}
-          canUpdateResult={access.canUpdateResult}
           canEditSchedule={access.canEditSchedule}
+          canAssignReferee={access.canAssignReferee}
           canDelete={access.canDeleteMatch}
-          round={match.round}
+          jornada={match.jornada}
           stage={match.stage}
-          courtInfo={match.court_info}
+          venue={match.venue}
           scheduledAt={match.scheduled_at}
+          refereeId={match.referee_id}
+          referees={referees}
         />
+
+        <ScheduleChangeHistory changes={changes} />
 
         {usesSets ? (
           <MatchSetsEditor
             orgSlug={orgSlug}
             matchId={match.id}
             sets={sets ?? []}
-            canEdit={access.canUpdateResult}
+            canEdit={access.canEditSchedule && match.status !== "finalizado"}
           />
         ) : null}
       </div>

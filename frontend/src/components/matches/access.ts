@@ -1,19 +1,20 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getMembership, type MembershipWithOrg } from "@/lib/org";
-import type { MembershipRole } from "@/types/database";
+import type { MembershipRole, Tables } from "@/types/database";
 
 export type MatchAccess = {
   membership: MembershipWithOrg;
   roles: MembershipRole[];
   canCreateMatch: boolean;
   canDeleteMatch: boolean;
-  canUpdateResult: boolean;
   canEditSchedule: boolean;
+  canAssignReferee: boolean;
 };
 
 /**
- * Role capabilities for match CTAs. Server Actions + RLS remain authoritative.
+ * Capacidades de UI para partidos. Solo admin calendariza y asigna árbitro;
+ * la captura de marcador va en cédula (paso 5). RLS es la autoridad.
  */
 export async function getMatchAccess(orgSlug: string): Promise<MatchAccess> {
   const membership = await getMembership(orgSlug);
@@ -33,19 +34,23 @@ export async function getMatchAccess(orgSlug: string): Promise<MatchAccess> {
   }
 
   const roles = (data ?? []).map((r) => r.role);
-  const canManageStaff =
-    roles.includes("admin") || roles.includes("league_manager");
-  const canUpdateResult =
-    canManageStaff || roles.includes("referee");
+  const isAdmin = roles.includes("admin");
 
   return {
     membership,
     roles,
-    canCreateMatch: canManageStaff,
-    canDeleteMatch: canManageStaff,
-    canUpdateResult,
-    canEditSchedule: canManageStaff,
+    canCreateMatch: isAdmin,
+    canDeleteMatch: isAdmin,
+    canEditSchedule: isAdmin,
+    canAssignReferee: isAdmin,
   };
+}
+
+export function isAssignedReferee(
+  match: Pick<Tables<"matches">, "referee_id">,
+  userId: string
+): boolean {
+  return match.referee_id === userId;
 }
 
 export { actionError, type ActionResult } from "@/lib/action-result";

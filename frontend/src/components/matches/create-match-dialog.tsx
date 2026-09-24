@@ -16,44 +16,91 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  BRANCH_LABELS,
+  MATCH_STAGE_LABELS,
+  sportLabel,
+} from "@/lib/labels";
+import type { Branch } from "@/types/database";
 
-export type TournamentOption = {
+export type DivisionOption = {
   id: string;
-  name: string;
-  season: string;
+  tournamentId: string;
+  tournamentName: string;
+  sportId: string;
+  sportKey: string;
+  sportName: string;
+  branch: Branch;
+  categoryId: string;
+  categoryName: string;
+  label: string;
 };
 
-export type EnrollmentOption = {
-  tournamentId: string;
-  teamId: string;
-  teamName: string;
+export type TeamOption = {
+  id: string;
+  name: string;
+  divisionId: string;
+  groupId: string | null;
+};
+
+export type GroupOption = {
+  id: string;
+  name: string;
+  divisionId: string;
 };
 
 type CreateMatchDialogProps = {
   orgSlug: string;
-  tournaments: TournamentOption[];
-  enrollments: EnrollmentOption[];
+  divisions: DivisionOption[];
+  teams: TeamOption[];
+  groups: GroupOption[];
 };
+
+const selectClass =
+  "h-8 w-full rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 text-sm text-[#0A0A0A] outline-none focus-visible:border-[#00B7FF] focus-visible:ring-2 focus-visible:ring-[#00B7FF]/35";
 
 export function CreateMatchDialog({
   orgSlug,
-  tournaments,
-  enrollments,
+  divisions,
+  teams,
+  groups,
 }: CreateMatchDialogProps) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [pending, startTransition] = React.useTransition();
-  const [tournamentId, setTournamentId] = React.useState(
-    tournaments[0]?.id ?? ""
-  );
+  const [divisionId, setDivisionId] = React.useState(divisions[0]?.id ?? "");
+  const [homeTeamId, setHomeTeamId] = React.useState("");
+  const [awayTeamId, setAwayTeamId] = React.useState("");
 
-  const teamsForTournament = enrollments.filter(
-    (e) => e.tournamentId === tournamentId
-  );
+  const teamsInDivision = teams.filter((t) => t.divisionId === divisionId);
+  const groupsInDivision = groups.filter((g) => g.divisionId === divisionId);
+  const selectedDivision = divisions.find((d) => d.id === divisionId);
 
+  function onDivisionChange(nextId: string) {
+    setDivisionId(nextId);
+    setHomeTeamId("");
+    setAwayTeamId("");
+  }
   function onSubmit(formData: FormData) {
     setError(null);
+
+    if (homeTeamId && awayTeamId && homeTeamId === awayTeamId) {
+      setError("Un equipo no puede jugar contra sí mismo. Elige dos distintos.");
+      return;
+    }
+
+    const home = teams.find((t) => t.id === homeTeamId);
+    const away = teams.find((t) => t.id === awayTeamId);
+    if (
+      home &&
+      away &&
+      (home.divisionId !== divisionId || away.divisionId !== divisionId)
+    ) {
+      setError("Los dos equipos deben pertenecer a la misma división.");
+      return;
+    }
+
     startTransition(async () => {
       const result = await createMatch(orgSlug, formData);
       if (!result.ok) {
@@ -65,7 +112,7 @@ export function CreateMatchDialog({
     });
   }
 
-  if (tournaments.length === 0) {
+  if (divisions.length === 0) {
     return null;
   }
 
@@ -83,28 +130,36 @@ export function CreateMatchDialog({
         <DialogHeader>
           <DialogTitle>Programar partido</DialogTitle>
           <DialogDescription>
-            Elige el torneo y los dos equipos. El marcador lo capturas después,
-            cuando se juegue.
+            Elige la división y los dos equipos. El marcador se captura en la
+            cédula cuando se juegue.
           </DialogDescription>
         </DialogHeader>
         <form action={onSubmit} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="match-tournament">Torneo</Label>
+            <Label htmlFor="match-division">División</Label>
             <select
-              id="match-tournament"
-              name="tournament_id"
+              id="match-division"
+              name="division_id"
               required
-              value={tournamentId}
-              onChange={(e) => setTournamentId(e.target.value)}
+              value={divisionId}
+              onChange={(e) => onDivisionChange(e.target.value)}
               disabled={pending}
-              className="h-8 w-full rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 text-sm text-[#0A0A0A] outline-none focus-visible:border-[#00B7FF] focus-visible:ring-2 focus-visible:ring-[#00B7FF]/35"
+              className={selectClass}
             >
-              {tournaments.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} ({t.season})
+              {divisions.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.label}
                 </option>
               ))}
             </select>
+            {selectedDivision ? (
+              <p className="text-xs text-[#5C6570]">
+                {selectedDivision.tournamentName} ·{" "}
+                {sportLabel(selectedDivision.sportKey)} ·{" "}
+                {BRANCH_LABELS[selectedDivision.branch]} ·{" "}
+                {selectedDivision.categoryName}
+              </p>
+            ) : null}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -114,13 +169,15 @@ export function CreateMatchDialog({
                 id="match-home"
                 name="home_team_id"
                 required
-                disabled={pending || teamsForTournament.length === 0}
-                className="h-8 w-full rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 text-sm text-[#0A0A0A] outline-none focus-visible:border-[#00B7FF] focus-visible:ring-2 focus-visible:ring-[#00B7FF]/35"
+                value={homeTeamId}
+                onChange={(e) => setHomeTeamId(e.target.value)}
+                disabled={pending || teamsInDivision.length === 0}
+                className={selectClass}
               >
                 <option value="">Elige un equipo</option>
-                {teamsForTournament.map((t) => (
-                  <option key={t.teamId} value={t.teamId}>
-                    {t.teamName}
+                {teamsInDivision.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
                   </option>
                 ))}
               </select>
@@ -131,45 +188,53 @@ export function CreateMatchDialog({
                 id="match-away"
                 name="away_team_id"
                 required
-                disabled={pending || teamsForTournament.length === 0}
-                className="h-8 w-full rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 text-sm text-[#0A0A0A] outline-none focus-visible:border-[#00B7FF] focus-visible:ring-2 focus-visible:ring-[#00B7FF]/35"
+                value={awayTeamId}
+                onChange={(e) => setAwayTeamId(e.target.value)}
+                disabled={pending || teamsInDivision.length === 0}
+                className={selectClass}
               >
                 <option value="">Elige un equipo</option>
-                {teamsForTournament.map((t) => (
-                  <option key={t.teamId} value={t.teamId}>
-                    {t.teamName}
+                {teamsInDivision.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
                   </option>
                 ))}
               </select>
             </div>
           </div>
 
-          {teamsForTournament.length < 2 ? (
+          {teamsInDivision.length < 2 ? (
             <p className="text-sm text-[#5C6570]">
-              Este torneo necesita al menos dos equipos inscritos antes de
-              poder programar un partido.
+              Esta división necesita al menos dos equipos antes de poder
+              programar un partido.
             </p>
           ) : null}
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="match-round">Jornada (opcional)</Label>
-              <Input
-                id="match-round"
-                name="round"
-                type="number"
-                min={1}
-                className="rounded-[4px]"
-                disabled={pending}
-              />
+              <Label htmlFor="match-group">Grupo (opcional)</Label>
+              <select
+                id="match-group"
+                name="group_id"
+                disabled={pending || groupsInDivision.length === 0}
+                className={selectClass}
+                defaultValue=""
+              >
+                <option value="">Sin grupo</option>
+                {groupsInDivision.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="match-stage">Fase (opcional)</Label>
+              <Label htmlFor="match-jornada">Jornada (opcional)</Label>
               <Input
-                id="match-stage"
-                name="stage"
-                maxLength={80}
-                placeholder="Ej. Grupo A"
+                id="match-jornada"
+                name="jornada"
+                type="number"
+                min={1}
                 className="rounded-[4px]"
                 disabled={pending}
               />
@@ -178,26 +243,43 @@ export function CreateMatchDialog({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
-              <Label htmlFor="match-scheduled">Fecha y hora</Label>
-              <Input
-                id="match-scheduled"
-                name="scheduled_at"
-                type="datetime-local"
-                className="rounded-[4px]"
+              <Label htmlFor="match-stage">Fase</Label>
+              <select
+                id="match-stage"
+                name="stage"
+                defaultValue="regular"
                 disabled={pending}
-              />
+                className={selectClass}
+              >
+                {Object.entries(MATCH_STAGE_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="match-court">Cancha o sede</Label>
+              <Label htmlFor="match-venue">Sede</Label>
               <Input
-                id="match-court"
-                name="court_info"
+                id="match-venue"
+                name="venue"
                 maxLength={120}
                 placeholder="Ej. Cancha 1"
                 className="rounded-[4px]"
                 disabled={pending}
               />
             </div>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="match-scheduled">Fecha y hora</Label>
+            <Input
+              id="match-scheduled"
+              name="scheduled_at"
+              type="datetime-local"
+              className="rounded-[4px]"
+              disabled={pending}
+            />
           </div>
 
           {error ? (
@@ -214,11 +296,11 @@ export function CreateMatchDialog({
               disabled={pending}
               onClick={() => setOpen(false)}
             >
-              Cancelar
+              Cerrar
             </Button>
             <Button
               type="submit"
-              disabled={pending || teamsForTournament.length < 2}
+              disabled={pending || teamsInDivision.length < 2}
               className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
             >
               {pending ? "Guardando…" : "Programar partido"}

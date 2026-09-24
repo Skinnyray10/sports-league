@@ -23,9 +23,7 @@ export default async function StandingsPage({
   const { orgSlug } = await params;
   const sp = await searchParams;
   const membership = await getMembership(orgSlug);
-  if (!membership) {
-    notFound();
-  }
+  if (!membership) notFound();
 
   const orgId = membership.organization_id;
   const supabase = await createClient();
@@ -39,11 +37,7 @@ export default async function StandingsPage({
   if (tournamentsError) throw tournamentsError;
 
   const tournaments: TournamentFilterOption[] = (tournamentsRaw ?? []).map(
-    (t) => ({
-      id: t.id,
-      name: t.name,
-      season: t.season,
-    })
+    (t) => ({ id: t.id, name: t.name, season: t.season })
   );
 
   const tournamentParam = Array.isArray(sp.tournament)
@@ -63,7 +57,7 @@ export default async function StandingsPage({
     <div className="mx-auto max-w-6xl">
       <StandingsPageHeader
         title="Posiciones"
-        description="Se calcula con los partidos finalizados. Ordena por puntos, luego diferencia y luego anotación a favor."
+        description="Se calcula con los partidos finalizados. Ordena por puntos, luego diferencia."
         actions={
           <TournamentFilter
             orgSlug={orgSlug}
@@ -86,14 +80,9 @@ async function loadStandings(
     .from("standings")
     .select("*")
     .eq("organization_id", organizationId)
-    .eq("tournament_id", tournamentId)
-    .order("pts", { ascending: false })
-    .order("dg", { ascending: false })
-    .order("gf", { ascending: false });
+    .eq("tournament_id", tournamentId);
 
   if (error) throw error;
 
-  return (data ?? [])
-    .map(toStandingRow)
-    .filter((row): row is NonNullable<typeof row> => row != null);
+  return (data ?? []).map(toStandingRow);
 }

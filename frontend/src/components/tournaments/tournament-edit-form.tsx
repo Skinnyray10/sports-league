@@ -6,7 +6,6 @@ import { updateTournament } from "@/app/(app)/[orgSlug]/tournaments/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { sportLabel } from "@/lib/labels";
 import {
   Select,
   SelectContent,
@@ -16,16 +15,12 @@ import {
 } from "@/components/ui/select";
 import type { TournamentStatus } from "@/types/database";
 
-type SportOption = { id: string; name: string };
-
 type TournamentEditFormProps = {
   orgSlug: string;
   tournamentId: string;
-  sports: SportOption[];
   initial: {
     name: string;
     season: string;
-    sportId: string;
     format: string;
     legs: number;
     status: TournamentStatus;
@@ -41,20 +36,17 @@ function toDateInputValue(iso: string | null): string {
 export function TournamentEditForm({
   orgSlug,
   tournamentId,
-  sports,
   initial,
 }: TournamentEditFormProps) {
   const router = useRouter();
   const [error, setError] = React.useState<string | null>(null);
   const [pending, startTransition] = React.useTransition();
-  const [sportId, setSportId] = React.useState(initial.sportId);
   const [format, setFormat] = React.useState(initial.format);
   const [legs, setLegs] = React.useState(String(initial.legs));
   const [status, setStatus] = React.useState(initial.status);
 
   function onSubmit(formData: FormData) {
     setError(null);
-    formData.set("sport_id", sportId);
     formData.set("format", format);
     formData.set("legs", legs);
     formData.set("status", status);
@@ -72,7 +64,7 @@ export function TournamentEditForm({
   return (
     <form action={onSubmit} className="grid max-w-lg gap-4">
       <div className="grid gap-2">
-        <Label htmlFor="edit-tournament-name">Name</Label>
+        <Label htmlFor="edit-tournament-name">Nombre</Label>
         <Input
           id="edit-tournament-name"
           name="name"
@@ -94,25 +86,6 @@ export function TournamentEditForm({
           className="rounded-[4px]"
           disabled={pending}
         />
-      </div>
-      <div className="grid gap-2">
-        <Label>Deporte</Label>
-        <Select
-          value={sportId}
-          onValueChange={(value) => setSportId(value ?? sportId)}
-          disabled={pending}
-        >
-          <SelectTrigger className="w-full rounded-[4px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {sports.map((sport) => (
-              <SelectItem key={sport.id} value={sport.id}>
-                {sportLabel(sport.name)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="grid gap-2">

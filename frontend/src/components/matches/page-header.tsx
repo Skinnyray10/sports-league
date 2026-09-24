@@ -7,7 +7,7 @@ type MatchPageHeaderProps = {
   className?: string;
 };
 
-/** Matches module chrome — cyan identity band (DESIGN.md). */
+/** Matches module chrome — cyan identity band (Modular Band Ops). */
 export function MatchPageHeader({
   title,
   description,

@@ -7,13 +7,16 @@ export type OrgAccess = {
   membership: MembershipWithOrg;
   roles: MembershipRole[];
   managedTeamId: string | null;
+  isAdmin: boolean;
+  isDelegado: boolean;
+  isReferee: boolean;
   canManageStaff: boolean;
   canUpdateTeam: (teamId: string) => boolean;
+  isDelegadoOf: (teamId: string) => boolean;
 };
 
 /**
- * Membership + role capabilities for Operate CTAs.
- * Server + RLS remain authoritative; this only drives UI.
+ * Membresía + capacidades de Operate. RLS sigue siendo la autoridad.
  */
 export async function getOrgAccess(orgSlug: string): Promise<OrgAccess> {
   const membership = await getMembership(orgSlug);
@@ -34,18 +37,24 @@ export async function getOrgAccess(orgSlug: string): Promise<OrgAccess> {
 
   const rows = data ?? [];
   const roles = rows.map((r) => r.role);
-  const canManageStaff =
-    roles.includes("admin") || roles.includes("league_manager");
+  const isAdmin = roles.includes("admin");
+  const isDelegado = roles.includes("team_manager");
+  const isReferee = roles.includes("referee");
   const managedTeamId =
     rows.find((r) => r.role === "team_manager" && r.team_id)?.team_id ?? null;
+
+  const isDelegadoOf = (teamId: string) => managedTeamId === teamId;
 
   return {
     membership,
     roles,
     managedTeamId,
-    canManageStaff,
-    canUpdateTeam: (teamId: string) =>
-      canManageStaff || managedTeamId === teamId,
+    isAdmin,
+    isDelegado,
+    isReferee,
+    canManageStaff: isAdmin,
+    canUpdateTeam: (teamId: string) => isAdmin || isDelegadoOf(teamId),
+    isDelegadoOf,
   };
 }
 

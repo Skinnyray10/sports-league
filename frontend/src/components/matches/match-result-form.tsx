@@ -3,9 +3,11 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
-  updateMatchResult,
-  updateMatchSchedule,
+  assignReferee,
+  cancelMatch,
   deleteMatch,
+  postponeMatch,
+  rescheduleMatch,
 } from "@/app/(app)/[orgSlug]/matches/actions";
 import type { MatchStatus } from "@/types/database";
 import { Button } from "@/components/ui/button";
@@ -21,6 +23,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+export type RefereeOption = {
+  userId: string;
+  label: string;
+};
+
 type MatchResultFormProps = {
   orgSlug: string;
   matchId: string;
@@ -28,13 +35,15 @@ type MatchResultFormProps = {
   awayScore: number;
   status: MatchStatus;
   scoreLabel: string;
-  canUpdateResult: boolean;
   canEditSchedule: boolean;
+  canAssignReferee: boolean;
   canDelete: boolean;
-  round: number | null;
-  stage: string | null;
-  courtInfo: string | null;
+  jornada: number | null;
+  stage: string;
+  venue: string | null;
   scheduledAt: string | null;
+  refereeId: string | null;
+  referees: RefereeOption[];
 };
 
 function toDatetimeLocal(iso: string | null): string {
@@ -45,6 +54,9 @@ function toDatetimeLocal(iso: string | null): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+const selectClass =
+  "h-8 w-full rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 text-sm text-[#0A0A0A] outline-none focus-visible:border-[#00B7FF] focus-visible:ring-2 focus-visible:ring-[#00B7FF]/35";
+
 export function MatchResultForm({
   orgSlug,
   matchId,
@@ -52,36 +64,29 @@ export function MatchResultForm({
   awayScore,
   status,
   scoreLabel,
-  canUpdateResult,
   canEditSchedule,
+  canAssignReferee,
   canDelete,
-  round,
-  stage,
-  courtInfo,
+  venue,
   scheduledAt,
+  refereeId,
+  referees,
 }: MatchResultFormProps) {
   const router = useRouter();
   const [error, setError] = React.useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = React.useState(false);
   const [pending, startTransition] = React.useTransition();
-  const scoreUnit = scoreLabel.charAt(0).toUpperCase() + scoreLabel.slice(1);
+  const locked = status === "finalizado" || status === "cancelado";
 
-  function submitResult(formData: FormData) {
+  function runAction(
+    action: (orgSlug: string, matchId: string, formData: FormData) => Promise<
+      { ok: true } | { ok: false; error: string }
+    >,
+    formData: FormData
+  ) {
     setError(null);
     startTransition(async () => {
-      const result = await updateMatchResult(orgSlug, matchId, formData);
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
-      router.refresh();
-    });
-  }
-
-  function submitSchedule(formData: FormData) {
-    setError(null);
-    startTransition(async () => {
-      const result = await updateMatchSchedule(orgSlug, matchId, formData);
+      const result = await action(orgSlug, matchId, formData);
       if (!result.ok) {
         setError(result.error);
         return;
@@ -104,145 +109,222 @@ export function MatchResultForm({
     });
   }
 
-  if (!canUpdateResult && !canEditSchedule && !canDelete) {
-    return null;
+  if (!canEditSchedule && !canAssignReferee && !canDelete) {
+    return (
+      <section className="border border-[#D0D5DB] bg-white p-5">
+        <h2 className="text-base font-semibold text-[#0A0A0A]">Marcador</h2>
+        <p className="mt-1 text-sm text-[#5C6570]">
+          {status === "finalizado"
+            ? `Resultado final: ${homeScore}–${awayScore} ${scoreLabel}.`
+            : "El marcador se captura en la cédula del árbitro (próximamente)."}
+        </p>
+      </section>
+    );
   }
 
   return (
     <div className="grid gap-8">
-      {canUpdateResult ? (
+      <section className="border border-[#D0D5DB] bg-white p-5">
+        <h2 className="text-base font-semibold text-[#0A0A0A]">Marcador</h2>
+        <p className="mt-1 text-sm text-[#5C6570]">
+          {status === "finalizado" ? (
+            <>
+              Resultado final (solo lectura):{" "}
+              <span className="font-mono font-semibold tabular-nums text-[#0A0A0A]">
+                {homeScore}–{awayScore}
+              </span>{" "}
+              {scoreLabel}.
+            </>
+          ) : (
+            <>
+              La captura de {scoreLabel} y el cierre del partido se harán en la{" "}
+              <span className="font-medium text-[#0A0A0A]">cédula</span> del
+              árbitro (paso 5).{" "}
+              {/* TODO(step-5): enlazar a /matches/[id]/cedula cuando exista */}
+              <span className="text-[#5C6570]">
+                Enlace a cédula: pendiente.
+              </span>
+            </>
+          )}
+        </p>
+      </section>
+
+      {canAssignReferee ? (
         <section className="border border-[#D0D5DB] bg-white p-5">
           <h2 className="text-base font-semibold text-[#0A0A0A]">
-            Marcador y estado
+            Árbitro asignado
           </h2>
           <p className="mt-1 text-sm text-[#5C6570]">
-            Captura los {scoreLabel} y marca en qué va el partido. La tabla de
-            posiciones solo cuenta los partidos finalizados.
+            Solo un administrador puede asignar o cambiar al árbitro.
           </p>
-          <form action={submitResult} className="mt-4 grid gap-4 sm:grid-cols-3">
+          <form
+            action={(fd) => runAction(assignReferee, fd)}
+            className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto]"
+          >
             <div className="grid gap-2">
-              <Label htmlFor="home_score">{scoreUnit} del local</Label>
-              <Input
-                id="home_score"
-                name="home_score"
-                type="number"
-                min={0}
-                required
-                defaultValue={homeScore}
-                className="rounded-[4px] font-mono tabular-nums"
-                disabled={pending}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="away_score">{scoreUnit} del visitante</Label>
-              <Input
-                id="away_score"
-                name="away_score"
-                type="number"
-                min={0}
-                required
-                defaultValue={awayScore}
-                className="rounded-[4px] font-mono tabular-nums"
-                disabled={pending}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="status">Estado</Label>
+              <Label htmlFor="referee_id">Árbitro</Label>
               <select
-                id="status"
-                name="status"
-                required
-                defaultValue={status}
-                disabled={pending}
-                className="h-8 w-full rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 text-sm text-[#0A0A0A] outline-none focus-visible:border-[#00B7FF] focus-visible:ring-2 focus-visible:ring-[#00B7FF]/35"
+                id="referee_id"
+                name="referee_id"
+                defaultValue={refereeId ?? ""}
+                disabled={pending || locked}
+                className={selectClass}
               >
-                <option value="programado">Programado</option>
-                <option value="en_vivo">En vivo</option>
-                <option value="finalizado">Finalizado</option>
-                <option value="suspendido">Suspendido</option>
+                <option value="">Sin árbitro</option>
+                {referees.map((r) => (
+                  <option key={r.userId} value={r.userId}>
+                    {r.label}
+                  </option>
+                ))}
               </select>
             </div>
-            <div className="sm:col-span-3">
+            <div className="flex items-end">
               <Button
                 type="submit"
-                disabled={pending}
-                className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] transition-[background,color] duration-150 ease-out hover:bg-[#0A0A0A] hover:text-white"
+                disabled={pending || locked}
+                className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
               >
-                {pending ? "Guardando…" : "Guardar marcador"}
+                {pending ? "Guardando…" : "Guardar árbitro"}
               </Button>
             </div>
           </form>
+          {referees.length === 0 ? (
+            <p className="mt-2 text-sm text-[#5C6570]">
+              Todavía no hay miembros con rol de árbitro. Invita a alguien desde
+              la organización.
+            </p>
+          ) : null}
         </section>
       ) : null}
 
-      {canEditSchedule ? (
-        <section className="border border-[#D0D5DB] bg-white p-5">
-          <h2 className="text-base font-semibold text-[#0A0A0A]">
-            Programación
-          </h2>
-          <p className="mt-1 text-sm text-[#5C6570]">
-            Jornada, fase, cancha y hora. Los árbitros no pueden cambiar estos
-            campos.
-          </p>
-          <form
-            action={submitSchedule}
-            className="mt-4 grid gap-4 sm:grid-cols-2"
-          >
-            <div className="grid gap-2">
-              <Label htmlFor="round">Jornada</Label>
-              <Input
-                id="round"
-                name="round"
-                type="number"
-                min={1}
-                defaultValue={round ?? ""}
-                className="rounded-[4px]"
-                disabled={pending}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="stage">Fase</Label>
-              <Input
-                id="stage"
-                name="stage"
-                defaultValue={stage ?? ""}
-                className="rounded-[4px]"
-                disabled={pending}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="scheduled_at">Fecha y hora</Label>
-              <Input
-                id="scheduled_at"
-                name="scheduled_at"
-                type="datetime-local"
-                defaultValue={toDatetimeLocal(scheduledAt)}
-                className="rounded-[4px]"
-                disabled={pending}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="court_info">Cancha o sede</Label>
-              <Input
-                id="court_info"
-                name="court_info"
-                defaultValue={courtInfo ?? ""}
-                className="rounded-[4px]"
-                disabled={pending}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Button
-                type="submit"
-                variant="outline"
-                disabled={pending}
-                className="rounded-[2px]"
+      {canEditSchedule && !locked ? (
+        <>
+          <section className="border border-[#D0D5DB] bg-white p-5">
+            <h2 className="text-base font-semibold text-[#0A0A0A]">
+              Reprogramar
+            </h2>
+            <p className="mt-1 text-sm text-[#5C6570]">
+              Cambia fecha, hora o sede y deja el motivo. El partido vuelve a
+              programado.
+            </p>
+            <form
+              action={(fd) => runAction(rescheduleMatch, fd)}
+              className="mt-4 grid gap-4 sm:grid-cols-2"
+            >
+              <div className="grid gap-2">
+                <Label htmlFor="reschedule_at">Nueva fecha y hora</Label>
+                <Input
+                  id="reschedule_at"
+                  name="scheduled_at"
+                  type="datetime-local"
+                  required
+                  defaultValue={toDatetimeLocal(scheduledAt)}
+                  className="rounded-[4px]"
+                  disabled={pending}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="reschedule_venue">Nueva sede</Label>
+                <Input
+                  id="reschedule_venue"
+                  name="venue"
+                  defaultValue={venue ?? ""}
+                  className="rounded-[4px]"
+                  disabled={pending}
+                />
+              </div>
+              <div className="grid gap-2 sm:col-span-2">
+                <Label htmlFor="reschedule_reason">Motivo</Label>
+                <Input
+                  id="reschedule_reason"
+                  name="reason"
+                  required
+                  maxLength={240}
+                  placeholder="Ej. Lluvia en la cancha"
+                  className="rounded-[4px]"
+                  disabled={pending}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <Button
+                  type="submit"
+                  disabled={pending}
+                  className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+                >
+                  {pending ? "Guardando…" : "Reprogramar"}
+                </Button>
+              </div>
+            </form>
+          </section>
+
+          <section className="grid gap-4 sm:grid-cols-2">
+            <div className="border border-[#D0D5DB] bg-white p-5">
+              <h2 className="text-base font-semibold text-[#0A0A0A]">
+                Aplazar
+              </h2>
+              <p className="mt-1 text-sm text-[#5C6570]">
+                Marca el partido como aplazado sin borrar la programación.
+              </p>
+              <form
+                action={(fd) => runAction(postponeMatch, fd)}
+                className="mt-4 grid gap-3"
               >
-                {pending ? "Guardando…" : "Guardar programación"}
-              </Button>
+                <div className="grid gap-2">
+                  <Label htmlFor="postpone_reason">Motivo</Label>
+                  <Input
+                    id="postpone_reason"
+                    name="reason"
+                    required
+                    maxLength={240}
+                    className="rounded-[4px]"
+                    disabled={pending}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  variant="outline"
+                  disabled={pending || status === "aplazado"}
+                  className="rounded-[2px]"
+                >
+                  {pending ? "Guardando…" : "Aplazar partido"}
+                </Button>
+              </form>
             </div>
-          </form>
-        </section>
+
+            <div className="border border-[#D0D5DB] bg-white p-5">
+              <h2 className="text-base font-semibold text-[#0A0A0A]">
+                Cancelar
+              </h2>
+              <p className="mt-1 text-sm text-[#5C6570]">
+                Cancela el partido. Queda en el historial de cambios.
+              </p>
+              <form
+                action={(fd) => runAction(cancelMatch, fd)}
+                className="mt-4 grid gap-3"
+              >
+                <div className="grid gap-2">
+                  <Label htmlFor="cancel_reason">Motivo</Label>
+                  <Input
+                    id="cancel_reason"
+                    name="reason"
+                    required
+                    maxLength={240}
+                    className="rounded-[4px]"
+                    disabled={pending}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  variant="destructive"
+                  disabled={pending}
+                  className="rounded-[2px]"
+                >
+                  {pending ? "Guardando…" : "Cancelar partido"}
+                </Button>
+              </form>
+            </div>
+          </section>
+        </>
       ) : null}
 
       {canDelete ? (
@@ -251,7 +333,8 @@ export function MatchResultForm({
             Eliminar partido
           </h2>
           <p className="mt-1 text-sm text-[#5C6570]">
-            Se borra el partido junto con sus sets. No se puede deshacer.
+            Se borra el partido junto con sets e historial. No se puede
+            deshacer.
           </p>
           <Dialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>
             <DialogTrigger
@@ -270,8 +353,8 @@ export function MatchResultForm({
               <DialogHeader>
                 <DialogTitle>¿Eliminar este partido?</DialogTitle>
                 <DialogDescription>
-                  Se borra el partido con su marcador y sus sets. No se puede
-                  deshacer, y la tabla de posiciones se recalcula sin él.
+                  Se borra el partido con su historial de programación y sets.
+                  No se puede deshacer.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter className="rounded-b-[4px]">
@@ -282,7 +365,7 @@ export function MatchResultForm({
                   disabled={pending}
                   onClick={() => setConfirmingDelete(false)}
                 >
-                  Cancelar
+                  Volver
                 </Button>
                 <Button
                   type="button"

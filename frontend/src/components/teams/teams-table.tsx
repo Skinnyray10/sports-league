@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { Tables } from "@/types/database";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,12 +9,24 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { BRANCH_LABELS, sportLabel } from "@/lib/labels";
+import type { Branch } from "@/types/database";
 
-type Team = Tables<"teams">;
+export type TeamListRow = {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  club_name: string;
+  division_label: string;
+  sport_key: string;
+  branch: Branch;
+  category_name: string;
+  group_name: string | null;
+};
 
 type TeamsTableProps = {
   orgSlug: string;
-  teams: Team[];
+  teams: TeamListRow[];
   canManageStaff: boolean;
   managedTeamId: string | null;
 };
@@ -34,8 +45,8 @@ export function TeamsTable({
         </p>
         <p className="mt-1 text-sm text-[#5C6570]">
           {canManageStaff
-            ? "Agrega el primer equipo para poder armar torneos."
-            : "Pídele a un coordinador de liga que dé de alta los equipos."}
+            ? "Necesitas clubes y divisiones. Luego agrega el primer equipo."
+            : "Pídele a un administrador que dé de alta los equipos."}
         </p>
       </div>
     );
@@ -49,7 +60,11 @@ export function TeamsTable({
             <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
               Equipo
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Logo</TableHead>
+            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Club</TableHead>
+            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+              División
+            </TableHead>
+            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Grupo</TableHead>
             <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
               Acciones
             </TableHead>
@@ -77,8 +92,20 @@ export function TeamsTable({
                     </Badge>
                   ) : null}
                 </TableCell>
-                <TableCell className="text-xs text-[#5C6570]">
-                  {team.logo_url ? "Cargado" : "Sin logo"}
+                <TableCell className="text-[#0A0A0A]">
+                  {team.club_name}
+                </TableCell>
+                <TableCell className="text-sm text-[#5C6570]">
+                  <span className="text-[#0A0A0A]">
+                    {sportLabel(team.sport_key)}
+                  </span>
+                  {" · "}
+                  {BRANCH_LABELS[team.branch]}
+                  {" · "}
+                  {team.category_name}
+                </TableCell>
+                <TableCell className="text-[#5C6570]">
+                  {team.group_name ?? "—"}
                 </TableCell>
                 <TableCell className="text-right">
                   {canEdit ? (

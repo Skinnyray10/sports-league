@@ -12,7 +12,7 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
         </Link>
       </header>
       <main className="flex flex-1 items-start justify-center px-4 py-10 sm:items-center sm:py-16">
-        <div className="w-full max-w-sm border border-border bg-card p-6 shadow-[0_8px_24px_rgba(10,10,10,0.08)]">
+        <div className="w-full max-w-2xl border border-border bg-card p-6 shadow-[0_8px_24px_rgba(10,10,10,0.08)]">
           {children}
         </div>
       </main>

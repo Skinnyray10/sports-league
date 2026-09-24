@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireOrgRole } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
 import { actionError, type ActionResult } from "@/components/ops/access";
-import type { TournamentStatus } from "@/types/database";
+import type { Branch, TournamentStatus } from "@/types/database";
 
 const FORMATS = new Set(["round_robin", "knockout", "groups"]);
 const STATUSES = new Set<TournamentStatus>([
@@ -12,6 +12,7 @@ const STATUSES = new Set<TournamentStatus>([
   "active",
   "finished",
 ]);
+const BRANCHES = new Set<Branch>(["varonil", "femenil", "mixto"]);
 
 function parseLegs(raw: FormDataEntryValue | null): number | null {
   const n = Number(raw);
@@ -19,19 +20,23 @@ function parseLegs(raw: FormDataEntryValue | null): number | null {
   return null;
 }
 
+function revalidateTournament(orgSlug: string, tournamentId?: string) {
+  revalidatePath(`/${orgSlug}/tournaments`);
+  if (tournamentId) {
+    revalidatePath(`/${orgSlug}/tournaments/${tournamentId}`);
+  }
+  revalidatePath(`/${orgSlug}/teams`);
+}
+
 export async function createTournament(
   orgSlug: string,
   formData: FormData
 ): Promise<ActionResult> {
   try {
-    const membership = await requireOrgRole(orgSlug, [
-      "admin",
-      "league_manager",
-    ]);
+    const membership = await requireOrgRole(orgSlug, ["admin"]);
 
     const name = String(formData.get("name") ?? "").trim();
     const season = String(formData.get("season") ?? "").trim();
-    const sportId = String(formData.get("sport_id") ?? "").trim();
     const format = String(formData.get("format") ?? "round_robin").trim();
     const legs = parseLegs(formData.get("legs")) ?? 1;
     const statusRaw = String(
@@ -39,10 +44,10 @@ export async function createTournament(
     ).trim() as TournamentStatus;
     const startDateRaw = String(formData.get("start_date") ?? "").trim();
 
-    if (!name || !season || !sportId) {
+    if (!name || !season) {
       return {
         ok: false,
-        error: "Faltan datos: nombre, temporada y deporte son obligatorios.",
+        error: "Faltan datos: nombre y temporada son obligatorios.",
       };
     }
     if (!FORMATS.has(format)) {
@@ -55,7 +60,6 @@ export async function createTournament(
     const supabase = await createClient();
     const { error } = await supabase.from("tournaments").insert({
       organization_id: membership.organization_id,
-      sport_id: sportId,
       name,
       season,
       format,
@@ -68,7 +72,7 @@ export async function createTournament(
       return actionError(error, "No pudimos crear el torneo. Inténtalo de nuevo.");
     }
 
-    revalidatePath(`/${orgSlug}/tournaments`);
+    revalidateTournament(orgSlug);
     return { ok: true };
   } catch (error) {
     return actionError(error, "No pudimos crear el torneo. Inténtalo de nuevo.");
@@ -81,14 +85,10 @@ export async function updateTournament(
   formData: FormData
 ): Promise<ActionResult> {
   try {
-    const membership = await requireOrgRole(orgSlug, [
-      "admin",
-      "league_manager",
-    ]);
+    const membership = await requireOrgRole(orgSlug, ["admin"]);
 
     const name = String(formData.get("name") ?? "").trim();
     const season = String(formData.get("season") ?? "").trim();
-    const sportId = String(formData.get("sport_id") ?? "").trim();
     const format = String(formData.get("format") ?? "round_robin").trim();
     const legs = parseLegs(formData.get("legs")) ?? 1;
     const statusRaw = String(
@@ -96,10 +96,10 @@ export async function updateTournament(
     ).trim() as TournamentStatus;
     const startDateRaw = String(formData.get("start_date") ?? "").trim();
 
-    if (!name || !season || !sportId) {
+    if (!name || !season) {
       return {
         ok: false,
-        error: "Faltan datos: nombre, temporada y deporte son obligatorios.",
+        error: "Faltan datos: nombre y temporada son obligatorios.",
       };
     }
     if (!FORMATS.has(format)) {
@@ -113,7 +113,6 @@ export async function updateTournament(
     const { error } = await supabase
       .from("tournaments")
       .update({
-        sport_id: sportId,
         name,
         season,
         format,
@@ -125,14 +124,19 @@ export async function updateTournament(
       .eq("organization_id", membership.organization_id);
 
     if (error) {
-      return actionError(error, "No pudimos guardar los cambios. Inténtalo de nuevo.");
+      return actionError(
+        error,
+        "No pudimos guardar los cambios. Inténtalo de nuevo."
+      );
     }
 
-    revalidatePath(`/${orgSlug}/tournaments`);
-    revalidatePath(`/${orgSlug}/tournaments/${tournamentId}`);
+    revalidateTournament(orgSlug, tournamentId);
     return { ok: true };
   } catch (error) {
-    return actionError(error, "No pudimos guardar los cambios. Inténtalo de nuevo.");
+    return actionError(
+      error,
+      "No pudimos guardar los cambios. Inténtalo de nuevo."
+    );
   }
 }
 
@@ -141,10 +145,7 @@ export async function deleteTournament(
   tournamentId: string
 ): Promise<ActionResult> {
   try {
-    const membership = await requireOrgRole(orgSlug, [
-      "admin",
-      "league_manager",
-    ]);
+    const membership = await requireOrgRole(orgSlug, ["admin"]);
 
     const supabase = await createClient();
     const { error } = await supabase
@@ -157,75 +158,153 @@ export async function deleteTournament(
       return actionError(error, "No pudimos eliminar el torneo.");
     }
 
-    revalidatePath(`/${orgSlug}/tournaments`);
+    revalidateTournament(orgSlug);
     return { ok: true };
   } catch (error) {
     return actionError(error, "No pudimos eliminar el torneo.");
   }
 }
 
-export async function enrollTeam(
+export async function createDivision(
   orgSlug: string,
   tournamentId: string,
-  teamId: string
+  formData: FormData
 ): Promise<ActionResult> {
   try {
-    const membership = await requireOrgRole(orgSlug, [
-      "admin",
-      "league_manager",
-    ]);
+    const membership = await requireOrgRole(orgSlug, ["admin"]);
+
+    const sportId = String(formData.get("sport_id") ?? "").trim();
+    const branch = String(formData.get("branch") ?? "").trim() as Branch;
+    const categoryId = String(formData.get("category_id") ?? "").trim();
+    const name = String(formData.get("name") ?? "").trim();
+
+    if (!sportId || !branch || !categoryId) {
+      return {
+        ok: false,
+        error: "Deporte, rama y categoría son obligatorios.",
+      };
+    }
+    if (!BRANCHES.has(branch)) {
+      return { ok: false, error: "Esa rama no es válida." };
+    }
 
     const supabase = await createClient();
-    const { error } = await supabase.from("tournament_teams").insert({
+    const { error } = await supabase.from("divisions").insert({
       organization_id: membership.organization_id,
       tournament_id: tournamentId,
-      team_id: teamId,
+      sport_id: sportId,
+      branch,
+      category_id: categoryId,
+      name: name || null,
     });
 
     if (error) {
       return actionError(
         error,
-        "No pudimos inscribir al equipo. Inténtalo de nuevo.",
-        "Ese equipo ya está inscrito en este torneo."
+        "No pudimos crear la división. Inténtalo de nuevo.",
+        "Ya existe una división con ese deporte, rama y categoría."
       );
     }
 
-    revalidatePath(`/${orgSlug}/tournaments/${tournamentId}`);
+    revalidateTournament(orgSlug, tournamentId);
     return { ok: true };
   } catch (error) {
     return actionError(
       error,
-      "No pudimos inscribir al equipo. Inténtalo de nuevo."
+      "No pudimos crear la división. Inténtalo de nuevo."
     );
   }
 }
 
-export async function unenrollTeam(
+export async function deleteDivision(
   orgSlug: string,
   tournamentId: string,
-  teamId: string
+  divisionId: string
 ): Promise<ActionResult> {
   try {
-    const membership = await requireOrgRole(orgSlug, [
-      "admin",
-      "league_manager",
-    ]);
+    const membership = await requireOrgRole(orgSlug, ["admin"]);
 
     const supabase = await createClient();
     const { error } = await supabase
-      .from("tournament_teams")
+      .from("divisions")
       .delete()
+      .eq("id", divisionId)
       .eq("tournament_id", tournamentId)
-      .eq("team_id", teamId)
       .eq("organization_id", membership.organization_id);
 
     if (error) {
-      return actionError(error, "No pudimos quitar al equipo del torneo.");
+      return actionError(error, "No pudimos eliminar la división.");
     }
 
-    revalidatePath(`/${orgSlug}/tournaments/${tournamentId}`);
+    revalidateTournament(orgSlug, tournamentId);
     return { ok: true };
   } catch (error) {
-    return actionError(error, "No pudimos quitar al equipo del torneo.");
+    return actionError(error, "No pudimos eliminar la división.");
+  }
+}
+
+export async function createGroup(
+  orgSlug: string,
+  tournamentId: string,
+  formData: FormData
+): Promise<ActionResult> {
+  try {
+    const membership = await requireOrgRole(orgSlug, ["admin"]);
+
+    const divisionId = String(formData.get("division_id") ?? "").trim();
+    const name = String(formData.get("name") ?? "").trim();
+
+    if (!divisionId || !name) {
+      return {
+        ok: false,
+        error: "Elige una división y escribe el nombre del grupo.",
+      };
+    }
+
+    const supabase = await createClient();
+    const { error } = await supabase.from("groups").insert({
+      organization_id: membership.organization_id,
+      division_id: divisionId,
+      name,
+    });
+
+    if (error) {
+      return actionError(
+        error,
+        "No pudimos crear el grupo. Inténtalo de nuevo.",
+        `Ya hay un grupo llamado "${name}" en esa división.`
+      );
+    }
+
+    revalidateTournament(orgSlug, tournamentId);
+    return { ok: true };
+  } catch (error) {
+    return actionError(error, "No pudimos crear el grupo. Inténtalo de nuevo.");
+  }
+}
+
+export async function deleteGroup(
+  orgSlug: string,
+  tournamentId: string,
+  groupId: string
+): Promise<ActionResult> {
+  try {
+    const membership = await requireOrgRole(orgSlug, ["admin"]);
+
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("groups")
+      .delete()
+      .eq("id", groupId)
+      .eq("organization_id", membership.organization_id);
+
+    if (error) {
+      return actionError(error, "No pudimos eliminar el grupo.");
+    }
+
+    revalidateTournament(orgSlug, tournamentId);
+    return { ok: true };
+  } catch (error) {
+    return actionError(error, "No pudimos eliminar el grupo.");
   }
 }

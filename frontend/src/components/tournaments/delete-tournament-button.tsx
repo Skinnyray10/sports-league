@@ -57,7 +57,7 @@ export function DeleteTournamentButton({
         <DialogHeader>
           <DialogTitle>¿Eliminar {tournamentName}?</DialogTitle>
           <DialogDescription>
-            Se borra el torneo junto con sus inscripciones y no se puede
+            Se borra el torneo junto con sus divisiones y no se puede
             deshacer. Si ya tiene partidos registrados, primero tendrás que
             eliminarlos.
           </DialogDescription>

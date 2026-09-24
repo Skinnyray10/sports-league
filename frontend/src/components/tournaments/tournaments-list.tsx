@@ -2,11 +2,7 @@
 
 import Link from "next/link";
 import type { TournamentStatus } from "@/types/database";
-import {
-  TOURNAMENT_STATUS_LABELS,
-  formatLabel,
-  sportLabel,
-} from "@/lib/labels";
+import { TOURNAMENT_STATUS_LABELS, formatLabel } from "@/lib/labels";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,7 +22,7 @@ type TournamentRow = {
   format: string;
   legs: number;
   status: TournamentStatus;
-  sport_name: string;
+  division_count: number;
 };
 
 type TournamentsListProps = {
@@ -66,13 +62,13 @@ function TournamentTable({
               Torneo
             </TableHead>
             <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
-              Deporte
-            </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
               Temporada
             </TableHead>
             <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
               Formato
+            </TableHead>
+            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+              Divisiones
             </TableHead>
             <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
               Estado
@@ -93,15 +89,15 @@ function TournamentTable({
                   {row.name}
                 </Link>
               </TableCell>
-              <TableCell className="text-[#0A0A0A]">
-                {sportLabel(row.sport_name)}
-              </TableCell>
               <TableCell className="font-mono text-sm text-[#0A0A0A]">
                 {row.season}
               </TableCell>
               <TableCell className="text-[#5C6570]">
                 {formatLabel(row.format)}
                 {row.legs === 2 ? " · Ida y vuelta" : ""}
+              </TableCell>
+              <TableCell className="tabular-nums text-[#0A0A0A]">
+                {row.division_count}
               </TableCell>
               <TableCell>
                 <Badge variant="secondary" className="rounded-[2px]">
@@ -141,8 +137,8 @@ export function TournamentsList({
         </p>
         <p className="mt-1 text-sm text-[#5C6570]">
           {canManageStaff
-            ? "Crea un torneo y luego inscribe a los equipos que van a competir."
-            : "Pídele a un coordinador de liga que cree el primer torneo."}
+            ? "Crea un torneo y luego agrega divisiones (deporte, rama y categoría)."
+            : "Pídele a un administrador que cree el primer torneo."}
         </p>
       </div>
     );

@@ -10,6 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { BRANCH_LABELS, MATCH_STAGE_LABELS, sportLabel } from "@/lib/labels";
+import type { Branch } from "@/types/database";
 
 export type MatchListRow = {
   id: string;
@@ -17,9 +19,14 @@ export type MatchListRow = {
   homeScore: number;
   awayScore: number;
   scheduledAt: string | null;
-  round: number | null;
-  stage: string | null;
+  jornada: number | null;
+  stage: string;
+  venue: string | null;
   tournamentName: string;
+  sportKey: string;
+  branch: Branch | null;
+  categoryName: string | null;
+  groupName: string | null;
   homeTeamName: string;
   awayTeamName: string;
 };
@@ -55,8 +62,8 @@ export function MatchesTable({
         </p>
         <p className="mt-1 text-sm text-[#5C6570]">
           {canCreateMatch
-            ? "Programa el primero. Necesitas un torneo con al menos dos equipos inscritos."
-            : "Pídele a un coordinador de liga que programe la jornada."}
+            ? "Programa el primero. Necesitas una división con al menos dos equipos."
+            : "Pídele a un administrador que programe la jornada."}
         </p>
       </div>
     );
@@ -71,10 +78,13 @@ export function MatchesTable({
               Fecha
             </TableHead>
             <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
-              Torneo
+              División
             </TableHead>
             <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
               Partido
+            </TableHead>
+            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+              Sede
             </TableHead>
             <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
               Marcador
@@ -92,27 +102,39 @@ export function MatchesTable({
             <TableRow key={match.id} className="hover:bg-[#E6E9EC]/40">
               <TableCell className="font-mono text-sm text-[#0A0A0A] tabular-nums">
                 {formatWhen(match.scheduledAt)}
-                {match.round != null ? (
-                  <span className="mt-0.5 block text-xs text-[#5C6570]">
-                    Jornada {match.round}
-                    {match.stage ? ` · ${match.stage}` : ""}
-                  </span>
-                ) : match.stage ? (
-                  <span className="mt-0.5 block text-xs text-[#5C6570]">
-                    {match.stage}
-                  </span>
-                ) : null}
+                <span className="mt-0.5 block text-xs text-[#5C6570]">
+                  {match.jornada != null ? `Jornada ${match.jornada}` : null}
+                  {match.jornada != null && match.stage !== "regular"
+                    ? " · "
+                    : null}
+                  {match.stage !== "regular"
+                    ? (MATCH_STAGE_LABELS[match.stage] ?? match.stage)
+                    : match.jornada == null
+                      ? "—"
+                      : null}
+                </span>
               </TableCell>
               <TableCell className="text-[#0A0A0A]">
-                {match.tournamentName}
+                <span className="block">{match.tournamentName}</span>
+                <span className="mt-0.5 block text-xs text-[#5C6570]">
+                  {sportLabel(match.sportKey)}
+                  {match.branch ? ` · ${BRANCH_LABELS[match.branch]}` : ""}
+                  {match.categoryName ? ` · ${match.categoryName}` : ""}
+                  {match.groupName ? ` · ${match.groupName}` : ""}
+                </span>
               </TableCell>
               <TableCell className="font-medium text-[#0A0A0A]">
                 {match.homeTeamName}
                 <span className="mx-1.5 font-normal text-[#5C6570]">vs</span>
                 {match.awayTeamName}
               </TableCell>
+              <TableCell className="text-sm text-[#5C6570]">
+                {match.venue ?? "—"}
+              </TableCell>
               <TableCell className="font-mono text-sm tabular-nums text-[#0A0A0A]">
-                {match.homeScore}–{match.awayScore}
+                {match.status === "finalizado"
+                  ? `${match.homeScore}–${match.awayScore}`
+                  : "—"}
               </TableCell>
               <TableCell>
                 <MatchStatusBadge status={match.status} />

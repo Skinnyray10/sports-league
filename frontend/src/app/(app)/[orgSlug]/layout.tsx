@@ -1,13 +1,114 @@
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/layout/app-header";
-import { OrgSidebar } from "@/components/layout/org-sidebar";
+import { OrgSidebar, type ModuleNavItem } from "@/components/layout/org-sidebar";
 import { requireUser } from "@/lib/auth";
 import { getMembership, listUserOrganizations } from "@/lib/org";
+import { createClient } from "@/lib/supabase/server";
+import type { MembershipRole } from "@/types/database";
 
 type OrgLayoutProps = {
   children: React.ReactNode;
   params: Promise<{ orgSlug: string }>;
 };
+
+function buildNav(
+  orgSlug: string,
+  roles: MembershipRole[]
+): ModuleNavItem[] {
+  const isAdmin = roles.includes("admin");
+  const isDelegado = roles.includes("team_manager");
+  const isReferee = roles.includes("referee");
+
+  const items: ModuleNavItem[] = [];
+
+  if (isAdmin) {
+    items.push(
+      {
+        href: `/${orgSlug}/clubs`,
+        label: "Clubes",
+        bandClass: "bg-band-teams",
+      },
+      {
+        href: `/${orgSlug}/tournaments`,
+        label: "Torneos",
+        bandClass: "bg-band-tournaments",
+      },
+      {
+        href: `/${orgSlug}/teams`,
+        label: "Equipos",
+        bandClass: "bg-band-teams",
+      },
+      {
+        href: `/${orgSlug}/matches`,
+        label: "Partidos",
+        bandClass: "bg-band-matches",
+      },
+      {
+        href: `/${orgSlug}/standings`,
+        label: "Posiciones",
+        bandClass: "bg-band-standings",
+      },
+      {
+        href: `/${orgSlug}/approvals`,
+        label: "Credenciales",
+        bandClass: "bg-band-matches",
+      },
+      {
+        href: `/${orgSlug}/members`,
+        label: "Solicitudes",
+        bandClass: "bg-[#5C6570]",
+      },
+      {
+        href: `/${orgSlug}/settings`,
+        label: "Configuración",
+        bandClass: "bg-[#5C6570]",
+      }
+    );
+  }
+
+  if (isDelegado) {
+    items.push(
+      {
+        href: `/${orgSlug}/players`,
+        label: "Jugadores",
+        bandClass: "bg-band-teams",
+      },
+      {
+        href: `/${orgSlug}/matches`,
+        label: "Partidos",
+        bandClass: "bg-band-matches",
+      },
+      {
+        href: `/${orgSlug}/standings`,
+        label: "Posiciones",
+        bandClass: "bg-band-standings",
+      }
+    );
+  }
+
+  if (isReferee) {
+    items.push(
+      {
+        href: `/${orgSlug}/referee`,
+        label: "Mis partidos",
+        bandClass: "bg-band-matches",
+      },
+      {
+        href: `/${orgSlug}/standings`,
+        label: "Posiciones",
+        bandClass: "bg-band-standings",
+      }
+    );
+  }
+
+  // Deduplicate by href (user may have multiple roles).
+  const seen = new Set<string>();
+  return items.filter((item) => {
+    if (seen.has(item.href)) return false;
+    seen.add(item.href);
+    return true;
+  });
+}
 
 export default async function OrgLayout({ children, params }: OrgLayoutProps) {
   const { orgSlug } = await params;
@@ -18,31 +119,17 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
     notFound();
   }
 
+  const supabase = await createClient();
+  const { data: roleRows } = await supabase
+    .from("memberships")
+    .select("role")
+    .eq("organization_id", membership.organization_id)
+    .eq("user_id", membership.user_id);
+
+  const roles = (roleRows ?? []).map((r) => r.role);
   const organizations = await listUserOrganizations();
   const org = membership.organization;
-
-  const modules = [
-    {
-      href: `/${orgSlug}/teams`,
-      label: "Equipos",
-      bandClass: "bg-band-teams",
-    },
-    {
-      href: `/${orgSlug}/tournaments`,
-      label: "Torneos",
-      bandClass: "bg-band-tournaments",
-    },
-    {
-      href: `/${orgSlug}/matches`,
-      label: "Partidos",
-      bandClass: "bg-band-matches",
-    },
-    {
-      href: `/${orgSlug}/standings`,
-      label: "Posiciones",
-      bandClass: "bg-band-standings",
-    },
-  ];
+  const modules = buildNav(orgSlug, roles);
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-background md:flex-row">

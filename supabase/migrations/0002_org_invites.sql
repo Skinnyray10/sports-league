@@ -1,30 +1,33 @@
 -- =============================================================================
 -- SPORTS LEAGUE · 0002_org_invites.sql
 -- =============================================================================
--- Invites para unirse a una organización sin descubrir orgs vía RLS.
--- Admin crea/revoca filas; la aceptación ocurre solo vía RPC SECURITY DEFINER.
+-- Invites: solo team_manager (con team_id) y referee. Admin crea/revoca;
+-- aceptación vía RPC SECURITY DEFINER.
 -- =============================================================================
-
--- -----------------------------------------------------------------------------
--- 1. TABLA
--- -----------------------------------------------------------------------------
 
 create table public.organization_invites (
   id               uuid primary key default gen_random_uuid(),
   organization_id  uuid not null references public.organizations (id) on delete cascade,
-  -- Token opaco; gen_random_bytes requiere pgcrypto (ya en 0001).
   token            text not null unique default encode(gen_random_bytes(32), 'hex'),
   role             public.membership_role not null,
+  team_id          uuid references public.teams (id) on delete cascade,
   expires_at       timestamptz not null,
   created_by       uuid not null default auth.uid() references auth.users (id),
   created_at       timestamptz not null default now(),
   accepted_at      timestamptz,
   accepted_by      uuid references auth.users (id),
-  constraint chk_organization_invites_expires_after_created check (expires_at > created_at)
+  constraint chk_organization_invites_expires_after_created check (expires_at > created_at),
+  constraint chk_organization_invites_role check (
+    role in ('team_manager'::public.membership_role, 'referee'::public.membership_role)
+  ),
+  constraint chk_organization_invites_team_for_delegado check (
+    (role = 'team_manager' and team_id is not null)
+    or (role = 'referee' and team_id is null)
+  )
 );
 
 comment on table public.organization_invites is
-  'Invites por token para unirse a una org. Lectura/escritura admin; accept vía accept_org_invite().';
+  'Invites por token. Roles permitidos: team_manager (requiere team_id) y referee.';
 
 create index idx_organization_invites_organization_id
   on public.organization_invites (organization_id);
@@ -32,12 +35,6 @@ create index idx_organization_invites_organization_id
 create index idx_organization_invites_pending_token
   on public.organization_invites (token)
   where accepted_at is null;
-
--- -----------------------------------------------------------------------------
--- 2. RPC: accept_org_invite
--- -----------------------------------------------------------------------------
--- SECURITY DEFINER: el invitee no es miembro aún, así que no puede INSERT
--- en memberships ni SELECT en organization_invites bajo RLS org-only.
 
 create or replace function public.accept_org_invite(p_token text)
 returns table (
@@ -80,9 +77,18 @@ begin
     raise exception 'invite expired';
   end if;
 
-  insert into public.memberships (user_id, organization_id, role)
-  values (v_uid, v_invite.organization_id, v_invite.role)
-  on conflict (user_id, organization_id, role) do nothing;
+  if v_invite.role not in ('team_manager', 'referee') then
+    raise exception 'invite role not allowed';
+  end if;
+
+  if v_invite.role = 'team_manager' and v_invite.team_id is null then
+    raise exception 'team_manager invite requires team_id';
+  end if;
+
+  insert into public.memberships (user_id, organization_id, role, team_id)
+  values (v_uid, v_invite.organization_id, v_invite.role, v_invite.team_id)
+  on conflict (user_id, organization_id, role) do update
+    set team_id = excluded.team_id;
 
   update public.organization_invites
   set
@@ -102,25 +108,19 @@ end;
 $$;
 
 comment on function public.accept_org_invite(text) is
-  'Acepta un invite por token: crea membership y marca el invite como usado. Requiere auth.uid().';
+  'Acepta un invite por token: crea membership (con team_id si Delegado) y marca el invite como usado.';
 
 revoke all on function public.accept_org_invite(text) from public;
 grant execute on function public.accept_org_invite(text) to authenticated;
 
--- -----------------------------------------------------------------------------
--- 3. RLS
--- -----------------------------------------------------------------------------
-
 alter table public.organization_invites enable row level security;
 
--- Solo admins de la org ven invites (incluye usados/expirados para auditoría).
 create policy "organization_invites_select_admin"
   on public.organization_invites for select
   using (
     public.has_org_role(organization_id, array['admin']::public.membership_role[])
   );
 
--- Solo admin puede crear; created_by debe ser el usuario actual.
 create policy "organization_invites_insert_admin"
   on public.organization_invites for insert
   with check (
@@ -128,7 +128,6 @@ create policy "organization_invites_insert_admin"
     and public.has_org_role(organization_id, array['admin']::public.membership_role[])
   );
 
--- Admin puede actualizar (p. ej. extender expires_at) mientras no esté aceptado.
 create policy "organization_invites_update_admin"
   on public.organization_invites for update
   using (
@@ -138,7 +137,6 @@ create policy "organization_invites_update_admin"
     public.has_org_role(organization_id, array['admin']::public.membership_role[])
   );
 
--- Revocar = DELETE.
 create policy "organization_invites_delete_admin"
   on public.organization_invites for delete
   using (

@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { sportLabel } from "@/lib/labels";
 import {
   Select,
   SelectContent,
@@ -25,29 +24,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-type SportOption = { id: string; name: string };
-
 type CreateTournamentDialogProps = {
   orgSlug: string;
-  sports: SportOption[];
 };
 
 export function CreateTournamentDialog({
   orgSlug,
-  sports,
 }: CreateTournamentDialogProps) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [pending, startTransition] = React.useTransition();
-  const [sportId, setSportId] = React.useState(sports[0]?.id ?? "");
   const [format, setFormat] = React.useState("round_robin");
   const [legs, setLegs] = React.useState("1");
   const [status, setStatus] = React.useState("registration");
 
   function onSubmit(formData: FormData) {
     setError(null);
-    formData.set("sport_id", sportId);
     formData.set("format", format);
     formData.set("legs", legs);
     formData.set("status", status);
@@ -67,10 +60,7 @@ export function CreateTournamentDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button
-            className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
-            disabled={sports.length === 0}
-          />
+          <Button className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white" />
         }
       >
         <PlusIcon data-icon="inline-start" />
@@ -80,8 +70,8 @@ export function CreateTournamentDialog({
         <DialogHeader>
           <DialogTitle>Agregar torneo</DialogTitle>
           <DialogDescription>
-            Define temporada, deporte y formato. Los equipos se inscriben
-            después, desde el torneo ya creado.
+            Define temporada y formato. El deporte se elige al crear cada
+            división dentro del torneo.
           </DialogDescription>
         </DialogHeader>
         <form action={onSubmit} className="grid gap-4">
@@ -108,25 +98,6 @@ export function CreateTournamentDialog({
               className="rounded-[4px]"
               disabled={pending}
             />
-          </div>
-          <div className="grid gap-2">
-            <Label>Deporte</Label>
-            <Select
-              value={sportId}
-              onValueChange={(value) => setSportId(value ?? "")}
-              disabled={pending || sports.length === 0}
-            >
-              <SelectTrigger className="w-full rounded-[4px]">
-                <SelectValue placeholder="Elige un deporte" />
-              </SelectTrigger>
-              <SelectContent>
-                {sports.map((sport) => (
-                  <SelectItem key={sport.id} value={sport.id}>
-                    {sportLabel(sport.name)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
@@ -212,7 +183,7 @@ export function CreateTournamentDialog({
             <Button
               type="submit"
               className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
-              disabled={pending || !sportId}
+              disabled={pending}
             >
               {pending ? "Guardando…" : "Crear torneo"}
             </Button>

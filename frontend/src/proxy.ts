@@ -9,7 +9,13 @@ function isPublicPath(pathname: string): boolean {
   if (pathname === "/" || pathname === "/login" || pathname === "/signup") {
     return true;
   }
+  if (pathname === "/pending" || pathname.startsWith("/pending/")) {
+    return true;
+  }
   if (pathname.startsWith("/join/")) {
+    return true;
+  }
+  if (pathname.startsWith("/p/") || pathname.startsWith("/c/")) {
     return true;
   }
   return false;

@@ -6,20 +6,27 @@ import { getOrgAccess } from "@/components/ops/access";
 import { ModulePageHeader } from "@/components/ops/module-page-header";
 import { DeleteTournamentButton } from "@/components/tournaments/delete-tournament-button";
 import { TournamentEditForm } from "@/components/tournaments/tournament-edit-form";
-import { TournamentEnrollment } from "@/components/tournaments/tournament-enrollment";
+import {
+  TournamentDivisions,
+  type DivisionView,
+} from "@/components/tournaments/tournament-divisions";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { TournamentStatus } from "@/types/database";
+import type { Branch, TournamentStatus } from "@/types/database";
 import {
   TOURNAMENT_STATUS_LABELS,
   formatLabel,
   legsLabel,
-  sportLabel,
 } from "@/lib/labels";
 
 type TournamentDetailPageProps = {
   params: Promise<{ orgSlug: string; tournamentId: string }>;
 };
+
+function one<T>(value: T | T[] | null): T | null {
+  if (!value) return null;
+  return Array.isArray(value) ? value[0] ?? null : value;
+}
 
 export default async function TournamentDetailPage({
   params,
@@ -31,9 +38,11 @@ export default async function TournamentDetailPage({
 
   const [
     { data: tournament, error: tournamentError },
-    { data: sports, error: sportsError },
-    { data: teams, error: teamsError },
-    { data: enrollments, error: enrollError },
+    { data: divisionsRaw, error: divisionsError },
+    { data: groupsRaw, error: groupsError },
+    { data: orgSportsRaw, error: orgSportsError },
+    { data: branchesRaw, error: branchesError },
+    { data: categories, error: categoriesError },
   ] = await Promise.all([
     supabase
       .from("tournaments")
@@ -41,37 +50,91 @@ export default async function TournamentDetailPage({
       .eq("id", tournamentId)
       .eq("organization_id", orgId)
       .maybeSingle(),
-    supabase.from("sports").select("id, name").order("name", { ascending: true }),
     supabase
-      .from("teams")
-      .select("id, name")
+      .from("divisions")
+      .select(
+        "id, name, branch, sport:sports(id, key, name), category:categories(id, name)"
+      )
+      .eq("tournament_id", tournamentId)
+      .eq("organization_id", orgId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("groups")
+      .select("id, name, division_id")
       .eq("organization_id", orgId)
       .order("name", { ascending: true }),
     supabase
-      .from("tournament_teams")
-      .select("team_id, team:teams(id, name)")
-      .eq("tournament_id", tournamentId)
-      .eq("organization_id", orgId),
+      .from("org_sports")
+      .select("active, sport:sports(id, key, name)")
+      .eq("organization_id", orgId)
+      .eq("active", true),
+    supabase
+      .from("org_sport_branches")
+      .select("sport_id, branch, active")
+      .eq("organization_id", orgId)
+      .eq("active", true),
+    supabase
+      .from("categories")
+      .select("id, name")
+      .eq("organization_id", orgId)
+      .order("sort_order", { ascending: true }),
   ]);
 
   if (tournamentError) throw tournamentError;
-  if (sportsError) throw sportsError;
-  if (teamsError) throw teamsError;
-  if (enrollError) throw enrollError;
+  if (divisionsError) throw divisionsError;
+  if (groupsError) throw groupsError;
+  if (orgSportsError) throw orgSportsError;
+  if (branchesError) throw branchesError;
+  if (categoriesError) throw categoriesError;
   if (!tournament) notFound();
 
-  const enrolled = (enrollments ?? []).flatMap((row) => {
-    const team = row.team as
-      | { id: string; name: string }
-      | { id: string; name: string }[]
-      | null;
-    const resolved = Array.isArray(team) ? team[0] : team;
-    return resolved ? [{ id: resolved.id, name: resolved.name }] : [];
+  const groupsByDivision = new Map<string, { id: string; name: string }[]>();
+  for (const g of groupsRaw ?? []) {
+    const list = groupsByDivision.get(g.division_id) ?? [];
+    list.push({ id: g.id, name: g.name });
+    groupsByDivision.set(g.division_id, list);
+  }
+
+  const divisions: DivisionView[] = (divisionsRaw ?? []).flatMap((row) => {
+    const sport = one(
+      row.sport as
+        | { id: string; key: string; name: string }
+        | { id: string; key: string; name: string }[]
+        | null
+    );
+    const category = one(
+      row.category as
+        | { id: string; name: string }
+        | { id: string; name: string }[]
+        | null
+    );
+    if (!sport || !category) return [];
+    return [
+      {
+        id: row.id,
+        name: row.name,
+        branch: row.branch as Branch,
+        sport,
+        category,
+        groups: groupsByDivision.get(row.id) ?? [],
+      },
+    ];
   });
-  const enrolledIds = new Set(enrolled.map((t) => t.id));
-  const available = (teams ?? []).filter((t) => !enrolledIds.has(t.id));
-  const sportName =
-    (sports ?? []).find((s) => s.id === tournament.sport_id)?.name ?? "";
+
+  const sports = (orgSportsRaw ?? []).flatMap((row) => {
+    const sport = one(
+      row.sport as
+        | { id: string; key: string; name: string }
+        | { id: string; key: string; name: string }[]
+        | null
+    );
+    return sport ? [sport] : [];
+  });
+
+  const activeBranches = (branchesRaw ?? []).map((b) => ({
+    sport_id: b.sport_id,
+    branch: b.branch as Branch,
+  }));
 
   return (
     <section className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
@@ -88,7 +151,7 @@ export default async function TournamentDetailPage({
       <ModulePageHeader
         band="tournaments"
         title={tournament.name}
-        description={`Temporada ${tournament.season} · ${sportLabel(sportName)} · ${formatLabel(tournament.format)}`}
+        description={`Temporada ${tournament.season} · ${formatLabel(tournament.format)} · ${legsLabel(tournament.legs)}`}
         actions={
           access.canManageStaff ? (
             <DeleteTournamentButton
@@ -100,22 +163,24 @@ export default async function TournamentDetailPage({
         }
       />
 
-      <Tabs defaultValue="enrollment">
+      <Tabs defaultValue="divisions">
         <TabsList variant="line" className="mb-5 rounded-none">
-          <TabsTrigger value="enrollment" className="rounded-[2px]">
-            Equipos inscritos
+          <TabsTrigger value="divisions" className="rounded-[2px]">
+            Divisiones
           </TabsTrigger>
           <TabsTrigger value="settings" className="rounded-[2px]">
             Configuración
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="enrollment">
-          <TournamentEnrollment
+        <TabsContent value="divisions">
+          <TournamentDivisions
             orgSlug={orgSlug}
             tournamentId={tournament.id}
-            enrolled={enrolled}
-            available={available}
+            divisions={divisions}
+            sports={sports}
+            categories={categories ?? []}
+            activeBranches={activeBranches}
             canManageStaff={access.canManageStaff}
           />
         </TabsContent>
@@ -126,11 +191,9 @@ export default async function TournamentDetailPage({
               <TournamentEditForm
                 orgSlug={orgSlug}
                 tournamentId={tournament.id}
-                sports={sports ?? []}
                 initial={{
                   name: tournament.name,
                   season: tournament.season,
-                  sportId: tournament.sport_id,
                   format: tournament.format,
                   legs: tournament.legs,
                   status: tournament.status as TournamentStatus,
