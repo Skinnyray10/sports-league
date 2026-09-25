@@ -13,7 +13,7 @@ export function AppHeader({
   currentSlug,
 }: AppHeaderProps) {
   return (
-    <header className="flex items-center justify-end gap-4 border-b border-border bg-card px-4 py-3 md:px-6">
+    <header className="flex items-center justify-end gap-4 border-b border-border bg-card/80 px-4 py-3 backdrop-blur-[2px] md:px-6">
       <UserMenu
         email={email}
         organizations={organizations}

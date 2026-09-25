@@ -23,7 +23,7 @@ export function DivisionFilter({
 
   if (divisions.length === 0) {
     return (
-      <p className="text-sm text-[#5C6570]">
+      <p className="text-sm text-muted-foreground">
         Todavía no hay divisiones. Crea un torneo con divisiones para ver
         posiciones.
       </p>
@@ -32,7 +32,7 @@ export function DivisionFilter({
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <Label htmlFor="standings-division" className="text-[#5C6570]">
+      <Label htmlFor="standings-division" className="text-muted-foreground">
         División
       </Label>
       <select
@@ -45,7 +45,7 @@ export function DivisionFilter({
             : `/${orgSlug}/standings`;
           router.push(href);
         }}
-        className="h-8 min-w-[16rem] max-w-full rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 text-sm text-[#0A0A0A] outline-none focus-visible:border-[#00B7FF] focus-visible:ring-2 focus-visible:ring-[#00B7FF]/35"
+        className="h-8 min-w-[16rem] max-w-full rounded-[4px] border border-border bg-card px-2.5 text-sm text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/35"
       >
         <option value="">Elige una división</option>
         {divisions.map((d) => (

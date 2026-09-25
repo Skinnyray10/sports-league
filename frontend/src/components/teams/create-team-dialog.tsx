@@ -90,7 +90,7 @@ export function CreateTeamDialog({
       <DialogTrigger
         render={
           <Button
-            className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+            className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
             disabled={!canCreate}
           />
         }
@@ -107,7 +107,7 @@ export function CreateTeamDialog({
           </DialogDescription>
         </DialogHeader>
         {!canCreate ? (
-          <p className="text-sm text-[#5C6570]">
+          <p className="text-sm text-muted-foreground">
             Necesitas al menos un club y una división en algún torneo antes de
             crear equipos.
           </p>
@@ -220,7 +220,7 @@ export function CreateTeamDialog({
               </Button>
               <Button
                 type="submit"
-                className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+                className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
                 disabled={pending || !clubId || !divisionId}
               >
                 {pending ? "Guardando…" : "Crear equipo"}

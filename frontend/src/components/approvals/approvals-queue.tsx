@@ -95,11 +95,11 @@ export function ApprovalsQueue({ orgSlug, rows }: ApprovalsQueueProps) {
 
   if (rows.length === 0) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">
+      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">
           No hay credenciales con estos filtros
         </p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Cambia el filtro o espera a que los delegados registren jugadores.
         </p>
       </div>
@@ -112,7 +112,7 @@ export function ApprovalsQueue({ orgSlug, rows }: ApprovalsQueueProps) {
         <Button
           type="button"
           size="sm"
-          className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+          className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
           disabled={pending || selected.size === 0}
           onClick={runBulkApprove}
         >
@@ -125,32 +125,32 @@ export function ApprovalsQueue({ orgSlug, rows }: ApprovalsQueueProps) {
         ) : null}
       </div>
 
-      <div className="overflow-x-auto border border-[#D0D5DB] bg-white">
+      <div className="overflow-x-auto border border-border bg-card">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead className="bg-[#E6E9EC] w-10">
+              <TableHead className="bg-secondary w-10">
                 <input
                   type="checkbox"
                   aria-label="Seleccionar todas"
                   checked={selected.size === rows.length && rows.length > 0}
                   onChange={toggleAll}
-                  className="size-4 accent-[#00B7FF]"
+                  className="size-4 accent-primary"
                 />
               </TableHead>
-              <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+              <TableHead className="bg-secondary text-foreground">
                 Jugador
               </TableHead>
-              <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+              <TableHead className="bg-secondary text-foreground">
                 Equipo
               </TableHead>
-              <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+              <TableHead className="bg-secondary text-foreground">
                 Estado
               </TableHead>
-              <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+              <TableHead className="bg-secondary text-foreground">
                 Elegibilidad
               </TableHead>
-              <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
+              <TableHead className="bg-secondary text-right text-foreground">
                 Acciones
               </TableHead>
             </TableRow>
@@ -164,33 +164,33 @@ export function ApprovalsQueue({ orgSlug, rows }: ApprovalsQueueProps) {
                     aria-label={`Seleccionar ${row.firstNames} ${row.lastNames}`}
                     checked={selected.has(row.id)}
                     onChange={() => toggle(row.id)}
-                    className="size-4 accent-[#00B7FF]"
+                    className="size-4 accent-primary"
                   />
                 </TableCell>
                 <TableCell>
-                  <p className="font-medium text-[#0A0A0A]">
+                  <p className="font-medium text-foreground">
                     {row.firstNames} {row.lastNames}
                   </p>
-                  <p className="font-mono text-xs text-[#5C6570]">
+                  <p className="font-mono text-xs text-muted-foreground">
                     {row.folio}
                     {row.jerseyNumber != null ? ` · #${row.jerseyNumber}` : ""}
                   </p>
                 </TableCell>
-                <TableCell className="text-sm text-[#0A0A0A]">
+                <TableCell className="text-sm text-foreground">
                   <span>{row.teamName}</span>
-                  <span className="block text-xs text-[#5C6570]">
+                  <span className="block text-xs text-muted-foreground">
                     {row.clubName}
                   </span>
                 </TableCell>
                 <TableCell>
                   <Badge
                     variant="secondary"
-                    className="rounded-[2px] bg-[#E6E9EC] text-[#5C6570]"
+                    className="rounded-[2px] bg-secondary text-muted-foreground"
                   >
                     {APPROVAL_STATUS_LABELS[row.status]}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-sm text-[#5C6570]">
+                <TableCell className="text-sm text-muted-foreground">
                   {ELIGIBILITY_STATUS_LABELS[row.eligibility]}
                 </TableCell>
                 <TableCell className="text-right">

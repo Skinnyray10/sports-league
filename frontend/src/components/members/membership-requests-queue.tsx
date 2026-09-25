@@ -32,11 +32,11 @@ export function MembershipRequestsQueue({ orgSlug, requests }: Props) {
 
   if (requests.length === 0) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">
+      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">
           No hay solicitudes pendientes
         </p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Cuando un Delegado o Árbitro se registre, aparecerá aquí.
         </p>
       </div>
@@ -44,20 +44,20 @@ export function MembershipRequestsQueue({ orgSlug, requests }: Props) {
   }
 
   return (
-    <ul className="divide-y divide-[#D0D5DB] border border-[#D0D5DB] bg-white">
+    <ul className="divide-y divide-border border border-border bg-card">
       {requests.map((req) => (
         <li
           key={req.id}
           className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
         >
           <div className="min-w-0 space-y-1">
-            <p className="text-sm font-semibold text-[#0A0A0A]">{req.fullName}</p>
-            <p className="text-xs text-[#5C6570]">
+            <p className="text-sm font-semibold text-foreground">{req.fullName}</p>
+            <p className="text-xs text-muted-foreground">
               {ROLE_LABELS[req.requestedRole]}
               {req.clubName ? ` · ${req.clubName}` : ""}
               {req.username ? ` · @${req.username}` : ""}
             </p>
-            <p className="text-xs text-[#5C6570]">
+            <p className="text-xs text-muted-foreground">
               {req.email}
               {req.phone ? ` · ${req.phone}` : ""}
             </p>
@@ -66,7 +66,7 @@ export function MembershipRequestsQueue({ orgSlug, requests }: Props) {
             <Button
               type="button"
               disabled={pending}
-              className="h-8 rounded-sm bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+              className="h-8 rounded-full bg-primary text-foreground hover:bg-foreground hover:text-background"
               onClick={() => {
                 startTransition(async () => {
                   await approveMembershipRequest(orgSlug, req.id);

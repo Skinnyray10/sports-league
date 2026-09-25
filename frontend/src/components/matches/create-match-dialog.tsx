@@ -57,7 +57,7 @@ type CreateMatchDialogProps = {
 };
 
 const selectClass =
-  "h-8 w-full rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 text-sm text-[#0A0A0A] outline-none focus-visible:border-[#00B7FF] focus-visible:ring-2 focus-visible:ring-[#00B7FF]/35";
+  "h-8 w-full rounded-[4px] border border-border bg-card px-2.5 text-sm text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/35";
 
 export function CreateMatchDialog({
   orgSlug,
@@ -120,7 +120,7 @@ export function CreateMatchDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] transition-[background,color] duration-150 ease-out hover:bg-[#0A0A0A] hover:text-white" />
+          <Button className="rounded-[2px] bg-primary text-foreground transition-[background,color] duration-150 ease-out hover:bg-foreground hover:text-background" />
         }
       >
         <PlusIcon data-icon="inline-start" />
@@ -153,7 +153,7 @@ export function CreateMatchDialog({
               ))}
             </select>
             {selectedDivision ? (
-              <p className="text-xs text-[#5C6570]">
+              <p className="text-xs text-muted-foreground">
                 {selectedDivision.tournamentName} ·{" "}
                 {sportLabel(selectedDivision.sportKey)} ·{" "}
                 {BRANCH_LABELS[selectedDivision.branch]} ·{" "}
@@ -204,7 +204,7 @@ export function CreateMatchDialog({
           </div>
 
           {teamsInDivision.length < 2 ? (
-            <p className="text-sm text-[#5C6570]">
+            <p className="text-sm text-muted-foreground">
               Esta división necesita al menos dos equipos antes de poder
               programar un partido.
             </p>
@@ -301,7 +301,7 @@ export function CreateMatchDialog({
             <Button
               type="submit"
               disabled={pending || teamsInDivision.length < 2}
-              className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+              className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
             >
               {pending ? "Guardando…" : "Programar partido"}
             </Button>

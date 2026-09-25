@@ -27,7 +27,7 @@ export function UserMenu({ email, organizations, currentSlug }: UserMenuProps) {
         render={
           <Button
             variant="outline"
-            className="rounded-sm border-border bg-white"
+            className="rounded-sm border-border bg-card"
           />
         }
       >

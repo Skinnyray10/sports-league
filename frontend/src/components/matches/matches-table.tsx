@@ -56,11 +56,11 @@ export function MatchesTable({
 }: MatchesTableProps) {
   if (matches.length === 0) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">
+      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">
           Todavía no hay partidos
         </p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           {canCreateMatch
             ? "Programa el primero. Necesitas una división con al menos dos equipos."
             : "Pídele a un administrador que programe la jornada."}
@@ -70,39 +70,39 @@ export function MatchesTable({
   }
 
   return (
-    <div className="overflow-hidden border border-[#D0D5DB] bg-white">
+    <div className="overflow-hidden border border-border bg-card">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               Fecha
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               División
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               Partido
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               Sede
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               Marcador
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               Estado
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-right text-foreground">
               Acciones
             </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {matches.map((match) => (
-            <TableRow key={match.id} className="hover:bg-[#E6E9EC]/40">
-              <TableCell className="font-mono text-sm text-[#0A0A0A] tabular-nums">
+            <TableRow key={match.id} className="hover:bg-secondary/40">
+              <TableCell className="font-mono text-sm text-foreground tabular-nums">
                 {formatWhen(match.scheduledAt)}
-                <span className="mt-0.5 block text-xs text-[#5C6570]">
+                <span className="mt-0.5 block text-xs text-muted-foreground">
                   {match.jornada != null ? `Jornada ${match.jornada}` : null}
                   {match.jornada != null && match.stage !== "regular"
                     ? " · "
@@ -114,24 +114,24 @@ export function MatchesTable({
                       : null}
                 </span>
               </TableCell>
-              <TableCell className="text-[#0A0A0A]">
+              <TableCell className="text-foreground">
                 <span className="block">{match.tournamentName}</span>
-                <span className="mt-0.5 block text-xs text-[#5C6570]">
+                <span className="mt-0.5 block text-xs text-muted-foreground">
                   {sportLabel(match.sportKey)}
                   {match.branch ? ` · ${BRANCH_LABELS[match.branch]}` : ""}
                   {match.categoryName ? ` · ${match.categoryName}` : ""}
                   {match.groupName ? ` · ${match.groupName}` : ""}
                 </span>
               </TableCell>
-              <TableCell className="font-medium text-[#0A0A0A]">
+              <TableCell className="font-medium text-foreground">
                 {match.homeTeamName}
-                <span className="mx-1.5 font-normal text-[#5C6570]">vs</span>
+                <span className="mx-1.5 font-normal text-muted-foreground">vs</span>
                 {match.awayTeamName}
               </TableCell>
-              <TableCell className="text-sm text-[#5C6570]">
+              <TableCell className="text-sm text-muted-foreground">
                 {match.venue ?? "—"}
               </TableCell>
-              <TableCell className="font-mono text-sm tabular-nums text-[#0A0A0A]">
+              <TableCell className="font-mono text-sm tabular-nums text-foreground">
                 {match.status === "finalizado"
                   ? `${match.homeScore}–${match.awayScore}`
                   : "—"}

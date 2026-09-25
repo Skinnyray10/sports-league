@@ -41,7 +41,7 @@ export function CreateOrgForm() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Liga Municipal de Voleibol"
-          className="rounded-md bg-white"
+          className="rounded-md bg-card"
           disabled={pending}
         />
       </div>
@@ -55,7 +55,7 @@ export function CreateOrgForm() {
           value={slug}
           onChange={(e) => setSlugOverride(toSlug(e.target.value))}
           placeholder="liga-municipal-voleibol"
-          className="rounded-md bg-white font-mono text-[0.875rem]"
+          className="rounded-md bg-card font-mono text-[0.875rem]"
           aria-describedby="slug-hint"
           disabled={pending}
         />
@@ -69,13 +69,13 @@ export function CreateOrgForm() {
       {state.error ? (
         <p
           role="alert"
-          className="rounded-md border border-destructive/40 bg-white px-3 py-2 text-sm text-destructive"
+          className="rounded-md border border-destructive/40 bg-card px-3 py-2 text-sm text-destructive"
         >
           {state.error}
         </p>
       ) : null}
 
-      <Button type="submit" disabled={pending} className="rounded-sm">
+      <Button type="submit" disabled={pending} className="rounded-full">
         {pending ? "Creando…" : "Crear organización"}
       </Button>
     </form>

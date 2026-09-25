@@ -253,7 +253,7 @@ export default async function MatchesPage({ params, searchParams }: PageProps) {
                 groups={groups}
               />
             ) : (
-              <p className="text-sm text-[#5C6570]">
+              <p className="text-sm text-muted-foreground">
                 <Link
                   href={`/${orgSlug}/tournaments`}
                   className="underline-offset-4 hover:underline"

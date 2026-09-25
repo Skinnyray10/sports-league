@@ -29,11 +29,11 @@ export default async function PublicEstadisticasPage({ params }: PageProps) {
         description="Tabla de posiciones y goleo a partir de partidos finalizados."
       />
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-[#0A0A0A]">Posiciones</h2>
+        <h2 className="text-lg font-semibold text-foreground">Posiciones</h2>
         <PublicStandingsSections rows={standings} />
       </section>
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-[#0A0A0A]">Goleo</h2>
+        <h2 className="text-lg font-semibold text-foreground">Goleo</h2>
         <PublicScorersTable scorers={scorers} />
       </section>
     </div>

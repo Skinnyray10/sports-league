@@ -72,22 +72,22 @@ export function OrgSettingsForm({ orgSlug, initial }: OrgSettingsFormProps) {
           disabled={pending}
         />
       </div>
-      <label className="flex items-center gap-2 text-sm text-[#0A0A0A]">
+      <label className="flex items-center gap-2 text-sm text-foreground">
         <input
           type="checkbox"
           name="is_public"
           defaultChecked={initial.isPublic}
           disabled={pending}
-          className="size-4 rounded-[2px] border-[#D0D5DB] accent-[#00B7FF]"
+          className="size-4 rounded-[2px] border-border accent-primary"
         />
         Organización pública (visible sin iniciar sesión)
       </label>
       {initial.isPublic ? (
-        <p className="text-sm text-[#5C6570]">
+        <p className="text-sm text-muted-foreground">
           Vista pública:{" "}
           <a
             href={`/p/${orgSlug}`}
-            className="font-mono text-[#00B7FF] hover:underline"
+            className="font-mono text-foreground hover:underline"
             target="_blank"
             rel="noreferrer"
           >
@@ -103,7 +103,7 @@ export function OrgSettingsForm({ orgSlug, initial }: OrgSettingsFormProps) {
       <div>
         <Button
           type="submit"
-          className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+          className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
           disabled={pending}
         >
           {pending ? "Guardando…" : "Guardar organización"}

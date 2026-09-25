@@ -26,13 +26,13 @@ export function AcceptInviteForm({ token }: AcceptInviteFormProps) {
       {state.error ? (
         <p
           role="alert"
-          className="rounded-md border border-destructive/40 bg-white px-3 py-2 text-sm text-destructive"
+          className="rounded-md border border-destructive/40 bg-card px-3 py-2 text-sm text-destructive"
         >
           {state.error}
         </p>
       ) : null}
 
-      <Button type="submit" disabled={pending} className="rounded-sm">
+      <Button type="submit" disabled={pending} className="rounded-full">
         {pending ? "Entrando…" : "Aceptar invitación"}
       </Button>
     </form>

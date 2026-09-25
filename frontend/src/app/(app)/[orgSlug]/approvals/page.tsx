@@ -135,8 +135,8 @@ function FilterLink({
       href={href}
       className={
         active
-          ? "rounded-[2px] bg-[#0A0A0A] px-3 py-1.5 font-medium text-white"
-          : "rounded-[2px] border border-[#D0D5DB] bg-white px-3 py-1.5 text-[#5C6570] hover:bg-[#E6E9EC]"
+          ? "rounded-[2px] bg-foreground px-3 py-1.5 font-medium text-background"
+          : "rounded-[2px] border border-border bg-card px-3 py-1.5 text-muted-foreground hover:bg-secondary"
       }
     >
       {label}

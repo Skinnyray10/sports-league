@@ -61,7 +61,7 @@ function CategoryRowForm({
   return (
     <form
       action={onSave}
-      className="grid gap-3 border-b border-[#D0D5DB] px-4 py-3 last:border-b-0 sm:grid-cols-[1fr_6rem_auto] sm:items-end"
+      className="grid gap-3 border-b border-border px-4 py-3 last:border-b-0 sm:grid-cols-[1fr_6rem_auto] sm:items-end"
     >
       <div className="grid gap-1.5">
         <Label htmlFor={`cat-name-${category.id}`} className="text-xs">
@@ -146,7 +146,7 @@ export function CategoriesSettings({
     <div className="space-y-4">
       <form
         action={onCreate}
-        className="grid gap-3 border border-[#D0D5DB] bg-white p-4 sm:grid-cols-[1fr_6rem_auto] sm:items-end"
+        className="grid gap-3 border border-border bg-card p-4 sm:grid-cols-[1fr_6rem_auto] sm:items-end"
       >
         <div className="grid gap-1.5">
           <Label htmlFor="new-cat-name">Nueva categoría</Label>
@@ -174,7 +174,7 @@ export function CategoriesSettings({
         </div>
         <Button
           type="submit"
-          className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+          className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
           disabled={pending}
         >
           <PlusIcon data-icon="inline-start" />
@@ -189,11 +189,11 @@ export function CategoriesSettings({
       ) : null}
 
       {categories.length === 0 ? (
-        <p className="text-sm text-[#5C6570]">
+        <p className="text-sm text-muted-foreground">
           Todavía no hay categorías. Agrega la primera arriba.
         </p>
       ) : (
-        <div className="overflow-hidden border border-[#D0D5DB] bg-white">
+        <div className="overflow-hidden border border-border bg-card">
           {categories.map((category) => (
             <CategoryRowForm
               key={category.id}

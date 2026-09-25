@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=390" />
+  <title>Tablero mobile</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sofia+Sans+Condensed:wght@800&family=Sofia+Sans:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    html,
+    body {
+      margin: 0;
+      background: #f6f5f2;
+      font-family: "Sofia Sans", sans-serif;
+      color: #191919;
+    }
+    .top {
+      background: #191919;
+      color: #f6f5f2;
+      padding: 16px;
+    }
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: #fbfaf7;
+      color: #191919;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Sofia Sans Condensed", sans-serif;
+      font-weight: 800;
+      font-size: 12px;
+    }
+    nav {
+      display: flex;
+      gap: 8px;
+      overflow: auto;
+      padding: 10px 12px;
+      background: #191919;
+    }
+    nav a {
+      color: #cfcfc9;
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    nav a.active {
+      background: #2a2a2a;
+      color: #f6f5f2;
+      box-shadow: inset 3px 0 0 #dae937;
+    }
+    main {
+      padding: 16px;
+    }
+    h1 {
+      font-family: "Sofia Sans Condensed", sans-serif;
+      font-size: 24px;
+      margin: 0 0 4px;
+      font-weight: 800;
+    }
+    .sub {
+      color: #585858;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .board {
+      border-top: 28px solid #ebe9e4;
+      background: #fbfaf7;
+      margin-bottom: 14px;
+      padding: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+    th,
+    td {
+      padding: 6px 4px;
+      border-top: 1px solid #e3e1db;
+      text-align: left;
+    }
+    th {
+      color: #585858;
+      font-size: 12px;
+    }
+    button {
+      margin-top: 8px;
+      border: 0;
+      background: #dae937;
+      color: #191919;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 999px;
+      padding: 12px 18px;
+      width: 100%;
+    }
+    .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #585858;
+      margin-bottom: 6px;
+    }
+    .meta {
+      opacity: 0.55;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div class="brand">
+      <div class="mark">LI</div>
+      <div>
+        <strong>LIGA INTERFACULTADES DEMO</strong>
+        <div class="meta">Operaciones</div>
+      </div>
+    </div>
+  </div>
+  <nav>
+    <a>Clubes</a>
+    <a>Torneos</a>
+    <a>Equipos</a>
+    <a class="active">Partidos</a>
+    <a>Posiciones</a>
+  </nav>
+  <main>
+    <h1>Tablero de Cancha · Municipal</h1>
+    <div class="sub">Liga Interfacultades Demo</div>
+    <div class="board">
+      <div class="label">Posiciones generales</div>
+      <table>
+        <tr>
+          <th>POS</th>
+          <th>EQUIPO</th>
+          <th>PTS</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>FCCF</td>
+          <td>13</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>ODONTOLOGIA</td>
+          <td>10</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>INGENIERIA</td>
+          <td>9</td>
+        </tr>
+      </table>
+    </div>
+    <div class="board">
+      <div class="label">Partidos</div>
+      <table>
+        <tr>
+          <th>FECHA</th>
+          <th>LOCAL</th>
+          <th>VISITANTE</th>
+          <th>ESTADO</th>
+        </tr>
+        <tr>
+          <td>24/05</td>
+          <td>FCCF</td>
+          <td>ODONTO</td>
+          <td>POR JUGAR</td>
+        </tr>
+      </table>
+    </div>
+    <button type="button">Programar partido</button>
+  </main>
+</body>
+</html>

@@ -76,7 +76,7 @@ export function SignupForm({
           required
           maxLength={120}
           placeholder="Tu nombre"
-          className="rounded-sm bg-white"
+          className="rounded-full bg-card"
           disabled={pending}
         />
       </div>
@@ -91,7 +91,7 @@ export function SignupForm({
             maxLength={40}
             autoComplete="username"
             placeholder="usuario"
-            className="rounded-sm bg-white"
+            className="rounded-full bg-card"
             disabled={pending}
           />
         </div>
@@ -104,7 +104,7 @@ export function SignupForm({
             autoComplete="email"
             required
             placeholder="tu@liga.mx"
-            className="rounded-sm bg-white"
+            className="rounded-full bg-card"
             disabled={pending}
           />
         </div>
@@ -120,7 +120,7 @@ export function SignupForm({
             autoComplete="tel"
             maxLength={30}
             placeholder="opcional"
-            className="rounded-sm bg-white"
+            className="rounded-full bg-card"
             disabled={pending}
           />
         </div>
@@ -132,7 +132,7 @@ export function SignupForm({
             required
             value={orgId}
             onChange={(e) => setOrgId(e.target.value)}
-            className="h-8 w-full rounded-sm border border-input bg-white px-2.5 text-sm"
+            className="h-8 w-full rounded-full border border-input bg-card px-2.5 text-sm"
             disabled={pending}
           >
             {organizations.map((org) => (
@@ -150,7 +150,7 @@ export function SignupForm({
           <select
             id="club_id"
             name="club_id"
-            className="h-8 w-full rounded-sm border border-input bg-white px-2.5 text-sm"
+            className="h-8 w-full rounded-full border border-input bg-card px-2.5 text-sm"
             disabled={pending || clubsForOrg.length === 0}
             defaultValue=""
           >
@@ -173,7 +173,7 @@ export function SignupForm({
             name="requested_role"
             required
             defaultValue="team_manager"
-            className="h-8 w-full rounded-sm border border-input bg-white px-2.5 text-sm"
+            className="h-8 w-full rounded-full border border-input bg-card px-2.5 text-sm"
             disabled={pending}
           >
             <option value="team_manager">Delegado de equipo</option>
@@ -191,7 +191,7 @@ export function SignupForm({
           autoComplete="new-password"
           required
           minLength={8}
-          className="rounded-sm bg-white"
+          className="rounded-full bg-card"
           disabled={pending}
         />
         <p className="text-xs text-muted-foreground">Mínimo 8 caracteres.</p>
@@ -200,7 +200,7 @@ export function SignupForm({
       {state.error ? (
         <p
           role="alert"
-          className="rounded-sm border border-destructive/40 bg-white px-3 py-2 text-sm text-destructive"
+          className="rounded-full border border-destructive/40 bg-card px-3 py-2 text-sm text-destructive"
         >
           {state.error}
         </p>
@@ -209,7 +209,7 @@ export function SignupForm({
       {state.notice ? (
         <p
           role="status"
-          className="rounded-sm border border-border bg-secondary px-3 py-2 text-sm text-foreground"
+          className="rounded-full border border-border bg-secondary px-3 py-2 text-sm text-foreground"
         >
           {state.notice}
         </p>
@@ -219,7 +219,7 @@ export function SignupForm({
         <Button
           type="submit"
           disabled={pending}
-          className="rounded-sm bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+          className="rounded-full bg-primary text-foreground hover:bg-foreground hover:text-background"
         >
           {pending ? "Enviando…" : "Enviar solicitud"}
         </Button>

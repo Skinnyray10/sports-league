@@ -79,31 +79,31 @@ export function MatchSetsEditor({
   }
 
   return (
-    <section className="border border-[#D0D5DB] bg-white p-5">
-      <h2 className="text-base font-semibold text-[#0A0A0A]">Sets</h2>
-      <p className="mt-1 text-sm text-[#5C6570]">
+    <section className="border border-border bg-card p-5">
+      <h2 className="text-base font-semibold text-foreground">Sets</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
         Captura el parcial de cada set. El marcador del partido sigue siendo la
         cantidad de sets ganados por cada equipo.
       </p>
 
       {sets.length === 0 ? (
-        <p className="mt-4 text-sm text-[#5C6570]">
+        <p className="mt-4 text-sm text-muted-foreground">
           Todavía no capturas ningún set.
         </p>
       ) : (
-        <div className="mt-4 overflow-hidden border border-[#D0D5DB]">
+        <div className="mt-4 overflow-hidden border border-border">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Set</TableHead>
-                <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+                <TableHead className="bg-secondary text-foreground">Set</TableHead>
+                <TableHead className="bg-secondary text-foreground">
                   Local
                 </TableHead>
-                <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+                <TableHead className="bg-secondary text-foreground">
                   Visitante
                 </TableHead>
                 {canEdit ? (
-                  <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
+                  <TableHead className="bg-secondary text-right text-foreground">
                     Acciones
                   </TableHead>
                 ) : null}
@@ -248,7 +248,7 @@ export function MatchSetsEditor({
             type="submit"
             size="sm"
             disabled={pending}
-            className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+            className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
           >
             <PlusIcon data-icon="inline-start" />
             Agregar set

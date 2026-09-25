@@ -3,11 +3,13 @@ import { cn } from "cn";
 import { MATCH_STATUS_LABELS } from "@/lib/labels";
 
 const STATUS_CLASS: Record<MatchStatus, string> = {
-  programado: "bg-[#E6E9EC] text-[#5C6570]",
-  en_vivo: "bg-[rgba(232,93,4,0.15)] text-[#7C2D12]",
-  finalizado: "bg-[rgba(31,107,74,0.15)] text-[#0B2E1F]",
-  aplazado: "bg-[rgba(232,93,4,0.12)] text-[#9A3412]",
-  cancelado: "bg-[rgba(220,38,38,0.12)] text-[#991B1B]",
+  programado: "bg-secondary text-muted-foreground border border-border",
+  en_vivo: "bg-[color-mix(in_oklab,var(--status-live)_18%,transparent)] text-[color-mix(in_oklab,var(--status-live)_85%,black)] border border-[color-mix(in_oklab,var(--status-live)_35%,transparent)]",
+  finalizado:
+    "bg-[color-mix(in_oklab,var(--status-final)_16%,transparent)] text-[color-mix(in_oklab,var(--status-final)_90%,black)] border border-[color-mix(in_oklab,var(--status-final)_30%,transparent)]",
+  aplazado:
+    "bg-[color-mix(in_oklab,var(--status-live)_12%,transparent)] text-[color-mix(in_oklab,var(--status-live)_80%,black)] border border-[color-mix(in_oklab,var(--status-live)_28%,transparent)]",
+  cancelado: "bg-destructive/10 text-destructive border border-destructive/25",
 };
 
 export function MatchStatusBadge({
@@ -20,7 +22,7 @@ export function MatchStatusBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-[2px] px-2 py-0.5 text-xs font-medium",
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
         STATUS_CLASS[status],
         className
       )}

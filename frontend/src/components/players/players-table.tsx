@@ -35,19 +35,19 @@ type PlayersTableProps = {
 };
 
 function statusBadgeClass(status: ApprovalStatus): string {
-  if (status === "aprobado") return "bg-[#1F6B4A]/10 text-[#1F6B4A]";
-  if (status === "rechazado") return "bg-[#DC2626]/10 text-[#DC2626]";
-  return "bg-[#E6E9EC] text-[#5C6570]";
+  if (status === "aprobado") return "bg-[color-mix(in_oklab,var(--status-final)_14%,transparent)] text-[color-mix(in_oklab,var(--status-final)_90%,black)]";
+  if (status === "rechazado") return "bg-destructive/10 text-destructive";
+  return "bg-secondary text-muted-foreground";
 }
 
 export function PlayersTable({ orgSlug, rows }: PlayersTableProps) {
   if (rows.length === 0) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">
+      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">
           Todavía no hay jugadores
         </p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Registra a tu plantilla para solicitar credenciales.
         </p>
       </div>
@@ -55,17 +55,17 @@ export function PlayersTable({ orgSlug, rows }: PlayersTableProps) {
   }
 
   return (
-    <div className="overflow-hidden border border-[#D0D5DB] bg-white">
+    <div className="overflow-hidden border border-border bg-card">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Jugador</TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">#</TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Estado</TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">Jugador</TableHead>
+            <TableHead className="bg-secondary text-foreground">#</TableHead>
+            <TableHead className="bg-secondary text-foreground">Estado</TableHead>
+            <TableHead className="bg-secondary text-foreground">
               Elegibilidad
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-right text-foreground">
               Acciones
             </TableHead>
           </TableRow>
@@ -74,12 +74,12 @@ export function PlayersTable({ orgSlug, rows }: PlayersTableProps) {
           {rows.map((row) => (
             <TableRow key={row.id}>
               <TableCell>
-                <p className="font-medium text-[#0A0A0A]">
+                <p className="font-medium text-foreground">
                   {row.firstNames} {row.lastNames}
                 </p>
-                <p className="font-mono text-xs text-[#5C6570]">{row.folio}</p>
+                <p className="font-mono text-xs text-muted-foreground">{row.folio}</p>
               </TableCell>
-              <TableCell className="font-mono tabular-nums text-[#0A0A0A]">
+              <TableCell className="font-mono tabular-nums text-foreground">
                 {row.jerseyNumber ?? "—"}
               </TableCell>
               <TableCell>
@@ -90,7 +90,7 @@ export function PlayersTable({ orgSlug, rows }: PlayersTableProps) {
                   {APPROVAL_STATUS_LABELS[row.status]}
                 </Badge>
               </TableCell>
-              <TableCell className="text-sm text-[#5C6570]">
+              <TableCell className="text-sm text-muted-foreground">
                 {ELIGIBILITY_STATUS_LABELS[row.eligibility]}
               </TableCell>
               <TableCell className="text-right">

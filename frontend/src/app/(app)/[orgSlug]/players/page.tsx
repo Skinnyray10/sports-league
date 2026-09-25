@@ -96,11 +96,11 @@ export default async function PlayersPage({ params }: PageProps) {
       />
 
       {!teamId ? (
-        <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-          <p className="text-base font-medium text-[#0A0A0A]">
+        <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+          <p className="text-base font-medium text-foreground">
             Sin equipo asignado
           </p>
-          <p className="mt-1 text-sm text-[#5C6570]">
+          <p className="mt-1 text-sm text-muted-foreground">
             Pídele al administrador un invite de delegado ligado a un equipo.
           </p>
         </div>

@@ -30,7 +30,7 @@ export default async function JoinPage({ params }: JoinPageProps) {
           <div className="flex flex-col gap-2">
             <Link
               href={`/login?next=${encodeURIComponent(joinPath)}`}
-              className={cn(buttonVariants(), "rounded-sm")}
+              className={cn(buttonVariants(), "rounded-full")}
             >
               Iniciar sesión
             </Link>
@@ -38,7 +38,7 @@ export default async function JoinPage({ params }: JoinPageProps) {
               href={`/signup?next=${encodeURIComponent(joinPath)}`}
               className={cn(
                 buttonVariants({ variant: "outline" }),
-                "rounded-sm"
+                "rounded-full"
               )}
             >
               Crear cuenta

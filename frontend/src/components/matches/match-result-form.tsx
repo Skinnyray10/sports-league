@@ -55,7 +55,7 @@ function toDatetimeLocal(iso: string | null): string {
 }
 
 const selectClass =
-  "h-8 w-full rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 text-sm text-[#0A0A0A] outline-none focus-visible:border-[#00B7FF] focus-visible:ring-2 focus-visible:ring-[#00B7FF]/35";
+  "h-8 w-full rounded-[4px] border border-border bg-card px-2.5 text-sm text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/35";
 
 export function MatchResultForm({
   orgSlug,
@@ -111,9 +111,9 @@ export function MatchResultForm({
 
   if (!canEditSchedule && !canAssignReferee && !canDelete) {
     return (
-      <section className="border border-[#D0D5DB] bg-white p-5">
-        <h2 className="text-base font-semibold text-[#0A0A0A]">Marcador</h2>
-        <p className="mt-1 text-sm text-[#5C6570]">
+      <section className="border border-border bg-card p-5">
+        <h2 className="text-base font-semibold text-foreground">Marcador</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           {status === "finalizado"
             ? `Resultado final: ${homeScore}–${awayScore} ${scoreLabel}.`
             : "El marcador se captura en la cédula del árbitro (próximamente)."}
@@ -124,13 +124,13 @@ export function MatchResultForm({
 
   return (
     <div className="grid gap-8">
-      <section className="border border-[#D0D5DB] bg-white p-5">
-        <h2 className="text-base font-semibold text-[#0A0A0A]">Marcador</h2>
-        <p className="mt-1 text-sm text-[#5C6570]">
+      <section className="border border-border bg-card p-5">
+        <h2 className="text-base font-semibold text-foreground">Marcador</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           {status === "finalizado" ? (
             <>
               Resultado final (solo lectura):{" "}
-              <span className="font-mono font-semibold tabular-nums text-[#0A0A0A]">
+              <span className="font-mono font-semibold tabular-nums text-foreground">
                 {homeScore}–{awayScore}
               </span>{" "}
               {scoreLabel}.
@@ -138,10 +138,10 @@ export function MatchResultForm({
           ) : (
             <>
               La captura de {scoreLabel} y el cierre del partido se harán en la{" "}
-              <span className="font-medium text-[#0A0A0A]">cédula</span> del
+              <span className="font-medium text-foreground">cédula</span> del
               árbitro (paso 5).{" "}
               {/* TODO(step-5): enlazar a /matches/[id]/cedula cuando exista */}
-              <span className="text-[#5C6570]">
+              <span className="text-muted-foreground">
                 Enlace a cédula: pendiente.
               </span>
             </>
@@ -150,11 +150,11 @@ export function MatchResultForm({
       </section>
 
       {canAssignReferee ? (
-        <section className="border border-[#D0D5DB] bg-white p-5">
-          <h2 className="text-base font-semibold text-[#0A0A0A]">
+        <section className="border border-border bg-card p-5">
+          <h2 className="text-base font-semibold text-foreground">
             Árbitro asignado
           </h2>
-          <p className="mt-1 text-sm text-[#5C6570]">
+          <p className="mt-1 text-sm text-muted-foreground">
             Solo un administrador puede asignar o cambiar al árbitro.
           </p>
           <form
@@ -182,14 +182,14 @@ export function MatchResultForm({
               <Button
                 type="submit"
                 disabled={pending || locked}
-                className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+                className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
               >
                 {pending ? "Guardando…" : "Guardar árbitro"}
               </Button>
             </div>
           </form>
           {referees.length === 0 ? (
-            <p className="mt-2 text-sm text-[#5C6570]">
+            <p className="mt-2 text-sm text-muted-foreground">
               Todavía no hay miembros con rol de árbitro. Invita a alguien desde
               la organización.
             </p>
@@ -199,11 +199,11 @@ export function MatchResultForm({
 
       {canEditSchedule && !locked ? (
         <>
-          <section className="border border-[#D0D5DB] bg-white p-5">
-            <h2 className="text-base font-semibold text-[#0A0A0A]">
+          <section className="border border-border bg-card p-5">
+            <h2 className="text-base font-semibold text-foreground">
               Reprogramar
             </h2>
-            <p className="mt-1 text-sm text-[#5C6570]">
+            <p className="mt-1 text-sm text-muted-foreground">
               Cambia fecha, hora o sede y deja el motivo. El partido vuelve a
               programado.
             </p>
@@ -249,7 +249,7 @@ export function MatchResultForm({
                 <Button
                   type="submit"
                   disabled={pending}
-                  className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+                  className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
                 >
                   {pending ? "Guardando…" : "Reprogramar"}
                 </Button>
@@ -258,11 +258,11 @@ export function MatchResultForm({
           </section>
 
           <section className="grid gap-4 sm:grid-cols-2">
-            <div className="border border-[#D0D5DB] bg-white p-5">
-              <h2 className="text-base font-semibold text-[#0A0A0A]">
+            <div className="border border-border bg-card p-5">
+              <h2 className="text-base font-semibold text-foreground">
                 Aplazar
               </h2>
-              <p className="mt-1 text-sm text-[#5C6570]">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Marca el partido como aplazado sin borrar la programación.
               </p>
               <form
@@ -291,11 +291,11 @@ export function MatchResultForm({
               </form>
             </div>
 
-            <div className="border border-[#D0D5DB] bg-white p-5">
-              <h2 className="text-base font-semibold text-[#0A0A0A]">
+            <div className="border border-border bg-card p-5">
+              <h2 className="text-base font-semibold text-foreground">
                 Cancelar
               </h2>
-              <p className="mt-1 text-sm text-[#5C6570]">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Cancela el partido. Queda en el historial de cambios.
               </p>
               <form
@@ -328,11 +328,11 @@ export function MatchResultForm({
       ) : null}
 
       {canDelete ? (
-        <section className="border border-[#D0D5DB] bg-white p-5">
-          <h2 className="text-base font-semibold text-[#0A0A0A]">
+        <section className="border border-border bg-card p-5">
+          <h2 className="text-base font-semibold text-foreground">
             Eliminar partido
           </h2>
-          <p className="mt-1 text-sm text-[#5C6570]">
+          <p className="mt-1 text-sm text-muted-foreground">
             Se borra el partido junto con sets e historial. No se puede
             deshacer.
           </p>

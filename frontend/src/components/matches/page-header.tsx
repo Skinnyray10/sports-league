@@ -17,16 +17,16 @@ export function MatchPageHeader({
   return (
     <header
       className={cn(
-        "mb-6 flex flex-col gap-4 border-b border-[#D0D5DB] pb-5 sm:flex-row sm:items-end sm:justify-between",
+        "mb-6 flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between",
         className
       )}
     >
       <div className="min-w-0">
-        <div className="mb-3 h-1 w-12 bg-[#00B7FF]" aria-hidden />
-        <h1 className="text-2xl font-bold tracking-tight text-[#0A0A0A]">
+        <div className="mb-3 h-1 w-12 bg-primary" aria-hidden />
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           {title}
         </h1>
-        <p className="mt-1 max-w-prose text-[0.9375rem] text-[#5C6570]">
+        <p className="mt-1 max-w-prose text-[0.9375rem] text-muted-foreground">
           {description}
         </p>
       </div>

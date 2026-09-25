@@ -47,11 +47,11 @@ export function PublicStandingsSections({ rows }: PublicStandingsProps) {
 
   if (buckets.length === 0) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">
+      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">
           La tabla todavía está vacía
         </p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Aparecerá cuando haya partidos finalizados en una organización
           pública.
         </p>
@@ -70,7 +70,7 @@ export function PublicStandingsSections({ rows }: PublicStandingsProps) {
         });
         return (
           <section key={bucket.key} className="space-y-3">
-            <h2 className="text-sm font-semibold text-[#0A0A0A]">
+            <h2 className="text-sm font-semibold text-foreground">
               {bucket.title}
             </h2>
             <StandingsTable
@@ -91,9 +91,9 @@ type PublicScorersProps = {
 export function PublicScorersTable({ scorers }: PublicScorersProps) {
   if (scorers.length === 0) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">Sin goleo aún</p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">Sin goleo aún</p>
+        <p className="mt-1 text-sm text-muted-foreground">
           Las anotaciones aparecen cuando el árbitro cierra la cédula.
         </p>
       </div>
@@ -101,15 +101,15 @@ export function PublicScorersTable({ scorers }: PublicScorersProps) {
   }
 
   return (
-    <div className="overflow-hidden border border-[#D0D5DB] bg-white">
+    <div className="overflow-hidden border border-border bg-card">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-[#D0D5DB] bg-[#E6E9EC] text-left">
-            <th className="px-3 py-2 font-medium text-[#0A0A0A]">#</th>
-            <th className="px-3 py-2 font-medium text-[#0A0A0A]">Jugador</th>
-            <th className="px-3 py-2 font-medium text-[#0A0A0A]">Equipo</th>
-            <th className="px-3 py-2 font-medium text-[#0A0A0A]">División</th>
-            <th className="px-3 py-2 text-right font-medium text-[#0A0A0A]">
+          <tr className="border-b border-border bg-secondary text-left">
+            <th className="px-3 py-2 font-medium text-foreground">#</th>
+            <th className="px-3 py-2 font-medium text-foreground">Jugador</th>
+            <th className="px-3 py-2 font-medium text-foreground">Equipo</th>
+            <th className="px-3 py-2 font-medium text-foreground">División</th>
+            <th className="px-3 py-2 text-right font-medium text-foreground">
               Anotaciones
             </th>
           </tr>
@@ -118,16 +118,16 @@ export function PublicScorersTable({ scorers }: PublicScorersProps) {
           {scorers.map((row, index) => (
               <tr
                 key={row.player_registration_id}
-                className="border-b border-[#D0D5DB] last:border-0"
+                className="border-b border-border last:border-0"
               >
-                <td className="px-3 py-2 font-mono text-[#5C6570]">
+                <td className="px-3 py-2 font-mono text-muted-foreground">
                   {index + 1}
                 </td>
-                <td className="px-3 py-2 font-medium text-[#0A0A0A]">
+                <td className="px-3 py-2 font-medium text-foreground">
                   {row.first_names} {row.last_names}
                 </td>
-                <td className="px-3 py-2 text-[#5C6570]">{row.team_name}</td>
-                <td className="px-3 py-2 text-[#5C6570]">
+                <td className="px-3 py-2 text-muted-foreground">{row.team_name}</td>
+                <td className="px-3 py-2 text-muted-foreground">
                   {[
                     sportLabel(row.sport_key),
                     BRANCH_LABELS[row.branch],
@@ -136,7 +136,7 @@ export function PublicScorersTable({ scorers }: PublicScorersProps) {
                     .filter(Boolean)
                     .join(" · ")}
                 </td>
-                <td className="px-3 py-2 text-right font-mono font-bold tabular-nums text-[#0A0A0A]">
+                <td className="px-3 py-2 text-right font-mono font-bold tabular-nums text-foreground">
                   {row.anotaciones ?? 0}
                 </td>
               </tr>

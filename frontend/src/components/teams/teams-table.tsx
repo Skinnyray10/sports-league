@@ -39,11 +39,11 @@ export function TeamsTable({
 }: TeamsTableProps) {
   if (teams.length === 0) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">
+      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">
           Todavía no hay equipos
         </p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           {canManageStaff
             ? "Necesitas clubes y divisiones. Luego agrega el primer equipo."
             : "Pídele a un administrador que dé de alta los equipos."}
@@ -53,19 +53,19 @@ export function TeamsTable({
   }
 
   return (
-    <div className="overflow-hidden border border-[#D0D5DB] bg-white">
+    <div className="overflow-hidden border border-border bg-card">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               Equipo
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Club</TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">Club</TableHead>
+            <TableHead className="bg-secondary text-foreground">
               División
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Grupo</TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">Grupo</TableHead>
+            <TableHead className="bg-secondary text-right text-foreground">
               Acciones
             </TableHead>
           </TableRow>
@@ -76,7 +76,7 @@ export function TeamsTable({
               canManageStaff || managedTeamId === team.id;
             return (
               <TableRow key={team.id}>
-                <TableCell className="font-medium text-[#0A0A0A]">
+                <TableCell className="font-medium text-foreground">
                   <Link
                     href={`/${orgSlug}/teams/${team.id}`}
                     className="underline-offset-4 hover:underline"
@@ -92,11 +92,11 @@ export function TeamsTable({
                     </Badge>
                   ) : null}
                 </TableCell>
-                <TableCell className="text-[#0A0A0A]">
+                <TableCell className="text-foreground">
                   {team.club_name}
                 </TableCell>
-                <TableCell className="text-sm text-[#5C6570]">
-                  <span className="text-[#0A0A0A]">
+                <TableCell className="text-sm text-muted-foreground">
+                  <span className="text-foreground">
                     {sportLabel(team.sport_key)}
                   </span>
                   {" · "}
@@ -104,7 +104,7 @@ export function TeamsTable({
                   {" · "}
                   {team.category_name}
                 </TableCell>
-                <TableCell className="text-[#5C6570]">
+                <TableCell className="text-muted-foreground">
                   {team.group_name ?? "—"}
                 </TableCell>
                 <TableCell className="text-right">

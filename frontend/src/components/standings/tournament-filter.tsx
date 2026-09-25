@@ -24,7 +24,7 @@ export function TournamentFilter({
 
   if (tournaments.length === 0) {
     return (
-      <p className="text-sm text-[#5C6570]">
+      <p className="text-sm text-muted-foreground">
         Todavía no hay torneos. Crea uno para ver su tabla de posiciones.
       </p>
     );
@@ -32,7 +32,7 @@ export function TournamentFilter({
 
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <Label htmlFor="standings-tournament" className="text-[#5C6570]">
+      <Label htmlFor="standings-tournament" className="text-muted-foreground">
         Torneo
       </Label>
       <select
@@ -45,7 +45,7 @@ export function TournamentFilter({
             : `/${orgSlug}/standings`;
           router.push(href);
         }}
-        className="h-8 min-w-[12rem] rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 text-sm text-[#0A0A0A] outline-none focus-visible:border-[#00B7FF] focus-visible:ring-2 focus-visible:ring-[#00B7FF]/35"
+        className="h-8 min-w-[12rem] rounded-[4px] border border-border bg-card px-2.5 text-sm text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/35"
       >
         <option value="">Elige un torneo</option>
         {tournaments.map((t) => (

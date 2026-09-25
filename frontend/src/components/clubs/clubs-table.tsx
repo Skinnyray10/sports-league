@@ -122,7 +122,7 @@ function EditClubDialog({
             </Button>
             <Button
               type="submit"
-              className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+              className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
               disabled={pending}
             >
               {pending ? "Guardando…" : "Guardar"}
@@ -214,11 +214,11 @@ function DeleteClubButton({
 export function ClubsTable({ orgSlug, clubs }: ClubsTableProps) {
   if (clubs.length === 0) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">
+      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">
           Todavía no hay clubes
         </p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Agrega el primer club para poder crear equipos.
         </p>
       </div>
@@ -226,13 +226,13 @@ export function ClubsTable({ orgSlug, clubs }: ClubsTableProps) {
   }
 
   return (
-    <div className="overflow-hidden border border-[#D0D5DB] bg-white">
+    <div className="overflow-hidden border border-border bg-card">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Club</TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Logo</TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">Club</TableHead>
+            <TableHead className="bg-secondary text-foreground">Logo</TableHead>
+            <TableHead className="bg-secondary text-right text-foreground">
               Acciones
             </TableHead>
           </TableRow>
@@ -240,10 +240,10 @@ export function ClubsTable({ orgSlug, clubs }: ClubsTableProps) {
         <TableBody>
           {clubs.map((club) => (
             <TableRow key={club.id}>
-              <TableCell className="font-medium text-[#0A0A0A]">
+              <TableCell className="font-medium text-foreground">
                 {club.name}
               </TableCell>
-              <TableCell className="text-xs text-[#5C6570]">
+              <TableCell className="text-xs text-muted-foreground">
                 {club.logo_url ? "Cargado" : "Sin logo"}
               </TableCell>
               <TableCell className="text-right">

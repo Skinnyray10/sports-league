@@ -133,7 +133,7 @@ export function TournamentDivisions({
       {canManageStaff ? (
         <form
           action={onCreateDivision}
-          className="grid gap-3 border border-[#D0D5DB] bg-white p-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end"
+          className="grid gap-3 border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end"
         >
           <div className="grid gap-2">
             <Label>Deporte</Label>
@@ -207,7 +207,7 @@ export function TournamentDivisions({
           </div>
           <Button
             type="submit"
-            className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+            className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
             disabled={
               pending ||
               !sportId ||
@@ -230,11 +230,11 @@ export function TournamentDivisions({
       ) : null}
 
       {divisions.length === 0 ? (
-        <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-10 text-center">
-          <p className="font-medium text-[#0A0A0A]">
+        <div className="border border-dashed border-border bg-card px-6 py-10 text-center">
+          <p className="font-medium text-foreground">
             Todavía no hay divisiones
           </p>
-          <p className="mt-1 text-sm text-[#5C6570]">
+          <p className="mt-1 text-sm text-muted-foreground">
             {canManageStaff
               ? "Crea una división con deporte, rama y categoría. Luego puedes agregar grupos."
               : "El administrador creará las divisiones del torneo."}
@@ -249,12 +249,12 @@ export function TournamentDivisions({
             return (
               <div
                 key={division.id}
-                className="border border-[#D0D5DB] bg-white"
+                className="border border-border bg-card"
               >
-                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[#D0D5DB] px-4 py-3">
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-4 py-3">
                   <div>
-                    <p className="font-medium text-[#0A0A0A]">{title}</p>
-                    <p className="mt-0.5 text-sm text-[#5C6570]">
+                    <p className="font-medium text-foreground">{title}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">
                       {sportLabel(division.sport.key)} ·{" "}
                       {BRANCH_LABELS[division.branch]} ·{" "}
                       {division.category.name}
@@ -276,19 +276,19 @@ export function TournamentDivisions({
                 </div>
                 <div className="px-4 py-3">
                   {division.groups.length === 0 ? (
-                    <p className="text-sm text-[#5C6570]">Sin grupos</p>
+                    <p className="text-sm text-muted-foreground">Sin grupos</p>
                   ) : (
                     <ul className="flex flex-wrap gap-2">
                       {division.groups.map((group) => (
                         <li
                           key={group.id}
-                          className="inline-flex items-center gap-1 border border-[#D0D5DB] bg-[#F5F6F7] px-2 py-1 text-sm text-[#0A0A0A]"
+                          className="inline-flex items-center gap-1 border border-border bg-secondary px-2 py-1 text-sm text-foreground"
                         >
                           {group.name}
                           {canManageStaff ? (
                             <button
                               type="button"
-                              className="ml-1 text-[#5C6570] hover:text-destructive"
+                              className="ml-1 text-muted-foreground hover:text-destructive"
                               disabled={pending}
                               onClick={() => onDeleteGroup(group.id)}
                               aria-label={`Eliminar grupo ${group.name}`}
@@ -310,7 +310,7 @@ export function TournamentDivisions({
       {canManageStaff && divisions.length > 0 ? (
         <form
           action={onCreateGroup}
-          className="flex flex-col gap-3 border border-[#D0D5DB] bg-white p-4 sm:flex-row sm:items-end"
+          className="flex flex-col gap-3 border border-border bg-card p-4 sm:flex-row sm:items-end"
         >
           <div className="grid min-w-0 flex-1 gap-2">
             <Label>División</Label>
@@ -346,7 +346,7 @@ export function TournamentDivisions({
           </div>
           <Button
             type="submit"
-            className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+            className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
             disabled={pending || !resolvedGroupDivisionId}
           >
             <PlusIcon data-icon="inline-start" />

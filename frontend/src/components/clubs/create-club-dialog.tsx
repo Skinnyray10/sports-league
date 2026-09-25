@@ -44,7 +44,7 @@ export function CreateClubDialog({ orgSlug }: CreateClubDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white" />
+          <Button className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background" />
         }
       >
         <PlusIcon data-icon="inline-start" />
@@ -99,7 +99,7 @@ export function CreateClubDialog({ orgSlug }: CreateClubDialogProps) {
             </Button>
             <Button
               type="submit"
-              className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+              className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
               disabled={pending}
             >
               {pending ? "Guardando…" : "Crear club"}

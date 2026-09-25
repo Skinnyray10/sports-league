@@ -36,11 +36,11 @@ export function ScheduleChangeHistory({
 }) {
   if (changes.length === 0) {
     return (
-      <section className="border border-[#D0D5DB] bg-white p-5">
-        <h2 className="text-base font-semibold text-[#0A0A0A]">
+      <section className="border border-border bg-card p-5">
+        <h2 className="text-base font-semibold text-foreground">
           Historial de programación
         </h2>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Todavía no hay aplazamientos, cancelaciones ni reprogramaciones.
         </p>
       </section>
@@ -48,26 +48,26 @@ export function ScheduleChangeHistory({
   }
 
   return (
-    <section className="border border-[#D0D5DB] bg-white p-5">
-      <h2 className="text-base font-semibold text-[#0A0A0A]">
+    <section className="border border-border bg-card p-5">
+      <h2 className="text-base font-semibold text-foreground">
         Historial de programación
       </h2>
       <ul className="mt-4 grid gap-3">
         {changes.map((change) => (
           <li
             key={change.id}
-            className="border-l-2 border-[#00B7FF] pl-3 text-sm"
+            className="border-l-2 border-primary pl-3 text-sm"
           >
-            <p className="font-medium text-[#0A0A0A]">
+            <p className="font-medium text-foreground">
               {SCHEDULE_CHANGE_LABELS[change.changeType]}
-              <span className="ml-2 font-normal text-[#5C6570]">
+              <span className="ml-2 font-normal text-muted-foreground">
                 {formatWhen(change.createdAt)}
               </span>
             </p>
             {change.reason ? (
-              <p className="mt-0.5 text-[#5C6570]">{change.reason}</p>
+              <p className="mt-0.5 text-muted-foreground">{change.reason}</p>
             ) : null}
-            <p className="mt-1 font-mono text-xs tabular-nums text-[#5C6570]">
+            <p className="mt-1 font-mono text-xs tabular-nums text-muted-foreground">
               {change.changeType === "reprogramar" ? (
                 <>
                   {formatWhen(change.previousScheduledAt)} →{" "}

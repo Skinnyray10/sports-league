@@ -171,7 +171,7 @@ export function EditPlayerDialog({
             </Button>
             <Button
               type="submit"
-              className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+              className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
               disabled={pending}
             >
               {pending ? "Guardando…" : "Guardar"}

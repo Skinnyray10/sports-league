@@ -58,7 +58,7 @@ function modulesForRoles(roles: MembershipRole[]): DashModule[] {
         key: "members",
         label: "Solicitudes",
         description: "Aprueba Delegados y Árbitros que se registraron.",
-        bandClass: "bg-[#5C6570]",
+        bandClass: "bg-muted-foreground",
       },
       {
         key: "standings",
@@ -70,7 +70,7 @@ function modulesForRoles(roles: MembershipRole[]): DashModule[] {
         key: "settings",
         label: "Configuración",
         description: "Marca, deportes, ramas y categorías.",
-        bandClass: "bg-[#5C6570]",
+        bandClass: "bg-muted-foreground",
       }
     );
   }

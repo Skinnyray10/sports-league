@@ -45,22 +45,22 @@ function BranchRow({
   return (
     <form
       action={onSubmit}
-      className="flex flex-wrap items-center justify-between gap-3 border-b border-[#D0D5DB] px-4 py-3 last:border-b-0"
+      className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3 last:border-b-0"
     >
       <div className="min-w-0 text-sm">
-        <p className="font-medium text-[#0A0A0A]">
+        <p className="font-medium text-foreground">
           {sportLabel(row.sport.key) || sportLabel(row.sport.name)}
         </p>
-        <p className="text-[#5C6570]">{BRANCH_LABELS[row.branch]}</p>
+        <p className="text-muted-foreground">{BRANCH_LABELS[row.branch]}</p>
       </div>
       <div className="flex items-center gap-3">
-        <label className="flex items-center gap-2 text-sm text-[#0A0A0A]">
+        <label className="flex items-center gap-2 text-sm text-foreground">
           <input
             type="checkbox"
             name="active"
             defaultChecked={row.active}
             disabled={pending}
-            className="size-4 rounded-[2px] border-[#D0D5DB] accent-[#00B7FF]"
+            className="size-4 rounded-[2px] border-border accent-primary"
           />
           Activa
         </label>
@@ -89,14 +89,14 @@ export function OrgBranchesSettings({
 }: OrgBranchesSettingsProps) {
   if (branches.length === 0) {
     return (
-      <p className="text-sm text-[#5C6570]">
+      <p className="text-sm text-muted-foreground">
         No hay ramas configuradas.
       </p>
     );
   }
 
   return (
-    <div className="overflow-hidden border border-[#D0D5DB] bg-white">
+    <div className="overflow-hidden border border-border bg-card">
       {branches.map((row) => (
         <BranchRow key={row.id} orgSlug={orgSlug} row={row} />
       ))}

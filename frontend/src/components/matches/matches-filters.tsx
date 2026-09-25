@@ -43,7 +43,7 @@ function buildHref(
 }
 
 const selectClass =
-  "h-8 w-full min-w-[8rem] rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 text-sm text-[#0A0A0A] outline-none focus-visible:border-[#00B7FF] focus-visible:ring-2 focus-visible:ring-[#00B7FF]/35";
+  "h-8 w-full min-w-[8rem] rounded-[4px] border border-border bg-card px-2.5 text-sm text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/35";
 
 export function MatchesFilters({
   orgSlug,
@@ -61,9 +61,9 @@ export function MatchesFilters({
   }
 
   return (
-    <div className="mb-5 grid gap-3 border border-[#D0D5DB] bg-white p-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="mb-5 grid gap-3 border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-5">
       <div className="grid gap-1.5">
-        <Label htmlFor="filter-sport" className="text-[#5C6570]">
+        <Label htmlFor="filter-sport" className="text-muted-foreground">
           Deporte
         </Label>
         <select
@@ -84,7 +84,7 @@ export function MatchesFilters({
       </div>
 
       <div className="grid gap-1.5">
-        <Label htmlFor="filter-branch" className="text-[#5C6570]">
+        <Label htmlFor="filter-branch" className="text-muted-foreground">
           Rama
         </Label>
         <select
@@ -103,7 +103,7 @@ export function MatchesFilters({
       </div>
 
       <div className="grid gap-1.5">
-        <Label htmlFor="filter-category" className="text-[#5C6570]">
+        <Label htmlFor="filter-category" className="text-muted-foreground">
           Categoría
         </Label>
         <select
@@ -122,7 +122,7 @@ export function MatchesFilters({
       </div>
 
       <div className="grid gap-1.5">
-        <Label htmlFor="filter-group" className="text-[#5C6570]">
+        <Label htmlFor="filter-group" className="text-muted-foreground">
           Grupo
         </Label>
         <select
@@ -141,7 +141,7 @@ export function MatchesFilters({
       </div>
 
       <div className="grid gap-1.5">
-        <Label htmlFor="filter-jornada" className="text-[#5C6570]">
+        <Label htmlFor="filter-jornada" className="text-muted-foreground">
           Jornada
         </Label>
         <select

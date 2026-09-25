@@ -141,7 +141,7 @@ export default async function TournamentDetailPage({
       <Button
         variant="ghost"
         size="sm"
-        className="mb-4 rounded-[2px] px-0 text-[#5C6570] hover:bg-transparent hover:text-[#0A0A0A]"
+        className="mb-4 rounded-[2px] px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
         render={<Link href={`/${orgSlug}/tournaments`} />}
       >
         <ArrowLeftIcon data-icon="inline-start" />
@@ -187,7 +187,7 @@ export default async function TournamentDetailPage({
 
         <TabsContent value="settings">
           {access.canManageStaff ? (
-            <div className="border border-[#D0D5DB] bg-white p-5">
+            <div className="border border-border bg-card p-5">
               <TournamentEditForm
                 orgSlug={orgSlug}
                 tournamentId={tournament.id}
@@ -202,23 +202,23 @@ export default async function TournamentDetailPage({
               />
             </div>
           ) : (
-            <dl className="grid max-w-lg gap-4 border border-[#D0D5DB] bg-white p-5 text-sm">
+            <dl className="grid max-w-lg gap-4 border border-border bg-card p-5 text-sm">
               <div>
-                <dt className="font-medium text-[#5C6570]">Temporada</dt>
-                <dd className="mt-1 font-mono text-[#0A0A0A]">
+                <dt className="font-medium text-muted-foreground">Temporada</dt>
+                <dd className="mt-1 font-mono text-foreground">
                   {tournament.season}
                 </dd>
               </div>
               <div>
-                <dt className="font-medium text-[#5C6570]">Formato</dt>
-                <dd className="mt-1 text-[#0A0A0A]">
+                <dt className="font-medium text-muted-foreground">Formato</dt>
+                <dd className="mt-1 text-foreground">
                   {formatLabel(tournament.format)} ·{" "}
                   {legsLabel(tournament.legs)}
                 </dd>
               </div>
               <div>
-                <dt className="font-medium text-[#5C6570]">Estado</dt>
-                <dd className="mt-1 text-[#0A0A0A]">
+                <dt className="font-medium text-muted-foreground">Estado</dt>
+                <dd className="mt-1 text-foreground">
                   {TOURNAMENT_STATUS_LABELS[tournament.status]}
                 </dd>
               </div>

@@ -125,10 +125,10 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
 
       <div className="space-y-10">
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-[#0A0A0A]">
+          <h2 className="text-lg font-semibold text-foreground">
             Organización
           </h2>
-          <div className="border border-[#D0D5DB] bg-white p-5">
+          <div className="border border-border bg-card p-5">
             <OrgSettingsForm
               orgSlug={orgSlug}
               initial={{
@@ -142,8 +142,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-[#0A0A0A]">Deportes</h2>
-          <p className="text-sm text-[#5C6570]">
+          <h2 className="text-lg font-semibold text-foreground">Deportes</h2>
+          <p className="text-sm text-muted-foreground">
             Activa o desactiva deportes y ajusta los puntos. Si dejas un campo
             vacío al guardar, se usa el valor por defecto del deporte.
           </p>
@@ -151,8 +151,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-[#0A0A0A]">Ramas</h2>
-          <p className="text-sm text-[#5C6570]">
+          <h2 className="text-lg font-semibold text-foreground">Ramas</h2>
+          <p className="text-sm text-muted-foreground">
             Varonil, femenil y mixto por deporte. Solo las activas aparecen al
             crear divisiones.
           </p>
@@ -160,8 +160,8 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-[#0A0A0A]">Categorías</h2>
-          <p className="text-sm text-[#5C6570]">
+          <h2 className="text-lg font-semibold text-foreground">Categorías</h2>
+          <p className="text-sm text-muted-foreground">
             Las usas al armar divisiones dentro de un torneo (1RA, 2DA, etc.).
           </p>
           <CategoriesSettings

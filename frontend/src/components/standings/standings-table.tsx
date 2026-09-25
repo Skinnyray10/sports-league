@@ -60,9 +60,9 @@ export function toStandingRow(row: {
 export function StandingsTable({ rows, hasTournament }: StandingsTableProps) {
   if (!hasTournament) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">Elige un torneo</p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">Elige un torneo</p>
+        <p className="mt-1 text-sm text-muted-foreground">
           La tabla se calcula por torneo, a partir de sus partidos finalizados.
         </p>
       </div>
@@ -71,11 +71,11 @@ export function StandingsTable({ rows, hasTournament }: StandingsTableProps) {
 
   if (rows.length === 0) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">
+      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">
           La tabla todavía está vacía
         </p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Aparecerá cuando haya equipos en una división y al menos un partido
           finalizado.
         </p>
@@ -103,16 +103,16 @@ export function StandingsTable({ rows, hasTournament }: StandingsTableProps) {
   ];
 
   return (
-    <div className="overflow-x-auto border border-[#D0D5DB] bg-white">
+    <div className="overflow-x-auto border border-border bg-card">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="bg-[#E6E9EC] w-12 text-[#0A0A0A]">#</TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">Equipo</TableHead>
+            <TableHead className="bg-secondary w-12 text-foreground">#</TableHead>
+            <TableHead className="bg-secondary text-foreground">Equipo</TableHead>
             {cols.map((c) => (
               <TableHead
                 key={c.key}
-                className="bg-[#E6E9EC] text-right text-[#0A0A0A]"
+                className="bg-secondary text-right text-foreground"
               >
                 <abbr title={c.title} className="no-underline">
                   {c.label}

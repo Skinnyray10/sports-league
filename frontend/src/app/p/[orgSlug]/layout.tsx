@@ -36,7 +36,7 @@ function buildPublicNav(orgSlug: string): PublicNavItem[] {
     {
       href: `/p/${orgSlug}/avisos`,
       label: "Avisos",
-      bandClass: "bg-[#5C6570]",
+      bandClass: "bg-muted-foreground",
     },
   ];
 }
@@ -67,36 +67,38 @@ export default async function PublicOrgLayout({
         panelHref={panelHref}
       />
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="border-b border-border bg-[#0A0A0A] px-4 py-5 md:px-6">
+        <header className="border-b border-border bg-sidebar px-4 py-5 md:px-6">
           <div className="flex items-center gap-3">
             {org.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={org.logo_url}
                 alt=""
-                className="size-10 rounded-sm object-cover"
+                className="size-10 rounded-full object-cover"
               />
             ) : (
               <span
                 aria-hidden
-                className="flex size-10 items-center justify-center rounded-sm bg-[#00B7FF] font-mono text-xs font-bold text-[#0A0A0A]"
+                className="flex size-10 items-center justify-center rounded-full bg-primary font-heading text-xs font-extrabold text-foreground"
               >
                 SL
               </span>
             )}
             <div className="min-w-0">
-              <h1 className="truncate text-lg font-bold tracking-tight text-white md:text-xl">
+              <h1 className="truncate font-heading text-lg font-extrabold tracking-tight text-sidebar-foreground md:text-xl">
                 {org.name}
               </h1>
               {org.tagline ? (
-                <p className="truncate text-sm text-white/70">{org.tagline}</p>
+                <p className="truncate text-sm text-sidebar-foreground/65">
+                  {org.tagline}
+                </p>
               ) : (
-                <p className="text-sm text-white/70">Vista pública</p>
+                <p className="text-sm text-sidebar-foreground/65">Vista pública</p>
               )}
             </div>
           </div>
         </header>
-        <main className="flex-1 px-4 py-6 md:px-6 md:py-8">{children}</main>
+        <main className="tablero-enter flex-1 px-4 py-6 md:px-6 md:py-8">{children}</main>
       </div>
     </div>
   );

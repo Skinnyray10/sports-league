@@ -187,15 +187,15 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
-      <header className="border-b border-[#D0D5DB] pb-5">
-        <div className="mb-3 h-1 w-12 bg-[#00B7FF]" aria-hidden />
-        <h1 className="text-2xl font-bold tracking-tight text-[#0A0A0A]">
+      <header className="border-b border-border pb-5">
+        <div className="mb-3 h-1 w-12 bg-primary" aria-hidden />
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
           {homeTeamName} vs {awayTeamName}
         </h1>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           {sportLabel(sportKey || sportName)} · {BRANCH_LABELS[branch]}
         </p>
-        <p className="mt-3 font-mono text-3xl font-semibold tabular-nums text-[#0A0A0A]">
+        <p className="mt-3 font-mono text-3xl font-semibold tabular-nums text-foreground">
           {estimatedHome}–{estimatedAway}
         </p>
         {closed ? (
@@ -205,11 +205,11 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
         ) : null}
       </header>
 
-      <section className="border border-[#D0D5DB] bg-white p-4">
-        <h2 className="text-base font-semibold text-[#0A0A0A]">
+      <section className="border border-border bg-card p-4">
+        <h2 className="text-base font-semibold text-foreground">
           Participantes
         </h2>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Marca a los aprobados y elegibles que entran a la cédula.
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -231,8 +231,8 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
       </section>
 
       {scoreType === "sets" ? (
-        <section className="border border-[#D0D5DB] bg-white p-4">
-          <h2 className="text-base font-semibold text-[#0A0A0A]">Sets</h2>
+        <section className="border border-border bg-card p-4">
+          <h2 className="text-base font-semibold text-foreground">Sets</h2>
           <ul className="mt-3 space-y-2">
             {sets.map((s) => (
               <li key={s.id}>
@@ -326,7 +326,7 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
               <Button
                 type="submit"
                 size="sm"
-                className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+                className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
                 disabled={pending}
               >
                 Agregar set
@@ -336,8 +336,8 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
         </section>
       ) : null}
 
-      <section className="border border-[#D0D5DB] bg-white p-4">
-        <h2 className="text-base font-semibold text-[#0A0A0A]">Eventos</h2>
+      <section className="border border-border bg-card p-4">
+        <h2 className="text-base font-semibold text-foreground">Eventos</h2>
         {!closed ? (
           <form
             action={onAddEvent}
@@ -350,7 +350,7 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
                 name="player_registration_id"
                 required
                 disabled={pending}
-                className="h-8 rounded-[4px] border border-[#D0D5DB] bg-white px-2 text-sm"
+                className="h-8 rounded-[4px] border border-border bg-card px-2 text-sm"
               >
                 <option value="">Elige…</option>
                 {eligiblePlayers
@@ -371,7 +371,7 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
                 required
                 defaultValue={defaultEventType}
                 disabled={pending}
-                className="h-8 rounded-[4px] border border-[#D0D5DB] bg-white px-2 text-sm"
+                className="h-8 rounded-[4px] border border-border bg-card px-2 text-sm"
               >
                 {(Object.keys(MATCH_EVENT_LABELS) as MatchEventType[]).map(
                   (t) => (
@@ -410,7 +410,7 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
                 type="submit"
                 size="sm"
                 disabled={pending}
-                className="rounded-[2px] bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+                className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
               >
                 Agregar evento
               </Button>
@@ -419,9 +419,9 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
         ) : null}
 
         {events.length === 0 ? (
-          <p className="mt-4 text-sm text-[#5C6570]">Sin eventos.</p>
+          <p className="mt-4 text-sm text-muted-foreground">Sin eventos.</p>
         ) : (
-          <ul className="mt-4 divide-y divide-[#D0D5DB] border border-[#D0D5DB]">
+          <ul className="mt-4 divide-y divide-border border border-border">
             {events.map((ev) => {
               const player = playerById.get(ev.playerRegistrationId);
               return (
@@ -460,8 +460,8 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
         )}
       </section>
 
-      <section className="border border-[#D0D5DB] bg-white p-4">
-        <h2 className="text-base font-semibold text-[#0A0A0A]">Cierre</h2>
+      <section className="border border-border bg-card p-4">
+        <h2 className="text-base font-semibold text-foreground">Cierre</h2>
         <form
           action={closed ? onSaveMeta : onClose}
           className="mt-4 grid gap-4"
@@ -485,7 +485,7 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
               rows={3}
               defaultValue={observations}
               disabled={closed || pending}
-              className="w-full rounded-[4px] border border-[#D0D5DB] bg-white px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+              className="w-full rounded-[4px] border border-border bg-card px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
             />
           </div>
           {showShootout || shootoutWinnerTeamId ? (
@@ -498,7 +498,7 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
                 name="shootout_winner_team_id"
                 defaultValue={shootoutWinnerTeamId ?? ""}
                 disabled={closed || pending}
-                className="h-8 max-w-sm rounded-[4px] border border-[#D0D5DB] bg-white px-2 text-sm"
+                className="h-8 max-w-sm rounded-[4px] border border-border bg-card px-2 text-sm"
               >
                 <option value="">Sin definir</option>
                 <option value={homeTeamId}>{homeTeamName}</option>
@@ -542,7 +542,7 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
               <Button
                 type="submit"
                 disabled={pending}
-                className="rounded-[2px] bg-[#0A0A0A] text-white hover:bg-[#00B7FF] hover:text-[#0A0A0A]"
+                className="rounded-[2px] bg-foreground text-background hover:bg-primary hover:text-foreground"
               >
                 Cerrar cédula
               </Button>
@@ -575,9 +575,9 @@ function PlayerColumn({
 }) {
   return (
     <div>
-      <h3 className="mb-2 text-sm font-semibold text-[#0A0A0A]">{title}</h3>
+      <h3 className="mb-2 text-sm font-semibold text-foreground">{title}</h3>
       {players.length === 0 ? (
-        <p className="text-sm text-[#5C6570]">Sin elegibles.</p>
+        <p className="text-sm text-muted-foreground">Sin elegibles.</p>
       ) : (
         <ul className="space-y-2">
           {players.map((p) => (
@@ -585,12 +585,12 @@ function PlayerColumn({
               <label className="flex cursor-pointer items-start gap-2 text-sm">
                 <input
                   type="checkbox"
-                  className="mt-0.5 size-4 accent-[#00B7FF]"
+                  className="mt-0.5 size-4 accent-primary"
                   checked={selected.has(p.id)}
                   disabled={disabled}
                   onChange={() => onToggle(p.id)}
                 />
-                <span className="font-medium text-[#0A0A0A]">
+                <span className="font-medium text-foreground">
                   {p.jersey != null ? `#${p.jersey} ` : ""}
                   {p.name}
                 </span>

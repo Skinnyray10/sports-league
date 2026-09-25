@@ -71,19 +71,19 @@ export default async function PendingPage() {
       <div className="flex flex-col gap-2 sm:flex-row">
         <Link
           href="/"
-          className="inline-flex h-9 flex-1 items-center justify-center rounded-sm bg-[#00B7FF] px-4 text-sm font-medium text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+          className="inline-flex h-9 flex-1 items-center justify-center rounded-full bg-primary px-4 text-sm font-medium text-foreground hover:bg-foreground hover:text-background"
         >
           Ver vista pública
         </Link>
         <Link
           href="/signup"
-          className="inline-flex h-9 flex-1 items-center justify-center rounded-sm border border-border bg-white px-4 text-sm font-medium hover:bg-muted"
+          className="inline-flex h-9 flex-1 items-center justify-center rounded-full border border-border bg-card px-4 text-sm font-medium hover:bg-muted"
         >
           Nueva solicitud
         </Link>
       </div>
       <form action={signOut}>
-        <Button type="submit" variant="outline" className="h-9 w-full rounded-sm">
+        <Button type="submit" variant="outline" className="h-9 w-full rounded-full">
           Salir
         </Button>
       </form>

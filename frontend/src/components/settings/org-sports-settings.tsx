@@ -68,19 +68,19 @@ function OrgSportCard({
   return (
     <form
       action={onSubmit}
-      className="grid gap-4 border border-[#D0D5DB] bg-white p-4"
+      className="grid gap-4 border border-border bg-card p-4"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-base font-semibold text-[#0A0A0A]">
+        <h3 className="text-base font-semibold text-foreground">
           {sportLabel(sport.key) || sportLabel(sport.name)}
         </h3>
-        <label className="flex items-center gap-2 text-sm text-[#0A0A0A]">
+        <label className="flex items-center gap-2 text-sm text-foreground">
           <input
             type="checkbox"
             name="active"
             defaultChecked={row.active}
             disabled={pending}
-            className="size-4 rounded-[2px] border-[#D0D5DB] accent-[#00B7FF]"
+            className="size-4 rounded-[2px] border-border accent-primary"
           />
           Activo
         </label>
@@ -123,7 +123,7 @@ function OrgSportCard({
         ))}
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-[#0A0A0A]">
+      <label className="flex items-center gap-2 text-sm text-foreground">
         <input
           type="checkbox"
           name="draw_requires_shootout"
@@ -131,7 +131,7 @@ function OrgSportCard({
             row.draw_requires_shootout ?? sport.draw_requires_shootout
           }
           disabled={pending}
-          className="size-4 rounded-[2px] border-[#D0D5DB] accent-[#00B7FF]"
+          className="size-4 rounded-[2px] border-border accent-primary"
         />
         Empate define por penales / shootout
       </label>
@@ -163,7 +163,7 @@ export function OrgSportsSettings({
 }: OrgSportsSettingsProps) {
   if (orgSports.length === 0) {
     return (
-      <p className="text-sm text-[#5C6570]">
+      <p className="text-sm text-muted-foreground">
         No hay deportes configurados para esta organización.
       </p>
     );

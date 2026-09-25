@@ -89,13 +89,13 @@ export default async function RootPage() {
       <div className="flex flex-col gap-2 sm:flex-row">
         <Link
           href="/login"
-          className="inline-flex h-10 flex-1 items-center justify-center rounded-sm bg-[#00B7FF] px-4 text-sm font-medium text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+          className="inline-flex h-10 flex-1 items-center justify-center rounded-full bg-primary px-4 text-sm font-medium text-foreground hover:bg-foreground hover:text-background"
         >
           Iniciar sesión
         </Link>
         <Link
           href="/signup"
-          className="inline-flex h-10 flex-1 items-center justify-center rounded-sm border border-border bg-white px-4 text-sm font-medium hover:bg-muted"
+          className="inline-flex h-10 flex-1 items-center justify-center rounded-full border border-border bg-card px-4 text-sm font-medium hover:bg-muted"
         >
           Crear cuenta
         </Link>

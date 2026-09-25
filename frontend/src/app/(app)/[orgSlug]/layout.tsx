@@ -56,12 +56,12 @@ function buildNav(
       {
         href: `/${orgSlug}/members`,
         label: "Solicitudes",
-        bandClass: "bg-[#5C6570]",
+        bandClass: "bg-muted-foreground",
       },
       {
         href: `/${orgSlug}/settings`,
         label: "Configuración",
-        bandClass: "bg-[#5C6570]",
+        bandClass: "bg-muted-foreground",
       }
     );
   }
@@ -144,7 +144,7 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
           organizations={organizations}
           currentSlug={orgSlug}
         />
-        <main className="flex-1 px-4 py-6 md:px-6 md:py-8">{children}</main>
+        <main className="tablero-enter flex-1 px-4 py-6 md:px-6 md:py-8">{children}</main>
       </div>
     </div>
   );

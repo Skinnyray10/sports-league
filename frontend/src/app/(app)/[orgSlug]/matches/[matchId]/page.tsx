@@ -169,21 +169,21 @@ export default async function MatchDetailPage({ params }: PageProps) {
         actions={
           <Link
             href={`/${orgSlug}/matches`}
-            className="text-sm font-medium text-[#5C6570] underline-offset-4 hover:text-[#0A0A0A] hover:underline"
+            className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
           >
             Volver a partidos
           </Link>
         }
       />
 
-      <div className="mb-8 flex flex-wrap items-center gap-3 border border-[#D0D5DB] bg-white px-5 py-4">
+      <div className="mb-8 flex flex-wrap items-center gap-3 border border-border bg-card px-5 py-4">
         <MatchStatusBadge status={match.status} />
-        <p className="font-mono text-2xl font-semibold tabular-nums tracking-tight text-[#0A0A0A]">
+        <p className="font-mono text-2xl font-semibold tabular-nums tracking-tight text-foreground">
           {match.status === "finalizado"
             ? `${match.home_score}–${match.away_score}`
             : "vs"}
         </p>
-        <div className="text-sm text-[#5C6570]">
+        <div className="text-sm text-muted-foreground">
           <p>
             {match.scheduled_at
               ? new Intl.DateTimeFormat("es-MX", {
@@ -203,7 +203,7 @@ export default async function MatchDetailPage({ params }: PageProps) {
             <p className="mt-0.5 italic">{match.status_reason}</p>
           ) : null}
           {assigned ? (
-            <p className="mt-1 text-[#0A0A0A]">
+            <p className="mt-1 text-foreground">
               Estás asignado como árbitro.{" "}
               <Link
                 href={`/${orgSlug}/referee/${match.id}`}
@@ -216,7 +216,7 @@ export default async function MatchDetailPage({ params }: PageProps) {
             <p className="mt-1">
               <Link
                 href={`/${orgSlug}/referee/${match.id}`}
-                className="font-medium text-[#0A0A0A] underline underline-offset-4"
+                className="font-medium text-foreground underline underline-offset-4"
               >
                 Ver cédula
               </Link>

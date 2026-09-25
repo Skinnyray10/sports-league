@@ -32,7 +32,7 @@ export function PublicAccessPanel({
         </p>
         <Link
           href={panelHref}
-          className="inline-flex h-8 w-full items-center justify-center rounded-sm bg-[#00B7FF] px-2.5 text-sm font-medium text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+          className="inline-flex h-8 w-full items-center justify-center rounded-full bg-primary px-2.5 text-sm font-medium text-foreground hover:bg-foreground hover:text-background"
         >
           Ir a mi panel
         </Link>
@@ -40,12 +40,12 @@ export function PublicAccessPanel({
           <Button
             type="submit"
             variant="outline"
-            className="h-8 w-full rounded-sm"
+            className="h-8 w-full rounded-full"
           >
             Salir
           </Button>
         </form>
-        <p className="rounded-sm bg-[#00B7FF]/15 px-2 py-1.5 text-center text-[0.75rem] font-medium text-[#0A0A0A]">
+        <p className="rounded-full bg-primary/20 px-2 py-1.5 text-center text-[0.75rem] font-medium text-foreground">
           Estás en la vista pública
         </p>
       </div>
@@ -70,7 +70,7 @@ export function PublicAccessPanel({
             autoComplete="email"
             required
             placeholder="correo"
-            className="h-8 rounded-sm bg-white text-sm"
+            className="h-8 rounded-full bg-card text-sm"
             disabled={pending}
           />
         </div>
@@ -85,7 +85,7 @@ export function PublicAccessPanel({
             autoComplete="current-password"
             required
             placeholder="contraseña"
-            className="h-8 rounded-sm bg-white text-sm"
+            className="h-8 rounded-full bg-card text-sm"
             disabled={pending}
           />
         </div>
@@ -98,13 +98,13 @@ export function PublicAccessPanel({
           <Button
             type="submit"
             disabled={pending}
-            className="h-8 flex-1 rounded-sm bg-[#00B7FF] text-[#0A0A0A] hover:bg-[#0A0A0A] hover:text-white"
+            className="h-8 flex-1 rounded-full bg-primary text-foreground hover:bg-foreground hover:text-background"
           >
             {pending ? "…" : "Entrar"}
           </Button>
           <Link
             href="/signup"
-            className="inline-flex h-8 flex-1 items-center justify-center rounded-sm border border-border bg-background px-2.5 text-sm font-medium hover:bg-muted"
+            className="inline-flex h-8 flex-1 items-center justify-center rounded-full border border-border bg-background px-2.5 text-sm font-medium hover:bg-muted"
           >
             Registrarse
           </Link>
@@ -113,7 +113,7 @@ export function PublicAccessPanel({
       <p className="text-[0.6875rem] leading-snug text-muted-foreground">
         Acceso restringido a administración, delegados y árbitros autorizados.
       </p>
-      <p className="rounded-sm bg-[#00B7FF]/15 px-2 py-1.5 text-center text-[0.75rem] font-medium text-[#0A0A0A]">
+      <p className="rounded-full bg-primary/20 px-2 py-1.5 text-center text-[0.75rem] font-medium text-foreground">
         Estás en la vista pública
       </p>
     </div>

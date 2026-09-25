@@ -83,7 +83,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
       <Button
         variant="ghost"
         size="sm"
-        className="mb-4 rounded-[2px] px-0 text-[#5C6570] hover:bg-transparent hover:text-[#0A0A0A]"
+        className="mb-4 rounded-[2px] px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
         render={<Link href={`/${orgSlug}/teams`} />}
       >
         <ArrowLeftIcon data-icon="inline-start" />
@@ -109,27 +109,27 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
         }
       />
 
-      <dl className="mb-6 grid max-w-lg gap-4 border border-[#D0D5DB] bg-white p-5 text-sm">
+      <dl className="mb-6 grid max-w-lg gap-4 border border-border bg-card p-5 text-sm">
         <div>
-          <dt className="font-medium text-[#5C6570]">Club</dt>
-          <dd className="mt-1 text-[#0A0A0A]">{club?.name ?? "—"}</dd>
+          <dt className="font-medium text-muted-foreground">Club</dt>
+          <dd className="mt-1 text-foreground">{club?.name ?? "—"}</dd>
         </div>
         <div>
-          <dt className="font-medium text-[#5C6570]">Torneo</dt>
-          <dd className="mt-1 text-[#0A0A0A]">{tournament?.name ?? "—"}</dd>
+          <dt className="font-medium text-muted-foreground">Torneo</dt>
+          <dd className="mt-1 text-foreground">{tournament?.name ?? "—"}</dd>
         </div>
         <div>
-          <dt className="font-medium text-[#5C6570]">División</dt>
-          <dd className="mt-1 text-[#0A0A0A]">{divisionSummary}</dd>
+          <dt className="font-medium text-muted-foreground">División</dt>
+          <dd className="mt-1 text-foreground">{divisionSummary}</dd>
         </div>
         <div>
-          <dt className="font-medium text-[#5C6570]">Grupo</dt>
-          <dd className="mt-1 text-[#0A0A0A]">{group?.name ?? "—"}</dd>
+          <dt className="font-medium text-muted-foreground">Grupo</dt>
+          <dd className="mt-1 text-foreground">{group?.name ?? "—"}</dd>
         </div>
       </dl>
 
       {canEdit ? (
-        <div className="border border-[#D0D5DB] bg-white p-5">
+        <div className="border border-border bg-card p-5">
           <TeamEditForm
             orgSlug={orgSlug}
             teamId={team.id}

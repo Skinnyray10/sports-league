@@ -42,11 +42,11 @@ function TournamentTable({
 }) {
   if (rows.length === 0) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-10 text-center">
-        <p className="font-medium text-[#0A0A0A]">
+      <div className="border border-dashed border-border bg-card px-6 py-10 text-center">
+        <p className="font-medium text-foreground">
           Ningún torneo en este estado
         </p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           Cambia de pestaña para ver los demás.
         </p>
       </div>
@@ -54,26 +54,26 @@ function TournamentTable({
   }
 
   return (
-    <div className="overflow-hidden border border-[#D0D5DB] bg-white">
+    <div className="overflow-hidden border border-border bg-card">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               Torneo
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               Temporada
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               Formato
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               Divisiones
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-foreground">
               Estado
             </TableHead>
-            <TableHead className="bg-[#E6E9EC] text-right text-[#0A0A0A]">
+            <TableHead className="bg-secondary text-right text-foreground">
               Acciones
             </TableHead>
           </TableRow>
@@ -81,7 +81,7 @@ function TournamentTable({
         <TableBody>
           {rows.map((row) => (
             <TableRow key={row.id}>
-              <TableCell className="font-medium text-[#0A0A0A]">
+              <TableCell className="font-medium text-foreground">
                 <Link
                   href={`/${orgSlug}/tournaments/${row.id}`}
                   className="underline-offset-4 hover:underline"
@@ -89,14 +89,14 @@ function TournamentTable({
                   {row.name}
                 </Link>
               </TableCell>
-              <TableCell className="font-mono text-sm text-[#0A0A0A]">
+              <TableCell className="font-mono text-sm text-foreground">
                 {row.season}
               </TableCell>
-              <TableCell className="text-[#5C6570]">
+              <TableCell className="text-muted-foreground">
                 {formatLabel(row.format)}
                 {row.legs === 2 ? " · Ida y vuelta" : ""}
               </TableCell>
-              <TableCell className="tabular-nums text-[#0A0A0A]">
+              <TableCell className="tabular-nums text-foreground">
                 {row.division_count}
               </TableCell>
               <TableCell>
@@ -131,11 +131,11 @@ export function TournamentsList({
 }: TournamentsListProps) {
   if (tournaments.length === 0) {
     return (
-      <div className="border border-dashed border-[#D0D5DB] bg-white px-6 py-12 text-center">
-        <p className="text-base font-medium text-[#0A0A0A]">
+      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">
           Todavía no hay torneos
         </p>
-        <p className="mt-1 text-sm text-[#5C6570]">
+        <p className="mt-1 text-sm text-muted-foreground">
           {canManageStaff
             ? "Crea un torneo y luego agrega divisiones (deporte, rama y categoría)."
             : "Pídele a un administrador que cree el primer torneo."}

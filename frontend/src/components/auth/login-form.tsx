@@ -29,7 +29,7 @@ export function LoginForm({ next }: LoginFormProps) {
           autoComplete="email"
           required
           placeholder="tu@liga.mx"
-          className="rounded-md bg-white"
+          className="rounded-full bg-card"
           disabled={pending}
         />
       </div>
@@ -42,7 +42,7 @@ export function LoginForm({ next }: LoginFormProps) {
           type="password"
           autoComplete="current-password"
           required
-          className="rounded-md bg-white"
+          className="rounded-full bg-card"
           disabled={pending}
         />
       </div>
@@ -50,13 +50,13 @@ export function LoginForm({ next }: LoginFormProps) {
       {state.error ? (
         <p
           role="alert"
-          className="rounded-md border border-destructive/40 bg-white px-3 py-2 text-sm text-destructive"
+          className="rounded-md border border-destructive/40 bg-card px-3 py-2 text-sm text-destructive"
         >
           {state.error}
         </p>
       ) : null}
 
-      <Button type="submit" disabled={pending} className="rounded-sm">
+      <Button type="submit" disabled={pending} className="rounded-full">
         {pending ? "Entrando…" : "Iniciar sesión"}
       </Button>
 
