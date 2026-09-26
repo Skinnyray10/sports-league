@@ -24,24 +24,46 @@ export type CredentialView = {
   status: ApprovalStatus;
   eligibility: EligibilityStatus;
   jerseyNumber: number | null;
+  /** Logo de la liga; si falta, la ficha indica que hay que cargarlo en Configuración. */
+  organizationLogoUrl: string | null;
+  /** Logo del equipo; solo se muestra si hay URL. */
+  teamLogoUrl: string | null;
 };
 
 type CredentialCardProps = {
   credential: CredentialView;
-  /** Absolute or path used for QR payload. */
-  verifyUrl: string;
 };
 
-export function CredentialCard({
-  credential,
-  verifyUrl,
-}: CredentialCardProps) {
-  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}`;
+export function CredentialCard({ credential }: CredentialCardProps) {
   const fullName = `${credential.firstNames} ${credential.lastNames}`;
 
   return (
     <article className="credential-print mx-auto w-full max-w-md border border-border bg-card">
       <div className="h-1.5 w-full bg-band-tournaments" aria-hidden />
+      <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          {credential.organizationLogoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={credential.organizationLogoUrl}
+              alt="Logo de la liga"
+              className="h-10 w-auto max-w-[140px] object-contain"
+            />
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Falta el logo de la liga. Cárgalo en Configuración.
+            </p>
+          )}
+        </div>
+        {credential.teamLogoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={credential.teamLogoUrl}
+            alt={`Logo de ${credential.teamName}`}
+            className="h-10 w-auto max-w-[100px] shrink-0 object-contain"
+          />
+        ) : null}
+      </div>
       <div className="grid gap-5 p-5 sm:grid-cols-[120px_1fr]">
         <div className="mx-auto size-[120px] overflow-hidden border border-border bg-secondary sm:mx-0">
           {credential.photoUrl ? (
@@ -118,13 +140,6 @@ export function CredentialCard({
             </div>
           </dl>
         </div>
-      </div>
-      <div className="flex flex-col items-center gap-2 border-t border-border px-5 py-4">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={qrSrc} alt="Código QR de verificación" width={150} height={150} />
-        <p className="break-all text-center font-mono text-xs text-muted-foreground">
-          {verifyUrl}
-        </p>
       </div>
     </article>
   );

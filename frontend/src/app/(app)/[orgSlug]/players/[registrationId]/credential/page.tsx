@@ -45,6 +45,7 @@ export default async function CredentialPage({ params }: PageProps) {
       ),
       team:teams(
         name,
+        logo_url,
         division:divisions(
           branch,
           sport:sports(name),
@@ -89,11 +90,9 @@ export default async function CredentialPage({ params }: PageProps) {
     status: reg.status,
     eligibility: reg.eligibility,
     jerseyNumber: reg.jersey_number,
+    organizationLogoUrl: access.membership.organization.logo_url ?? null,
+    teamLogoUrl: team?.logo_url ?? null,
   };
-
-  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "");
-  const path = `/c/${credential.folio}`;
-  const verifyUrl = siteUrl ? `${siteUrl}${path}` : path;
 
   return (
     <section className="mx-auto w-full max-w-3xl">
@@ -115,7 +114,7 @@ export default async function CredentialPage({ params }: PageProps) {
           </div>
         }
       />
-      <CredentialCard credential={credential} verifyUrl={verifyUrl} />
+      <CredentialCard credential={credential} />
     </section>
   );
 }

@@ -55,19 +55,6 @@ export default async function CredentialPublicPage({ params }: PageProps) {
         </p>
       </div>
 
-      {row.photo_url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={row.photo_url}
-          alt=""
-          className="mx-auto aspect-square w-40 object-cover"
-        />
-      ) : (
-        <div className="mx-auto flex aspect-square w-40 items-center justify-center bg-secondary text-sm text-muted-foreground">
-          Sin foto
-        </div>
-      )}
-
       <div className="text-center">
         <h1 className="text-2xl font-bold tracking-tight">
           {row.first_names} {row.last_names}

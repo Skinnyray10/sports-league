@@ -101,7 +101,7 @@ export function PublicScorersTable({ scorers }: PublicScorersProps) {
   }
 
   return (
-    <div className="overflow-hidden border border-border bg-card">
+    <div className="overflow-x-auto border border-border bg-card">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border bg-secondary text-left">

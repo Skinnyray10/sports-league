@@ -53,7 +53,7 @@ export async function getOrgAccess(orgSlug: string): Promise<OrgAccess> {
     isDelegado,
     isReferee,
     canManageStaff: isAdmin,
-    canUpdateTeam: (teamId: string) => isAdmin || isDelegadoOf(teamId),
+    canUpdateTeam: (_teamId: string) => isAdmin,
     isDelegadoOf,
   };
 }

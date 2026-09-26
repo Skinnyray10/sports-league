@@ -32,7 +32,7 @@ Ya no hay que crearlos a mano: los define `0005_storage_buckets.sql`.
 
 | Bucket | Público | Uso |
 |--------|---------|-----|
-| `player-photos` | sí (lectura) | Fotos de credencial; path `{org_id}/{team_id}/{player_id}.jpg` |
+| `player-photos` | no | Fotos de credencial; path `{org_id}/{team_id}/{player_id}.jpg`; lectura admin/delegado del equipo |
 | `protest-evidence` | no | Evidencia de protestas; path `{org_id}/{protest_id}/...` |
 
 En ambos, **el primer segmento del path debe ser el `organization_id`**: las

@@ -678,6 +678,7 @@ export type Database = {
           photo_url: string | null,
           classification: string | null,
           profile_id: string | null,
+          created_by: string | null,
           created_at: string,
           updated_at: string
         };
@@ -691,6 +692,7 @@ export type Database = {
           photo_url?: string | null,
           classification?: string | null,
           profile_id?: string | null,
+          created_by?: string | null,
           created_at?: string,
           updated_at?: string
         };
@@ -704,6 +706,7 @@ export type Database = {
           photo_url?: string | null,
           classification?: string | null,
           profile_id?: string | null,
+          created_by?: string | null,
           created_at?: string,
           updated_at?: string
         };
@@ -727,6 +730,13 @@ export type Database = {
             columns: ["profile_id"];
             isOneToOne: true;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "players_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "users";
             referencedColumns: ["id"];
           }
         ];
@@ -1749,7 +1759,6 @@ export type Database = {
           folio: string;
           first_names: string;
           last_names: string;
-          photo_url: string | null;
           team_name: string;
           club_name: string;
           sport_name: string;
