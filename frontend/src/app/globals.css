@@ -151,6 +151,9 @@
     background-size: 256px 256px;
     background-repeat: repeat;
   }
+  .dark body {
+    background-image: none;
+  }
   html {
     @apply font-sans;
   }
