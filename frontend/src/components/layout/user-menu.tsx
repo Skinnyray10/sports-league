@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronDownIcon } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -21,6 +22,8 @@ type UserMenuProps = {
 };
 
 export function UserMenu({ email, organizations, currentSlug }: UserMenuProps) {
+  const router = useRouter();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -37,23 +40,32 @@ export function UserMenu({ email, organizations, currentSlug }: UserMenuProps) {
         <ChevronDownIcon className="size-3.5 opacity-70" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-48 rounded-md">
-        <DropdownMenuLabel className="font-normal">
-          <span className="block truncate text-xs text-muted-foreground">
-            {email}
-          </span>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="font-normal">
+            <span className="block truncate text-xs text-muted-foreground">
+              {email}
+            </span>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         {organizations.map((org) => (
           <DropdownMenuItem
             key={org.id}
-            render={<Link href={`/${org.slug}`} />}
+            onClick={() => router.push(`/${org.slug}`)}
             className={org.slug === currentSlug ? "bg-muted" : undefined}
           >
             {org.name}
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link href="/onboarding" />}>
+        <DropdownMenuItem onClick={() => router.push("/")}>
+          Cambiar de liga
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push(`/p/${currentSlug}`)}>
+          Vista pública
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => router.push("/onboarding")}>
           Crear organización
         </DropdownMenuItem>
         <DropdownMenuSeparator />

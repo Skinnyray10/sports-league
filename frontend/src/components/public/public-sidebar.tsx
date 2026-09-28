@@ -64,6 +64,15 @@ export function PublicSidebar({
         Consulta
       </p>
 
+      <div className="px-4 pb-2">
+        <Link
+          href="/"
+          className="text-[0.8125rem] font-medium text-sidebar-foreground/80 underline-offset-4 hover:text-sidebar-foreground hover:underline"
+        >
+          Cambiar de liga
+        </Link>
+      </div>
+
       <nav className="flex gap-1 overflow-x-auto px-2 pb-3 md:flex-col md:overflow-visible">
         {modules.map((item) => {
           const active =

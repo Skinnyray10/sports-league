@@ -167,12 +167,26 @@ export default async function MatchDetailPage({ params }: PageProps) {
             : "Detalle del partido"
         }
         actions={
-          <Link
-            href={`/${orgSlug}/matches`}
-            className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-          >
-            Volver a partidos
-          </Link>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            <Link
+              href={`/${orgSlug}/matches`}
+              className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Volver a partidos
+            </Link>
+            <Link
+              href={`/${orgSlug}/tournaments`}
+              className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              Torneos
+            </Link>
+            <Link
+              href={`/p/${orgSlug}`}
+              className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              Vista pública
+            </Link>
+          </div>
         }
       />
 

@@ -7,6 +7,8 @@
 -- Borra:
 --   - organizaciones interfacultades-demo y liga-norte-demo (cascade)
 --   - usuario auth admin@demo.liga (a1111111-1111-4111-8111-111111111111)
+--   - usuario auth delegado@demo.liga (a2222222-2222-4222-8222-222222222222)
+--   - usuario auth arbitro@demo.liga (a3333333-3333-4333-8333-333333333333)
 --
 -- Ejecutar en el SQL Editor del proyecto de producción (o psql linkeado).
 -- =============================================================================
@@ -22,13 +24,25 @@ where slug in ('interfacultades-demo', 'liga-norte-demo')
    );
 
 delete from auth.identities
-where user_id = 'a1111111-1111-4111-8111-111111111111';
+where user_id in (
+  'a1111111-1111-4111-8111-111111111111',
+  'a2222222-2222-4222-8222-222222222222',
+  'a3333333-3333-4333-8333-333333333333'
+);
 
 delete from public.profiles
-where id = 'a1111111-1111-4111-8111-111111111111';
+where id in (
+  'a1111111-1111-4111-8111-111111111111',
+  'a2222222-2222-4222-8222-222222222222',
+  'a3333333-3333-4333-8333-333333333333'
+);
 
 delete from auth.users
-where id = 'a1111111-1111-4111-8111-111111111111'
-   or email = 'admin@demo.liga';
+where id in (
+  'a1111111-1111-4111-8111-111111111111',
+  'a2222222-2222-4222-8222-222222222222',
+  'a3333333-3333-4333-8333-333333333333'
+)
+   or email in ('admin@demo.liga', 'delegado@demo.liga', 'arbitro@demo.liga');
 
 commit;

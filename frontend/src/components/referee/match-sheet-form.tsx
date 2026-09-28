@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Trash2Icon } from "lucide-react";
 import {
@@ -187,6 +188,26 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        <Link
+          href={`/${orgSlug}/matches/${matchId}`}
+          className="font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          Volver al partido
+        </Link>
+        <Link
+          href={`/${orgSlug}/tournaments`}
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          Torneos
+        </Link>
+        <Link
+          href={`/p/${orgSlug}`}
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          Vista pública
+        </Link>
+      </div>
       <header className="border-b border-border pb-5">
         <div className="mb-3 h-1 w-12 bg-primary" aria-hidden />
         <h1 className="text-2xl font-bold tracking-tight text-foreground">
