@@ -1,0 +1,124 @@
+{
+  "title": "Elige el mundo visual",
+  "question": "El roll asignó Tablero de Cancha. Manténlo, toma un alternate, o re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Tablero de Cancha",
+      "kicker": "THE ROLL",
+      "lineage": "tablero magnético / pizarra de posiciones en cancha municipal",
+      "thesis": "La liga se opera como el tablero al borde de la cancha: columnas claras, marcadores que se mueven, cero adorno sobre los números.",
+      "palette": ["#1A1F24", "#F7F4EF", "#C4CED6", "#E8F05A", "#2F6FED"],
+      "materials": ["tablero lacado mate", "fichas magnéticas", "tiza / marcador grueso"],
+      "viewport": "Sidebar como franja de módulos del tablero; campo principal = grilla de posiciones/partidos con tipografía tabular; CTA como ficha amarillo-lima que se 'pega' al hover.",
+      "risk": "Puede leerse genérico 'sports dashboard' si el amarillo se esparce; el tablero debe vivir en densidad de datos, no en iconos de balón.",
+      "raised": [
+        { "from": "oscilloscope", "raise": "Grilla medida: tablas y scores alinean a un ritmo de divisiones (tabular lining, gutters fijos)." },
+        { "from": "cyclorama", "raise": "Chrome en bandas horizontales de atmósfera (sidebar oscura → campo claro), no cards apiladas." },
+        { "from": "cracktro", "raise": "El módulo activo gana por peso/brillo/espaciado, no por cajas con borde grueso." },
+        { "from": "cloud-edge", "raise": "Color saturado solo en franja de acento y CTAs; el cuerpo de datos permanece acromático." },
+        { "from": "zoo-map", "raise": "Controles primarios como cápsulas de ficha (radio bajo, color sólido), no pills SaaS." }
+      ],
+      "comp": ".impeccable/mocks/decision/assigned.webp"
+    },
+    {
+      "id": "model-pick",
+      "label": "Cédula Carbón",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "cédula de árbitro / planilla de partido en papel carbón",
+      "thesis": "Cada pantalla es una planilla: reglas, sellos de estado, tinta de sello; la captura en cancha y la laptop del admin hablan el mismo papel.",
+      "palette": ["#F2EDE4", "#1C1917", "#9A3412", "#4472C4", "#D6D3D1"],
+      "materials": ["papel bond", "carbón duplicado", "sello de goma", "clip metálico"],
+      "viewport": "Hoja blanca/crema con header de folio; filas regladas para partidos/jugadores; estado = sello (Programado/En vivo/Final).",
+      "risk": "También es donde más corre esta categoría (forms-as-UI); familiar y efectivo, pero el más predecible.",
+      "comp": ".impeccable/mocks/decision/model-pick.webp"
+    },
+    {
+      "id": "challenger-oscilloscope",
+      "label": "Banco de Señal",
+      "verdict": "competitive",
+      "lineage": "CRT oscilloscope on a signal bench",
+      "thesis": "Partidos y tablas como traza medida: graticule, lecturas 7-segment, trigger que congela el marcador.",
+      "palette": ["#0B0E0C", "#39FF14", "#5A635C", "#FFB000", "#8A9A8E"],
+      "materials": ["fósforo verde", "vidrio graticule", "perillas dentadas"],
+      "viewport": "Campo casi negro; datos en fósforo; knobs/selects como controles de timebase; filas de partidos como sweeps.",
+      "case": "Gana claridad numérica Operate; pierde identificación con admin/delegado de liga MX.",
+      "risk": "Lee sci-fi / lab si el fósforo invade copy.",
+      "comp": ".impeccable/mocks/decision/challenger-oscilloscope.webp",
+      "hero": "https://impeccable.style/worlds/cards/scientific-notation-oscilloscope-signal-bench-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/scientific-notation-oscilloscope-signal-bench.webp"
+    },
+    {
+      "id": "challenger-cyclorama",
+      "label": "Ciclorama Amanecer",
+      "verdict": "competitive",
+      "lineage": "stagecraft cyclorama dawn",
+      "thesis": "La jornada se lee como cues de luz: noche → cobalto → rosa → día; el trabajo vive delante del horizonte.",
+      "palette": ["#0A0C12", "#1E3A8A", "#E11D48", "#F8FAFC", "#94A3B8"],
+      "materials": ["tela ciclorama", "wash de luz", "plot de iluminación"],
+      "viewport": "Bandas horizontales de atmósfera; contenido en la zona día; nav en la franja noche.",
+      "case": "Fuerte identificación atmosférica compartida pública+ops; pierde densidad de tablas frente al tablero.",
+      "risk": "Drama escénico puede opacar scanabilidad Operate.",
+      "comp": ".impeccable/mocks/decision/challenger-cyclorama.webp",
+      "hero": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn.webp"
+    },
+    {
+      "id": "challenger-cracktro",
+      "label": "Cola Cracktro",
+      "verdict": "declined",
+      "lineage": "cracktro scroller queue",
+      "palette": ["#000000", "#E8E4D9", "#FFB000"],
+      "materials": ["void emisivo", "polvo bitmap", "caret ámbar"],
+      "case": "Fusión débil: ligas municipales no se identifican con demoscene; tablas necesitan enclosure.",
+      "kept": "Jerarquía por profundidad/brillo del ítem activo.",
+      "hero": "https://impeccable.style/worlds/cards/operate-c-cracktro-scroller-queue-hero.webp"
+    },
+    {
+      "id": "challenger-cloud",
+      "label": "Borde Iridiscente",
+      "verdict": "declined",
+      "lineage": "iridescent cloud edge",
+      "palette": ["#FFFFFF", "#64748B", "#A7F3D0", "#FBCFE8"],
+      "materials": ["nube blanca", "franja pastel"],
+      "case": "Demasiado suave para captura en cancha y tablas densas.",
+      "kept": "Color solo en el borde; campo de texto acromático.",
+      "hero": "https://impeccable.style/worlds/cards/clouds-storms-auroras-iridescent-cloud-edge-hero.webp"
+    },
+    {
+      "id": "challenger-zoo",
+      "label": "Mapa de Lobos",
+      "verdict": "declined",
+      "lineage": "zoo gardens guide map",
+      "palette": ["#F5F1E4", "#8ED462", "#FF705D", "#F5E211"],
+      "materials": ["color plano", "costa SVG"],
+      "case": "Lóbulos y costa chocan con tablas Operate.",
+      "kept": "CTAs como cápsulas de color sólido.",
+      "hero": "https://impeccable.style/worlds/cards/aww2-zoo-gardens-guide-map-hero.webp"
+    },
+    {
+      "id": "challenger-generative",
+      "label": "Identidad Paramétrica",
+      "verdict": "declined",
+      "lineage": "generative parametric identity",
+      "palette": ["#111827", "#F9FAFB", "#6366F1"],
+      "materials": ["SVG paramétrico", "armonías algorítmicas"],
+      "case": "Variación de seed distrae en trabajo diario de liga.",
+      "kept": "Un acento semilla consistente en todos los shells.",
+      "hero": "https://impeccable.style/worlds/cards/generative-parametric-identity-hero.webp"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "comp", "toggle": true },
+  "canon": true,
+  "canonCard": {
+    "label": "El estándar de categoría",
+    "thesis": "Dashboard de liga deportiva limpio: sidebar, tablas, CTA azul, ejecutado a craft pleno.",
+    "palette": ["#FFFFFF", "#111827", "#2563EB", "#F3F4F6"],
+    "materials": ["grid limpia", "sans neutra", "fotos de producto"],
+    "viewport": "Shell SaaS deporte: nav izquierda, tabla de partidos, botón primario azul.",
+    "risk": "Indistinguible de competidores por diseño.",
+    "comp": ".impeccable/mocks/decision/canon.webp"
+  },
+  "steer": true
+}

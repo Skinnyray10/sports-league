@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# sports-league
 
-## Getting Started
+Plataforma de ligas multideporte (Next.js + Supabase).
 
-First, run the development server:
+## Estructura
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+frontend/   # App Next.js (UI, auth, Server Actions)
+supabase/   # Migraciones SQL y schema
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Frontend
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copia `frontend/.env.local` con `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
-## Learn More
+## Base de datos
 
-To learn more about Next.js, take a look at the following resources:
+Aplica las migraciones en `supabase/migrations/` desde el SQL Editor de Supabase (o CLI):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. `0001_init.sql`
+2. `0002_org_invites.sql`
+3. y el resto en orden numérico
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+El seed local `0007_demo_seed.sql` crea `admin@demo.liga` y las ligas demo; se conserva para `db reset`.
 
-## Deploy on Vercel
+## Corte a producción
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Antes de apuntar Hostinger (u otro host) a un proyecto Supabase que haya corrido el seed demo:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Preferible: usa un **proyecto Supabase distinto** del de pruebas.
+2. Si reutilizas el mismo proyecto, ejecuta a mano
+   [`supabase/scripts/remove-demo-admin.sql`](supabase/scripts/remove-demo-admin.sql)
+   en el SQL Editor. Borra `admin@demo.liga` y las orgs `interfacultades-demo` /
+   `liga-norte-demo`. **No es una migración**; no corre en cada reset.
+
+Ese script es obligatorio el día del corte si el demo estuvo en ese proyecto.
