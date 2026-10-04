@@ -52,6 +52,14 @@ políticas de `storage.objects` lo usan para resolver la membresía.
 - `validate_credential(folio)` y `accept_org_invite(token)` son públicas por
   diseño (QR de credencial e invitaciones por liga).
 
+## Evitar la pausa por inactividad (plan gratuito)
+
+Supabase pausa el proyecto tras 7 días sin consultas. El workflow
+`.github/workflows/supabase-keep-alive.yml` corre lunes y jueves y ejecuta
+`supabase/scripts/keep-alive.sh`, que lee `public_organizations` con la anon
+key. Necesita los secrets `SUPABASE_URL` y `SUPABASE_ANON_KEY` en GitHub
+(nunca la service role). Se puede lanzar a mano desde Actions → Run workflow.
+
 ## Pendiente en el Dashboard
 
 Authentication → Providers → Password: activar **Leaked password protection**
