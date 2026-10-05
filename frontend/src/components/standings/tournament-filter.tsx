@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
 
 export type TournamentFilterOption = {
   id: string;
@@ -35,7 +36,7 @@ export function TournamentFilter({
       <Label htmlFor="standings-tournament" className="text-muted-foreground">
         Torneo
       </Label>
-      <select
+      <NativeSelect
         id="standings-tournament"
         value={selectedId ?? ""}
         onChange={(e) => {
@@ -45,7 +46,7 @@ export function TournamentFilter({
             : `/${orgSlug}/standings`;
           router.push(href);
         }}
-        className="h-8 min-w-[12rem] rounded-[4px] border border-border bg-card px-2.5 text-sm text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/35"
+        className="w-auto min-w-[12rem]"
       >
         <option value="">Elige un torneo</option>
         {tournaments.map((t) => (
@@ -53,7 +54,7 @@ export function TournamentFilter({
             {t.name} ({t.season})
           </option>
         ))}
-      </select>
+      </NativeSelect>
     </div>
   );
 }

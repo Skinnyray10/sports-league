@@ -8,8 +8,11 @@ import {
 } from "@/components/players/credential-card";
 import { PrintButton } from "@/components/players/print-button";
 import { Button } from "@/components/ui/button";
+import QRCode from "qrcode";
+import { getSiteUrl } from "@/lib/site-url";
 import { createClient } from "@/lib/supabase/server";
 import type { Branch } from "@/types/database";
+import { unwrapOne } from "@/lib/utils";
 
 type PageProps = {
   params: Promise<{ orgSlug: string; registrationId: string }>;
@@ -76,6 +79,9 @@ export default async function CredentialPage({ params }: PageProps) {
   const sport = division ? unwrapOne(division.sport) : null;
   const category = division ? unwrapOne(division.category) : null;
 
+  const verifyUrl = `${await getSiteUrl()}/c/${encodeURIComponent(reg.folio)}`;
+  const qrDataUrl = await QRCode.toDataURL(verifyUrl, { margin: 1, width: 192 });
+
   const credential: CredentialView = {
     folio: reg.folio,
     firstNames: player?.first_names ?? "",
@@ -92,6 +98,8 @@ export default async function CredentialPage({ params }: PageProps) {
     jerseyNumber: reg.jersey_number,
     organizationLogoUrl: access.membership.organization.logo_url ?? null,
     teamLogoUrl: team?.logo_url ?? null,
+    verifyUrl,
+    qrDataUrl,
   };
 
   return (
@@ -105,7 +113,6 @@ export default async function CredentialPage({ params }: PageProps) {
           <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
-              className="rounded-[2px]"
               render={<Link href={`/${orgSlug}/players`} />}
             >
               Volver
@@ -119,7 +126,3 @@ export default async function CredentialPage({ params }: PageProps) {
   );
 }
 
-function unwrapOne<T>(value: T | T[] | null | undefined): T | null {
-  if (value == null) return null;
-  return Array.isArray(value) ? (value[0] ?? null) : value;
-}

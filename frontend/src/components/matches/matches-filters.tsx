@@ -1,9 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { buttonVariants } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { BRANCH_LABELS, sportLabel } from "@/lib/labels";
 import type { Branch } from "@/types/database";
+import { NativeSelect } from "@/components/ui/native-select";
 
 export type MatchFilterOption = {
   id: string;
@@ -42,8 +45,6 @@ function buildHref(
   return qs ? `/${orgSlug}/matches?${qs}` : `/${orgSlug}/matches`;
 }
 
-const selectClass =
-  "h-8 w-full min-w-[8rem] rounded-[4px] border border-border bg-card px-2.5 text-sm text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/35";
 
 export function MatchesFilters({
   orgSlug,
@@ -60,19 +61,34 @@ export function MatchesFilters({
     router.push(buildHref(orgSlug, { ...filters, ...patch }));
   }
 
+  const activeCount = Object.values(filters).filter(Boolean).length;
+
   return (
-    <div className="mb-5 grid gap-3 border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="mb-5 grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="flex items-center justify-between sm:col-span-2 lg:col-span-5">
+        <p className="text-sm font-medium text-foreground">
+          Filtros{activeCount > 0 ? ` (${activeCount} activos)` : ""}
+        </p>
+        {activeCount > 0 ? (
+          <Link
+            href={`/${orgSlug}/matches`}
+            className={buttonVariants({ variant: "ghost", size: "sm" })}
+          >
+            Limpiar filtros
+          </Link>
+        ) : null}
+      </div>
       <div className="grid gap-1.5">
         <Label htmlFor="filter-sport" className="text-muted-foreground">
           Deporte
         </Label>
-        <select
+        <NativeSelect
           id="filter-sport"
           value={filters.sport ?? ""}
           onChange={(e) =>
             update({ sport: e.target.value || undefined, group: undefined })
           }
-          className={selectClass}
+          className="min-w-[8rem]"
         >
           <option value="">Todos</option>
           {sports.map((s) => (
@@ -80,18 +96,18 @@ export function MatchesFilters({
               {sportLabel(s.label)}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
 
       <div className="grid gap-1.5">
         <Label htmlFor="filter-branch" className="text-muted-foreground">
           Rama
         </Label>
-        <select
+        <NativeSelect
           id="filter-branch"
           value={filters.branch ?? ""}
           onChange={(e) => update({ branch: e.target.value || undefined })}
-          className={selectClass}
+          className="min-w-[8rem]"
         >
           <option value="">Todas</option>
           {branches.map((b) => (
@@ -99,18 +115,18 @@ export function MatchesFilters({
               {BRANCH_LABELS[b]}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
 
       <div className="grid gap-1.5">
         <Label htmlFor="filter-category" className="text-muted-foreground">
           Categoría
         </Label>
-        <select
+        <NativeSelect
           id="filter-category"
           value={filters.category ?? ""}
           onChange={(e) => update({ category: e.target.value || undefined })}
-          className={selectClass}
+          className="min-w-[8rem]"
         >
           <option value="">Todas</option>
           {categories.map((c) => (
@@ -118,18 +134,18 @@ export function MatchesFilters({
               {c.label}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
 
       <div className="grid gap-1.5">
         <Label htmlFor="filter-group" className="text-muted-foreground">
           Grupo
         </Label>
-        <select
+        <NativeSelect
           id="filter-group"
           value={filters.group ?? ""}
           onChange={(e) => update({ group: e.target.value || undefined })}
-          className={selectClass}
+          className="min-w-[8rem]"
         >
           <option value="">Todos</option>
           {groups.map((g) => (
@@ -137,18 +153,18 @@ export function MatchesFilters({
               {g.label}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
 
       <div className="grid gap-1.5">
         <Label htmlFor="filter-jornada" className="text-muted-foreground">
           Jornada
         </Label>
-        <select
+        <NativeSelect
           id="filter-jornada"
           value={filters.jornada ?? ""}
           onChange={(e) => update({ jornada: e.target.value || undefined })}
-          className={selectClass}
+          className="min-w-[8rem]"
         >
           <option value="">Todas</option>
           {jornadas.map((j) => (
@@ -156,7 +172,7 @@ export function MatchesFilters({
               Jornada {j}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
     </div>
   );

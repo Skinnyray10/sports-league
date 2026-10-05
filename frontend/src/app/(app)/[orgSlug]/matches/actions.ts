@@ -1,5 +1,6 @@
 "use server";
 
+import { lengthError } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import { requireOrgRole } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
@@ -70,6 +71,8 @@ export async function createMatch(
     const groupId = groupIdRaw || null;
     const stageRaw = String(formData.get("stage") ?? "").trim() || "regular";
     const venue = String(formData.get("venue") ?? "").trim() || null;
+    const venueTooLong = lengthError([[venue, 160]]);
+    if (venueTooLong) return venueTooLong;
     const jornada = parseOptionalInt(formData.get("jornada"));
     const scheduled = parseScheduledAt(
       String(formData.get("scheduled_at") ?? "")
@@ -298,6 +301,8 @@ export async function postponeMatch(
     if (!reason) {
       return { ok: false, error: "Indica el motivo del aplazamiento." };
     }
+    const reasonTooLong = lengthError([[reason, 500]]);
+    if (reasonTooLong) return reasonTooLong;
     if (loaded.match.status === "finalizado") {
       return { ok: false, error: "Un partido finalizado no se puede aplazar." };
     }
@@ -355,6 +360,8 @@ export async function cancelMatch(
     if (!reason) {
       return { ok: false, error: "Indica el motivo de la cancelación." };
     }
+    const reasonTooLong = lengthError([[reason, 500]]);
+    if (reasonTooLong) return reasonTooLong;
     if (loaded.match.status === "finalizado") {
       return { ok: false, error: "Un partido finalizado no se puede cancelar." };
     }
@@ -412,6 +419,8 @@ export async function rescheduleMatch(
     if (!reason) {
       return { ok: false, error: "Indica el motivo de la reprogramación." };
     }
+    const reasonTooLong = lengthError([[reason, 500]]);
+    if (reasonTooLong) return reasonTooLong;
     if (loaded.match.status === "finalizado") {
       return {
         ok: false,
@@ -427,6 +436,8 @@ export async function rescheduleMatch(
 
     const venueRaw = String(formData.get("venue") ?? "").trim();
     const venue = venueRaw || null;
+    const venueTooLong = lengthError([[venue, 160]]);
+    if (venueTooLong) return venueTooLong;
     const scheduled = parseScheduledAt(
       String(formData.get("scheduled_at") ?? "")
     );

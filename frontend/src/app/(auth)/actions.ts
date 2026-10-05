@@ -3,37 +3,51 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { homePathAfterAuth } from "@/lib/org";
+import { clientIp, hit } from "@/lib/rate-limit";
+import {
+  operateDeepLink,
+  orgSlugFromPath,
+  safeNextPath,
+} from "@/lib/safe-redirect";
+import { getSiteUrl } from "@/lib/site-url";
 import type { MembershipRole } from "@/types/database";
+
+export type AuthField =
+  | "full_name"
+  | "username"
+  | "email"
+  | "phone"
+  | "organization_id"
+  | "club_id"
+  | "requested_role"
+  | "password"
+  | "password_confirm";
 
 export type AuthActionState = {
   error: string | null;
   /** Resultado correcto que aún no navega a ningún lado (p. ej. confirmar correo). */
   notice: string | null;
+  /** Campo responsable del error, para marcarlo con aria-invalid. */
+  field?: AuthField;
+  /** Valores no sensibles para repoblar el formulario tras un error. */
+  values?: Partial<Record<AuthField, string>>;
 };
 
-const RESERVED_ROOTS = new Set([
-  "login",
-  "signup",
-  "onboarding",
-  "p",
-  "c",
-  "join",
-  "pending",
-]);
+const MINUTE = 60_000;
 
-function safeNextPath(next: string | null | undefined): string | null {
-  if (!next || !next.startsWith("/") || next.startsWith("//")) {
-    return null;
-  }
-  return next;
+function captchaToken(formData: FormData): string | undefined {
+  const token = formData.get("cf-turnstile-response");
+  return typeof token === "string" && token.length > 0 ? token : undefined;
 }
 
-function orgSlugFromPath(path: string): string | null {
-  const segment = path.split("/").filter(Boolean)[0];
-  if (!segment || RESERVED_ROOTS.has(segment)) {
-    return null;
+/** Política mínima: 8–72 caracteres con letras y números (igual que config.toml). */
+function passwordProblem(password: string): string | null {
+  if (password.length < 8) return "La contraseña necesita al menos 8 caracteres.";
+  if (password.length > 72) return "La contraseña puede tener como máximo 72 caracteres.";
+  if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+    return "La contraseña debe combinar letras y números.";
   }
-  return segment;
+  return null;
 }
 
 /**
@@ -41,19 +55,13 @@ function orgSlugFromPath(path: string): string | null {
  * llevan al home por rol (admin → panel, delegado → jugadores, árbitro → cédula).
  */
 async function redirectAfterAuth(next: string | null) {
-  const safe = safeNextPath(next);
-  const preferredSlug = safe ? orgSlugFromPath(safe) : null;
-
-  if (
-    safe &&
-    preferredSlug &&
-    !safe.startsWith("/p/") &&
-    !safe.startsWith("/c/") &&
-    safe !== `/${preferredSlug}`
-  ) {
-    redirect(safe);
+  const deepLink = operateDeepLink(next);
+  if (deepLink) {
+    redirect(deepLink);
   }
 
+  const safe = safeNextPath(next);
+  const preferredSlug = safe ? orgSlugFromPath(safe) : null;
   redirect(await homePathAfterAuth(preferredSlug));
 }
 
@@ -72,29 +80,55 @@ function authErrorMessage(raw: string, fallback: string): string {
   if (message.includes("invalid format") || message.includes("valid email")) {
     return "Revisa el correo: parece que le falta algo.";
   }
+  if (message.includes("captcha")) {
+    return "Completa la verificación anti-bots e inténtalo de nuevo.";
+  }
+  if (message.includes("weak") || message.includes("pwned") || message.includes("leaked")) {
+    return "Esa contraseña es muy débil o apareció en filtraciones. Elige otra.";
+  }
   if (message.includes("rate limit") || message.includes("too many")) {
     return "Demasiados intentos seguidos. Espera un minuto y vuelve a intentarlo.";
   }
   return fallback;
 }
 
+const TOO_MANY: AuthActionState = {
+  error: "Demasiados intentos seguidos. Espera unos minutos y vuelve a intentarlo.",
+  notice: null,
+};
+
 export async function signIn(
   _prev: AuthActionState,
   formData: FormData
 ): Promise<AuthActionState> {
-  const email = String(formData.get("email") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().slice(0, 254);
   const password = String(formData.get("password") ?? "");
   const next = String(formData.get("next") ?? "") || null;
+  const values = { email };
 
   if (!email || !password) {
     return {
       error: "Escribe tu correo y tu contraseña para continuar.",
       notice: null,
+      field: email ? "password" : "email",
+      values,
     };
   }
 
+  const ip = await clientIp();
+  if (
+    !hit(`signin:ip:${ip}`, 30, 10 * MINUTE) ||
+    !hit(`signin:acct:${ip}:${email.toLowerCase()}`, 8, 10 * MINUTE)
+  ) {
+    return { ...TOO_MANY, values };
+  }
+
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+    options: { captchaToken: captchaToken(formData) },
+  });
 
   if (error) {
     return {
@@ -103,6 +137,7 @@ export async function signIn(
         "No pudimos iniciar tu sesión. Inténtalo de nuevo en un momento."
       ),
       notice: null,
+      values,
     };
   }
 
@@ -129,32 +164,43 @@ export async function signUpRequest(
   ).trim() as MembershipRole;
   const password = String(formData.get("password") ?? "");
 
-  if (!fullName || !username || !email || !organizationId || !password) {
-    return {
-      error: "Completa nombre, usuario, correo, liga y contraseña.",
-      notice: null,
-    };
+  const values: AuthActionState["values"] = {
+    full_name: fullName,
+    username,
+    email,
+    phone: phone ?? "",
+    organization_id: organizationId,
+    club_id: clubId ?? "",
+    requested_role: requestedRole,
+  };
+  const fail = (error: string, field?: AuthField): AuthActionState => ({
+    error,
+    notice: null,
+    field,
+    values,
+  });
+
+  if (!fullName) return fail("Escribe tu nombre completo.", "full_name");
+  if (fullName.length > 120) return fail("El nombre puede tener como máximo 120 caracteres.", "full_name");
+  if (!username) return fail("Elige un nombre de usuario.", "username");
+  if (!/^[a-zA-Z0-9._-]{3,40}$/.test(username)) {
+    return fail("El usuario debe tener 3 a 40 letras, números, puntos o guiones.", "username");
   }
-  if (password.length < 8) {
-    return {
-      error: "La contraseña necesita al menos 8 caracteres.",
-      notice: null,
-    };
-  }
-  if (
-    requestedRole !== "team_manager" &&
-    requestedRole !== "referee"
-  ) {
-    return {
-      error: "Solo puedes solicitar acceso como Delegado o Árbitro.",
-      notice: null,
-    };
+  if (!email || email.length > 254) return fail("Escribe un correo válido.", "email");
+  if (phone && phone.length > 30) return fail("El teléfono es demasiado largo.", "phone");
+  if (!organizationId) return fail("Elige la liga a la que quieres unirte.", "organization_id");
+  if (requestedRole !== "team_manager" && requestedRole !== "referee") {
+    return fail("Solo puedes solicitar acceso como Delegado o Árbitro.", "requested_role");
   }
   if (requestedRole === "team_manager" && !clubId) {
-    return {
-      error: "Como Delegado, elige la empresa o club al que perteneces.",
-      notice: null,
-    };
+    return fail("Como Delegado, elige la empresa o club al que perteneces.", "club_id");
+  }
+  const weak = passwordProblem(password);
+  if (weak) return fail(weak, "password");
+
+  const ip = await clientIp();
+  if (!hit(`signup:ip:${ip}`, 5, 60 * MINUTE)) {
+    return { ...TOO_MANY, values };
   }
 
   const nameParts = fullName.split(/\s+/);
@@ -167,17 +213,17 @@ export async function signUpRequest(
     password,
     options: {
       data: { nombre, apellido, username },
+      captchaToken: captchaToken(formData),
     },
   });
 
   if (error) {
-    return {
-      error: authErrorMessage(
+    return fail(
+      authErrorMessage(
         error.message,
         "No pudimos crear tu cuenta. Inténtalo de nuevo en un momento."
-      ),
-      notice: null,
-    };
+      )
+    );
   }
 
   if (!data.session || !data.user) {
@@ -222,6 +268,84 @@ export async function signUpRequest(
   }
 
   redirect("/pending");
+  return { error: null, notice: null };
+}
+
+/** Envía el correo de recuperación. Responde igual exista o no la cuenta. */
+export async function requestPasswordReset(
+  _prev: AuthActionState,
+  formData: FormData
+): Promise<AuthActionState> {
+  const email = String(formData.get("email") ?? "").trim().slice(0, 254);
+  const values = { email };
+  if (!email) {
+    return { error: "Escribe el correo de tu cuenta.", notice: null, field: "email", values };
+  }
+
+  const ip = await clientIp();
+  if (
+    !hit(`reset:ip:${ip}`, 10, 60 * MINUTE) ||
+    !hit(`reset:acct:${email.toLowerCase()}`, 3, 60 * MINUTE)
+  ) {
+    return { ...TOO_MANY, values };
+  }
+
+  const supabase = await createClient();
+  const site = await getSiteUrl();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${site}/auth/confirm?next=/reset-password`,
+    captchaToken: captchaToken(formData),
+  });
+
+  if (error && error.message.toLowerCase().includes("captcha")) {
+    return { error: authErrorMessage(error.message, ""), notice: null, values };
+  }
+
+  return {
+    error: null,
+    notice: `Si ${email} tiene una cuenta, te enviamos un enlace para crear una nueva contraseña. Revisa también la carpeta de spam.`,
+  };
+}
+
+/** Cambia la contraseña de la sesión abierta por el enlace de recuperación. */
+export async function updatePassword(
+  _prev: AuthActionState,
+  formData: FormData
+): Promise<AuthActionState> {
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("password_confirm") ?? "");
+
+  const weak = passwordProblem(password);
+  if (weak) return { error: weak, notice: null, field: "password" };
+  if (password !== confirm) {
+    return {
+      error: "Las contraseñas no coinciden.",
+      notice: null,
+      field: "password_confirm",
+    };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      error: "El enlace expiró. Solicita uno nuevo desde «¿Olvidaste tu contraseña?».",
+      notice: null,
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) {
+    return {
+      error: authErrorMessage(error.message, "No pudimos cambiar la contraseña. Inténtalo de nuevo."),
+      notice: null,
+      field: "password",
+    };
+  }
+
+  await redirectAfterAuth(null);
   return { error: null, notice: null };
 }
 

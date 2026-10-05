@@ -8,7 +8,9 @@ import {
   deleteCategory,
   updateCategory,
 } from "@/app/(app)/[orgSlug]/settings/actions";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -42,18 +44,7 @@ function CategoryRowForm({
         setError(result.error);
         return;
       }
-      router.refresh();
-    });
-  }
-
-  function onDelete() {
-    setError(null);
-    startTransition(async () => {
-      const result = await deleteCategory(orgSlug, category.id);
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
+      toast.success("Categoría guardada.");
       router.refresh();
     });
   }
@@ -73,7 +64,6 @@ function CategoryRowForm({
           required
           maxLength={60}
           defaultValue={category.name}
-          className="rounded-[4px]"
           disabled={pending}
         />
       </div>
@@ -87,7 +77,6 @@ function CategoryRowForm({
           type="number"
           step={1}
           defaultValue={category.sort_order}
-          className="rounded-[4px]"
           disabled={pending}
         />
       </div>
@@ -96,22 +85,34 @@ function CategoryRowForm({
           type="submit"
           variant="outline"
           size="sm"
-          className="rounded-[2px]"
           disabled={pending}
         >
           {pending ? "…" : "Guardar"}
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="rounded-[2px] text-destructive hover:bg-destructive/10 hover:text-destructive"
-          disabled={pending}
-          onClick={onDelete}
-        >
-          <Trash2Icon data-icon="inline-start" />
-          Eliminar
-        </Button>
+        <ConfirmDialog
+          trigger={
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              disabled={pending}
+            />
+          }
+          triggerContent={
+            <>
+              <Trash2Icon data-icon="inline-start" />
+              Eliminar
+            </>
+          }
+          title={`¿Eliminar la categoría ${category.name}?`}
+          description="No se puede deshacer. Si alguna división la usa, primero tendrás que cambiarla."
+          confirmLabel="Eliminar categoría"
+          pendingLabel="Eliminando…"
+          successMessage="Categoría eliminada."
+          onConfirm={() => deleteCategory(orgSlug, category.id)}
+          onSuccess={() => router.refresh()}
+        />
       </div>
       {error ? (
         <p className="sm:col-span-3 text-sm text-destructive" role="alert">
@@ -138,6 +139,7 @@ export function CategoriesSettings({
         setError(result.error);
         return;
       }
+      toast.success("Categoría creada.");
       router.refresh();
     });
   }
@@ -156,7 +158,6 @@ export function CategoriesSettings({
             required
             maxLength={60}
             placeholder="Ej. Libre"
-            className="rounded-[4px]"
             disabled={pending}
           />
         </div>
@@ -168,13 +169,11 @@ export function CategoriesSettings({
             type="number"
             step={1}
             defaultValue={categories.length}
-            className="rounded-[4px]"
             disabled={pending}
           />
         </div>
         <Button
           type="submit"
-          className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
           disabled={pending}
         >
           <PlusIcon data-icon="inline-start" />

@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 type CreateTournamentDialogProps = {
   orgSlug: string;
@@ -51,6 +52,7 @@ export function CreateTournamentDialog({
         setError(result.error);
         return;
       }
+      toast.success("Torneo creado.");
       setOpen(false);
       router.refresh();
     });
@@ -60,13 +62,13 @@ export function CreateTournamentDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background" />
+          <Button />
         }
       >
         <PlusIcon data-icon="inline-start" />
         Agregar torneo
       </DialogTrigger>
-      <DialogContent className="rounded-[4px] sm:max-w-md" showCloseButton>
+      <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle>Agregar torneo</DialogTitle>
           <DialogDescription>
@@ -83,7 +85,6 @@ export function CreateTournamentDialog({
               required
               maxLength={100}
               placeholder="Ej. Apertura"
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
@@ -95,19 +96,18 @@ export function CreateTournamentDialog({
               required
               maxLength={40}
               placeholder="Ej. 2026"
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
-              <Label>Formato</Label>
+              <Label htmlFor="new-tournament-1">Formato</Label>
               <Select
                 value={format}
                 onValueChange={(value) => setFormat(value ?? "round_robin")}
                 disabled={pending}
               >
-                <SelectTrigger className="w-full rounded-[4px]">
+                <SelectTrigger id="new-tournament-1" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -122,13 +122,13 @@ export function CreateTournamentDialog({
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label>Vueltas</Label>
+              <Label htmlFor="new-tournament-2">Vueltas</Label>
               <Select
                 value={legs}
                 onValueChange={(value) => setLegs(value ?? "1")}
                 disabled={pending}
               >
-                <SelectTrigger className="w-full rounded-[4px]">
+                <SelectTrigger id="new-tournament-2" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -139,13 +139,13 @@ export function CreateTournamentDialog({
             </div>
           </div>
           <div className="grid gap-2">
-            <Label>Estado</Label>
+            <Label htmlFor="new-tournament-3">Estado</Label>
             <Select
               value={status}
               onValueChange={(value) => setStatus(value ?? "registration")}
               disabled={pending}
             >
-              <SelectTrigger className="w-full rounded-[4px]">
+              <SelectTrigger id="new-tournament-3" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -161,7 +161,6 @@ export function CreateTournamentDialog({
               id="tournament-start"
               name="start_date"
               type="date"
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
@@ -170,11 +169,10 @@ export function CreateTournamentDialog({
               {error}
             </p>
           ) : null}
-          <DialogFooter className="rounded-b-[4px]">
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
-              className="rounded-[2px]"
               disabled={pending}
               onClick={() => setOpen(false)}
             >
@@ -182,7 +180,6 @@ export function CreateTournamentDialog({
             </Button>
             <Button
               type="submit"
-              className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
               disabled={pending}
             >
               {pending ? "Guardando…" : "Crear torneo"}

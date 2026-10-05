@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 type EditPlayerDialogProps = {
   orgSlug: string;
@@ -52,6 +53,7 @@ export function EditPlayerDialog({
         setError(result.error);
         return;
       }
+      toast.success("Jugador actualizado.");
       setOpen(false);
       router.refresh();
     });
@@ -64,14 +66,13 @@ export function EditPlayerDialog({
           <Button
             variant="outline"
             size="sm"
-            className="rounded-[2px]"
           />
         }
       >
         <PencilIcon data-icon="inline-start" />
         Editar
       </DialogTrigger>
-      <DialogContent className="rounded-[4px] sm:max-w-md" showCloseButton>
+      <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle>Editar jugador</DialogTitle>
           <DialogDescription>
@@ -88,7 +89,6 @@ export function EditPlayerDialog({
                 required
                 maxLength={80}
                 defaultValue={defaults.firstNames}
-                className="rounded-[4px]"
                 disabled={pending}
               />
             </div>
@@ -100,7 +100,6 @@ export function EditPlayerDialog({
                 required
                 maxLength={80}
                 defaultValue={defaults.lastNames}
-                className="rounded-[4px]"
                 disabled={pending}
               />
             </div>
@@ -112,7 +111,6 @@ export function EditPlayerDialog({
               name="id_number"
               maxLength={40}
               defaultValue={defaults.idNumber ?? ""}
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
@@ -126,7 +124,6 @@ export function EditPlayerDialog({
                 name="classification"
                 maxLength={40}
                 defaultValue={defaults.classification ?? ""}
-                className="rounded-[4px]"
                 disabled={pending}
               />
             </div>
@@ -138,7 +135,7 @@ export function EditPlayerDialog({
                 type="number"
                 min={1}
                 defaultValue={defaults.jerseyNumber ?? ""}
-                className="rounded-[4px] font-mono tabular-nums"
+                className="font-mono tabular-nums"
                 disabled={pending}
               />
             </div>
@@ -150,20 +147,18 @@ export function EditPlayerDialog({
               name="photo_url"
               type="url"
               defaultValue={defaults.photoUrl ?? ""}
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
           {error ? (
-            <p className="text-sm text-[#DC2626]" role="alert">
+            <p className="text-sm text-destructive" role="alert">
               {error}
             </p>
           ) : null}
-          <DialogFooter className="rounded-b-[4px]">
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
-              className="rounded-[2px]"
               disabled={pending}
               onClick={() => setOpen(false)}
             >
@@ -171,7 +166,6 @@ export function EditPlayerDialog({
             </Button>
             <Button
               type="submit"
-              className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
               disabled={pending}
             >
               {pending ? "Guardando…" : "Guardar"}

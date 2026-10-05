@@ -28,6 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { Tables } from "@/types/database";
+import { toast } from "sonner";
 
 type Club = Tables<"clubs">;
 
@@ -56,6 +57,7 @@ function EditClubDialog({
         setError(result.error);
         return;
       }
+      toast.success("Club actualizado.");
       setOpen(false);
       router.refresh();
     });
@@ -65,13 +67,13 @@ function EditClubDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button variant="outline" size="sm" className="rounded-[2px]" />
+          <Button variant="outline" size="sm" />
         }
       >
         <PencilIcon data-icon="inline-start" />
         Editar
       </DialogTrigger>
-      <DialogContent className="rounded-[4px] sm:max-w-md" showCloseButton>
+      <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle>Editar club</DialogTitle>
           <DialogDescription>
@@ -87,7 +89,6 @@ function EditClubDialog({
               required
               maxLength={80}
               defaultValue={club.name}
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
@@ -101,7 +102,6 @@ function EditClubDialog({
               type="url"
               defaultValue={club.logo_url ?? ""}
               placeholder="https://"
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
@@ -110,11 +110,10 @@ function EditClubDialog({
               {error}
             </p>
           ) : null}
-          <DialogFooter className="rounded-b-[4px]">
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
-              className="rounded-[2px]"
               disabled={pending}
               onClick={() => setOpen(false)}
             >
@@ -122,7 +121,6 @@ function EditClubDialog({
             </Button>
             <Button
               type="submit"
-              className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
               disabled={pending}
             >
               {pending ? "Guardando…" : "Guardar"}
@@ -154,6 +152,7 @@ function DeleteClubButton({
         setError(result.error);
         return;
       }
+      toast.success("Club eliminado.");
       setOpen(false);
       router.refresh();
     });
@@ -166,14 +165,14 @@ function DeleteClubButton({
           <Button
             variant="ghost"
             size="sm"
-            className="rounded-[2px] text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
           />
         }
       >
         <Trash2Icon data-icon="inline-start" />
         Eliminar
       </DialogTrigger>
-      <DialogContent className="rounded-[4px] sm:max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>¿Eliminar {club.name}?</DialogTitle>
           <DialogDescription>
@@ -186,11 +185,10 @@ function DeleteClubButton({
             {error}
           </p>
         ) : null}
-        <DialogFooter className="rounded-b-[4px]">
+        <DialogFooter>
           <Button
             type="button"
             variant="outline"
-            className="rounded-[2px]"
             disabled={pending}
             onClick={() => setOpen(false)}
           >
@@ -199,7 +197,6 @@ function DeleteClubButton({
           <Button
             type="button"
             variant="destructive"
-            className="rounded-[2px]"
             disabled={pending}
             onClick={onConfirm}
           >

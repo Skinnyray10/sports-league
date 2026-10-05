@@ -100,7 +100,7 @@ function TournamentTable({
                 {row.division_count}
               </TableCell>
               <TableCell>
-                <Badge variant="secondary" className="rounded-[2px]">
+                <Badge variant="secondary">
                   {TOURNAMENT_STATUS_LABELS[row.status]}
                 </Badge>
               </TableCell>
@@ -108,7 +108,6 @@ function TournamentTable({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="rounded-[2px]"
                   render={
                     <Link href={`/${orgSlug}/tournaments/${row.id}`} />
                   }
@@ -152,16 +151,16 @@ export function TournamentsList({
   return (
     <Tabs defaultValue="all">
       <TabsList variant="line" className="mb-4 rounded-none">
-        <TabsTrigger value="all" className="rounded-[2px]">
+        <TabsTrigger value="all">
           Todos ({tournaments.length})
         </TabsTrigger>
-        <TabsTrigger value="registration" className="rounded-[2px]">
+        <TabsTrigger value="registration">
           Inscripciones ({byStatus("registration").length})
         </TabsTrigger>
-        <TabsTrigger value="active" className="rounded-[2px]">
+        <TabsTrigger value="active">
           En curso ({byStatus("active").length})
         </TabsTrigger>
-        <TabsTrigger value="finished" className="rounded-[2px]">
+        <TabsTrigger value="finished">
           Finalizados ({byStatus("finished").length})
         </TabsTrigger>
       </TabsList>

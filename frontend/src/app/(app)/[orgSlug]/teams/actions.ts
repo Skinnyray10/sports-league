@@ -1,5 +1,12 @@
 "use server";
 
+import {
+  imageUrl,
+  optionalUuid,
+  parseForm,
+  requiredText,
+  uuidField,
+} from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import { requireOrgRole } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
@@ -15,21 +22,24 @@ export async function createTeam(
 ): Promise<ActionResult> {
   try {
     const membership = await requireOrgRole(orgSlug, ["admin"]);
-    const name = String(formData.get("name") ?? "").trim();
-    const logoUrlRaw = String(formData.get("logo_url") ?? "").trim();
-    const clubId = String(formData.get("club_id") ?? "").trim();
-    const divisionId = String(formData.get("division_id") ?? "").trim();
-    const groupIdRaw = String(formData.get("group_id") ?? "").trim();
-
-    if (!name) {
-      return { ok: false, error: "Escribe el nombre del equipo." };
-    }
-    if (!clubId || !divisionId) {
-      return {
-        ok: false,
-        error: "Elige un club y una división.",
-      };
-    }
+    const parsed = parseForm(
+      {
+        name: requiredText("Escribe el nombre del equipo."),
+        logo_url: imageUrl,
+        club_id: uuidField("Elige un club y una división."),
+        division_id: uuidField("Elige un club y una división."),
+        group_id: optionalUuid,
+      },
+      formData
+    );
+    if (!parsed.ok) return parsed;
+    const {
+      name,
+      logo_url: logoUrlRaw,
+      club_id: clubId,
+      division_id: divisionId,
+      group_id: groupIdRaw,
+    } = parsed.data;
 
     const supabase = await createClient();
     const { error } = await supabase.from("teams").insert({
@@ -38,7 +48,7 @@ export async function createTeam(
       division_id: divisionId,
       group_id: groupIdRaw || null,
       name,
-      logo_url: logoUrlRaw || null,
+      logo_url: logoUrlRaw,
     });
 
     if (error) {
@@ -70,19 +80,19 @@ export async function updateTeam(
       };
     }
 
-    const name = String(formData.get("name") ?? "").trim();
-    const logoUrlRaw = String(formData.get("logo_url") ?? "").trim();
-
-    if (!name) {
-      return { ok: false, error: "Escribe el nombre del equipo." };
-    }
+    const parsed = parseForm(
+      { name: requiredText("Escribe el nombre del equipo."), logo_url: imageUrl },
+      formData
+    );
+    if (!parsed.ok) return parsed;
+    const { name, logo_url: logoUrlRaw } = parsed.data;
 
     const supabase = await createClient();
     const { error } = await supabase
       .from("teams")
       .update({
         name,
-        logo_url: logoUrlRaw || null,
+        logo_url: logoUrlRaw,
       })
       .eq("id", teamId)
       .eq("organization_id", access.membership.organization_id);

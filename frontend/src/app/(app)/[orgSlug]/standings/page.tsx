@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getMembership } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
-import { StandingsPageHeader } from "@/components/standings/page-header";
+import { ModulePageHeader } from "@/components/ops/module-page-header";
 import {
   StandingsTable,
   toStandingRow,
@@ -55,7 +55,8 @@ export default async function StandingsPage({
 
   return (
     <div className="mx-auto max-w-6xl">
-      <StandingsPageHeader
+      <ModulePageHeader
+        band="standings"
         title="Posiciones"
         description="Se calcula con los partidos finalizados. Ordena por puntos, luego diferencia."
         actions={

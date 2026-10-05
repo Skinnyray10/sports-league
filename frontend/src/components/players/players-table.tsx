@@ -85,7 +85,7 @@ export function PlayersTable({ orgSlug, rows }: PlayersTableProps) {
               <TableCell>
                 <Badge
                   variant="secondary"
-                  className={`rounded-[2px] ${statusBadgeClass(row.status)}`}
+                  className={`${statusBadgeClass(row.status)}`}
                 >
                   {APPROVAL_STATUS_LABELS[row.status]}
                 </Badge>
@@ -112,7 +112,6 @@ export function PlayersTable({ orgSlug, rows }: PlayersTableProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="rounded-[2px]"
                     render={
                       <Link
                         href={`/${orgSlug}/players/${row.id}/credential`}

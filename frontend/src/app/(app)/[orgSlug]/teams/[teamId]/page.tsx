@@ -79,11 +79,11 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
       : "—";
 
   return (
-    <section className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+    <section className="mx-auto w-full max-w-5xl">
       <Button
         variant="ghost"
         size="sm"
-        className="mb-4 rounded-[2px] px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
+        className="mb-4 px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
         render={<Link href={`/${orgSlug}/teams`} />}
       >
         <ArrowLeftIcon data-icon="inline-start" />

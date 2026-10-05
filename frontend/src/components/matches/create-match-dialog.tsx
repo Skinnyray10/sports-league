@@ -22,6 +22,8 @@ import {
   sportLabel,
 } from "@/lib/labels";
 import type { Branch } from "@/types/database";
+import { toast } from "sonner";
+import { NativeSelect } from "@/components/ui/native-select";
 
 export type DivisionOption = {
   id: string;
@@ -56,8 +58,6 @@ type CreateMatchDialogProps = {
   groups: GroupOption[];
 };
 
-const selectClass =
-  "h-8 w-full rounded-[4px] border border-border bg-card px-2.5 text-sm text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/35";
 
 export function CreateMatchDialog({
   orgSlug,
@@ -107,6 +107,7 @@ export function CreateMatchDialog({
         setError(result.error);
         return;
       }
+      toast.success("Partido programado.");
       setOpen(false);
       router.refresh();
     });
@@ -120,13 +121,13 @@ export function CreateMatchDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="rounded-[2px] bg-primary text-foreground transition-[background,color] duration-150 ease-out hover:bg-foreground hover:text-background" />
+          <Button />
         }
       >
         <PlusIcon data-icon="inline-start" />
         Programar partido
       </DialogTrigger>
-      <DialogContent className="rounded-[4px] sm:max-w-lg" showCloseButton>
+      <DialogContent className="sm:max-w-lg" showCloseButton>
         <DialogHeader>
           <DialogTitle>Programar partido</DialogTitle>
           <DialogDescription>
@@ -137,21 +138,20 @@ export function CreateMatchDialog({
         <form action={onSubmit} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="match-division">División</Label>
-            <select
+            <NativeSelect
               id="match-division"
               name="division_id"
               required
               value={divisionId}
               onChange={(e) => onDivisionChange(e.target.value)}
               disabled={pending}
-              className={selectClass}
             >
               {divisions.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.label}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
             {selectedDivision ? (
               <p className="text-xs text-muted-foreground">
                 {selectedDivision.tournamentName} ·{" "}
@@ -165,14 +165,13 @@ export function CreateMatchDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="match-home">Equipo local</Label>
-              <select
+              <NativeSelect
                 id="match-home"
                 name="home_team_id"
                 required
                 value={homeTeamId}
                 onChange={(e) => setHomeTeamId(e.target.value)}
                 disabled={pending || teamsInDivision.length === 0}
-                className={selectClass}
               >
                 <option value="">Elige un equipo</option>
                 {teamsInDivision.map((t) => (
@@ -180,18 +179,17 @@ export function CreateMatchDialog({
                     {t.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="match-away">Equipo visitante</Label>
-              <select
+              <NativeSelect
                 id="match-away"
                 name="away_team_id"
                 required
                 value={awayTeamId}
                 onChange={(e) => setAwayTeamId(e.target.value)}
                 disabled={pending || teamsInDivision.length === 0}
-                className={selectClass}
               >
                 <option value="">Elige un equipo</option>
                 {teamsInDivision.map((t) => (
@@ -199,7 +197,7 @@ export function CreateMatchDialog({
                     {t.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
           </div>
 
@@ -213,11 +211,10 @@ export function CreateMatchDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="match-group">Grupo (opcional)</Label>
-              <select
+              <NativeSelect
                 id="match-group"
                 name="group_id"
                 disabled={pending || groupsInDivision.length === 0}
-                className={selectClass}
                 defaultValue=""
               >
                 <option value="">Sin grupo</option>
@@ -226,7 +223,7 @@ export function CreateMatchDialog({
                     {g.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="match-jornada">Jornada (opcional)</Label>
@@ -235,7 +232,6 @@ export function CreateMatchDialog({
                 name="jornada"
                 type="number"
                 min={1}
-                className="rounded-[4px]"
                 disabled={pending}
               />
             </div>
@@ -244,19 +240,18 @@ export function CreateMatchDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="match-stage">Fase</Label>
-              <select
+              <NativeSelect
                 id="match-stage"
                 name="stage"
                 defaultValue="regular"
                 disabled={pending}
-                className={selectClass}
               >
                 {Object.entries(MATCH_STAGE_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>
                     {label}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="match-venue">Sede</Label>
@@ -265,7 +260,6 @@ export function CreateMatchDialog({
                 name="venue"
                 maxLength={120}
                 placeholder="Ej. Cancha 1"
-                className="rounded-[4px]"
                 disabled={pending}
               />
             </div>
@@ -277,13 +271,12 @@ export function CreateMatchDialog({
               id="match-scheduled"
               name="scheduled_at"
               type="datetime-local"
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
 
           {error ? (
-            <p className="text-sm text-[#DC2626]" role="alert">
+            <p className="text-sm text-destructive" role="alert">
               {error}
             </p>
           ) : null}
@@ -292,7 +285,6 @@ export function CreateMatchDialog({
             <Button
               type="button"
               variant="outline"
-              className="rounded-[2px]"
               disabled={pending}
               onClick={() => setOpen(false)}
             >
@@ -301,7 +293,6 @@ export function CreateMatchDialog({
             <Button
               type="submit"
               disabled={pending || teamsInDivision.length < 2}
-              className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
             >
               {pending ? "Guardando…" : "Programar partido"}
             </Button>

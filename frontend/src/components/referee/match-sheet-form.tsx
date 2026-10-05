@@ -3,7 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Trash2Icon } from "lucide-react";
+import { ChevronLeftIcon, Trash2Icon } from "lucide-react";
+import { toast } from "sonner";
 import {
   addMatchEvent,
   closeMatchSheet,
@@ -15,9 +16,13 @@ import {
   deleteMatchSet,
   upsertMatchSet,
 } from "@/app/(app)/[orgSlug]/matches/actions";
+import { ModulePageHeader } from "@/components/ops/module-page-header";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
+import type { ActionResult } from "@/lib/action-result";
 import {
   BRANCH_LABELS,
   MATCH_EVENT_LABELS,
@@ -104,8 +109,13 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
   const [selected, setSelected] = React.useState<Set<string>>(
     () => new Set(selectedRegistrationIds)
   );
-  const [error, setError] = React.useState<string | null>(null);
   const [pending, startTransition] = React.useTransition();
+  const [confirmCloseOpen, setConfirmCloseOpen] = React.useState(false);
+  const [closeError, setCloseError] = React.useState<string | null>(null);
+  const [shootoutChoice, setShootoutChoice] = React.useState(
+    shootoutWinnerTeamId ?? ""
+  );
+  const closeFormRef = React.useRef<HTMLFormElement>(null);
 
   const homePlayers = eligiblePlayers.filter((p) => p.teamId === homeTeamId);
   const awayPlayers = eligiblePlayers.filter((p) => p.teamId === awayTeamId);
@@ -133,28 +143,39 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
 
   const isDraw = estimatedHome === estimatedAway;
   const showShootout = drawRequiresShootout && isDraw;
+  const shootoutWinnerName =
+    shootoutChoice === homeTeamId
+      ? homeTeamName
+      : shootoutChoice === awayTeamId
+        ? awayTeamName
+        : null;
 
   function run(
-    action: () => Promise<{ ok: true } | { ok: false; error: string }>
+    action: () => Promise<ActionResult>,
+    options: { success?: string; onError?: () => void } = {}
   ) {
-    setError(null);
     startTransition(async () => {
       const result = await action();
       if (!result.ok) {
-        setError(result.error);
+        toast.error(result.error);
+        options.onError?.();
         return;
       }
+      if (options.success) toast.success(options.success);
       router.refresh();
     });
   }
 
   function togglePlayer(id: string) {
     if (closed) return;
+    const previous = selected;
     const next = new Set(selected);
     if (next.has(id)) next.delete(id);
     else next.add(id);
     setSelected(next);
-    run(() => setParticipants(orgSlug, matchId, sheetId, Array.from(next)));
+    run(() => setParticipants(orgSlug, matchId, sheetId, Array.from(next)), {
+      onError: () => setSelected(previous),
+    });
   }
 
   function onAddEvent(formData: FormData) {
@@ -162,25 +183,43 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
     const regId = String(formData.get("player_registration_id") ?? "");
     const player = playerById.get(regId);
     if (player) formData.set("team_id", player.teamId);
-    run(() => addMatchEvent(orgSlug, matchId, formData));
+    run(() => addMatchEvent(orgSlug, matchId, formData), {
+      success: "Evento registrado.",
+    });
   }
 
-  function onSaveMeta(formData: FormData) {
-    formData.set("sheet_id", sheetId);
-    run(() => saveSheetMeta(orgSlug, matchId, formData));
+  function onSaveDraft() {
+    const form = closeFormRef.current;
+    if (!form) return;
+    const fd = new FormData(form);
+    fd.set("sheet_id", sheetId);
+    run(() => saveSheetMeta(orgSlug, matchId, fd), {
+      success: "Borrador guardado.",
+    });
   }
 
-  function onClose(formData: FormData) {
-    formData.set("sheet_id", sheetId);
-    run(() => closeMatchSheet(orgSlug, matchId, sheetId, formData));
+  function onRequestClose(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setCloseError(null);
+    if (showShootout && !shootoutChoice) {
+      setCloseError("Hay empate: elige el ganador por penales antes de cerrar.");
+      return;
+    }
+    setConfirmCloseOpen(true);
+  }
+
+  async function confirmClose(): Promise<ActionResult> {
+    const form = closeFormRef.current;
+    if (!form) return { ok: false, error: "No encontramos el formulario." };
+    const fd = new FormData(form);
+    fd.set("sheet_id", sheetId);
+    return closeMatchSheet(orgSlug, matchId, sheetId, fd);
   }
 
   function onUpsertSet(formData: FormData) {
-    run(() => upsertMatchSet(orgSlug, matchId, formData));
-  }
-
-  function onDeleteSet(setId: string) {
-    run(() => deleteMatchSet(orgSlug, matchId, setId));
+    run(() => upsertMatchSet(orgSlug, matchId, formData), {
+      success: "Set guardado.",
+    });
   }
 
   const nextSetNumber =
@@ -188,48 +227,46 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+      <nav aria-label="Ruta" className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+        <Link
+          href={`/${orgSlug}/referee`}
+          className="inline-flex min-h-11 items-center gap-1 font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          <ChevronLeftIcon className="size-4" aria-hidden />
+          Mis partidos
+        </Link>
         <Link
           href={`/${orgSlug}/matches/${matchId}`}
-          className="font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          className="inline-flex min-h-11 items-center font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
         >
-          Volver al partido
+          Detalle del partido
         </Link>
-        <Link
-          href={`/${orgSlug}/tournaments`}
-          className="font-medium text-foreground underline-offset-4 hover:underline"
-        >
-          Torneos
-        </Link>
-        <Link
-          href={`/p/${orgSlug}`}
-          className="font-medium text-foreground underline-offset-4 hover:underline"
-        >
-          Vista pública
-        </Link>
-      </div>
-      <header className="border-b border-border pb-5">
-        <div className="mb-3 h-1 w-12 bg-primary" aria-hidden />
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          {homeTeamName} vs {awayTeamName}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {sportLabel(sportKey || sportName)} · {BRANCH_LABELS[branch]}
-        </p>
-        <p className="mt-3 font-mono text-3xl font-semibold tabular-nums text-foreground">
-          {estimatedHome}–{estimatedAway}
-        </p>
-        {closed ? (
-          <p className="mt-2 text-sm font-medium text-[#1F6B4A]">
-            Cédula cerrada · solo lectura
-          </p>
-        ) : null}
-      </header>
+      </nav>
 
-      <section className="border border-border bg-card p-4">
-        <h2 className="text-base font-semibold text-foreground">
-          Participantes
-        </h2>
+      <ModulePageHeader
+        band="referee"
+        className="mb-0"
+        title={`${homeTeamName} vs ${awayTeamName}`}
+        description={`${sportLabel(sportKey || sportName)} · ${BRANCH_LABELS[branch]}`}
+        actions={
+          <div className="text-right">
+            <p
+              className="font-mono text-3xl font-semibold tabular-nums text-foreground"
+              aria-label={`Marcador ${estimatedHome} a ${estimatedAway}`}
+            >
+              {estimatedHome}–{estimatedAway}
+            </p>
+            {closed ? (
+              <p className="mt-1 text-sm font-medium text-status-final">
+                Cédula cerrada · solo lectura
+              </p>
+            ) : null}
+          </div>
+        }
+      />
+
+      <section className="rounded-xl border border-border bg-card p-4">
+        <h2 className="text-base font-semibold text-foreground">Participantes</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Marca a los aprobados y elegibles que entran a la cédula.
         </p>
@@ -252,7 +289,7 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
       </section>
 
       {scoreType === "sets" ? (
-        <section className="border border-border bg-card p-4">
+        <section className="rounded-xl border border-border bg-card p-4">
           <h2 className="text-base font-semibold text-foreground">Sets</h2>
           <ul className="mt-3 space-y-2">
             {sets.map((s) => (
@@ -262,94 +299,55 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
                     Set {s.setNumber}: {s.home}–{s.away}
                   </p>
                 ) : (
-                  <form
-                    action={onUpsertSet}
-                    className="flex flex-wrap items-end gap-2"
-                  >
+                  <form action={onUpsertSet} className="flex flex-wrap items-end gap-2">
                     <input type="hidden" name="set_id" value={s.id} />
-                    <Input
-                      name="set_number"
-                      type="number"
-                      min={1}
-                      defaultValue={s.setNumber}
-                      className="w-16 rounded-[4px] font-mono"
+                    <SetInputs
+                      idPrefix={`set-${s.id}`}
+                      setNumber={s.setNumber}
+                      home={s.home}
+                      away={s.away}
+                      homeTeamName={homeTeamName}
+                      awayTeamName={awayTeamName}
                       disabled={pending}
                     />
-                    <Input
-                      name="home_set_score"
-                      type="number"
-                      min={0}
-                      defaultValue={s.home}
-                      className="w-16 rounded-[4px] font-mono"
-                      disabled={pending}
-                    />
-                    <Input
-                      name="away_set_score"
-                      type="number"
-                      min={0}
-                      defaultValue={s.away}
-                      className="w-16 rounded-[4px] font-mono"
-                      disabled={pending}
-                    />
-                    <Button
-                      type="submit"
-                      size="sm"
-                      variant="outline"
-                      className="rounded-[2px]"
-                      disabled={pending}
-                    >
+                    <Button type="submit" variant="outline" disabled={pending}>
                       Guardar
                     </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      className="rounded-[2px] text-[#DC2626]"
-                      disabled={pending}
-                      onClick={() => onDeleteSet(s.id)}
-                    >
-                      Quitar
-                    </Button>
+                    <ConfirmDialog
+                      trigger={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          disabled={pending}
+                        />
+                      }
+                      triggerContent="Quitar"
+                      title={`¿Quitar el set ${s.setNumber}?`}
+                      description={`Se borra el marcador ${s.home}–${s.away} de este set.`}
+                      confirmLabel="Quitar set"
+                      pendingLabel="Quitando…"
+                      successMessage="Set eliminado."
+                      onConfirm={() => deleteMatchSet(orgSlug, matchId, s.id)}
+                      onSuccess={() => router.refresh()}
+                    />
                   </form>
                 )}
               </li>
             ))}
           </ul>
           {!closed ? (
-            <form
-              action={onUpsertSet}
-              className="mt-3 flex flex-wrap items-end gap-2"
-            >
-              <Input
-                name="set_number"
-                type="number"
-                min={1}
-                defaultValue={nextSetNumber}
-                className="w-16 rounded-[4px] font-mono"
+            <form action={onUpsertSet} className="mt-3 flex flex-wrap items-end gap-2">
+              <SetInputs
+                idPrefix="set-new"
+                setNumber={nextSetNumber}
+                home={0}
+                away={0}
+                homeTeamName={homeTeamName}
+                awayTeamName={awayTeamName}
                 disabled={pending}
               />
-              <Input
-                name="home_set_score"
-                type="number"
-                min={0}
-                defaultValue={0}
-                className="w-16 rounded-[4px] font-mono"
-                disabled={pending}
-              />
-              <Input
-                name="away_set_score"
-                type="number"
-                min={0}
-                defaultValue={0}
-                className="w-16 rounded-[4px] font-mono"
-                disabled={pending}
-              />
-              <Button
-                type="submit"
-                size="sm"
-                className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
-                disabled={pending}
-              >
+              <Button type="submit" disabled={pending}>
                 Agregar set
               </Button>
             </form>
@@ -357,21 +355,18 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
         </section>
       ) : null}
 
-      <section className="border border-border bg-card p-4">
+      <section className="rounded-xl border border-border bg-card p-4">
         <h2 className="text-base font-semibold text-foreground">Eventos</h2>
         {!closed ? (
-          <form
-            action={onAddEvent}
-            className="mt-4 grid gap-3 sm:grid-cols-2"
-          >
-            <div className="grid gap-1 sm:col-span-2">
+          <form action={onAddEvent} className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-1.5 sm:col-span-2">
               <Label htmlFor="event-player">Jugador en cédula</Label>
-              <select
+              <NativeSelect
                 id="event-player"
                 name="player_registration_id"
                 required
                 disabled={pending}
-                className="h-8 rounded-[4px] border border-border bg-card px-2 text-sm"
+                className="h-11"
               >
                 <option value="">Elige…</option>
                 {eligiblePlayers
@@ -382,57 +377,52 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
                       {p.name} ({p.teamName})
                     </option>
                   ))}
-              </select>
+              </NativeSelect>
             </div>
-            <div className="grid gap-1">
+            <div className="grid gap-1.5">
               <Label htmlFor="event-type">Tipo</Label>
-              <select
+              <NativeSelect
                 id="event-type"
                 name="event_type"
                 required
                 defaultValue={defaultEventType}
                 disabled={pending}
-                className="h-8 rounded-[4px] border border-border bg-card px-2 text-sm"
+                className="h-11"
               >
-                {(Object.keys(MATCH_EVENT_LABELS) as MatchEventType[]).map(
-                  (t) => (
-                    <option key={t} value={t}>
-                      {MATCH_EVENT_LABELS[t]}
-                    </option>
-                  )
-                )}
-              </select>
+                {(Object.keys(MATCH_EVENT_LABELS) as MatchEventType[]).map((t) => (
+                  <option key={t} value={t}>
+                    {MATCH_EVENT_LABELS[t]}
+                  </option>
+                ))}
+              </NativeSelect>
             </div>
-            <div className="grid gap-1">
+            <div className="grid gap-1.5">
               <Label htmlFor="event-qty">Cantidad</Label>
               <Input
                 id="event-qty"
                 name="quantity"
                 type="number"
+                inputMode="numeric"
                 min={1}
                 defaultValue={1}
-                className="rounded-[4px] font-mono"
+                className="h-11 font-mono"
                 disabled={pending}
               />
             </div>
-            <div className="grid gap-1">
+            <div className="grid gap-1.5">
               <Label htmlFor="event-minute">Minuto</Label>
               <Input
                 id="event-minute"
                 name="minute"
                 type="number"
+                inputMode="numeric"
                 min={0}
-                className="rounded-[4px] font-mono"
+                className="h-11 font-mono"
                 disabled={pending}
               />
             </div>
             <div className="sm:col-span-2">
-              <Button
-                type="submit"
-                size="sm"
-                disabled={pending}
-                className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
-              >
+              <Button type="submit" size="lg" disabled={pending}>
                 Agregar evento
               </Button>
             </div>
@@ -442,37 +432,42 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
         {events.length === 0 ? (
           <p className="mt-4 text-sm text-muted-foreground">Sin eventos.</p>
         ) : (
-          <ul className="mt-4 divide-y divide-border border border-border">
+          <ul className="mt-4 divide-y divide-border rounded-lg border border-border">
             {events.map((ev) => {
               const player = playerById.get(ev.playerRegistrationId);
+              const summary = `${MATCH_EVENT_LABELS[ev.eventType]}${
+                ev.quantity > 1 ? ` ×${ev.quantity}` : ""
+              } · ${player?.name ?? "Jugador"}${ev.minute != null ? ` · ${ev.minute}'` : ""}`;
               return (
                 <li
                   key={ev.id}
                   className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm"
                 >
-                  <span>
-                    <span className="font-medium">
-                      {MATCH_EVENT_LABELS[ev.eventType]}
-                    </span>
-                    {ev.quantity > 1 ? ` ×${ev.quantity}` : ""}
-                    {" · "}
-                    {player?.name ?? "Jugador"}
-                    {ev.minute != null ? ` · ${ev.minute}'` : ""}
-                  </span>
+                  <span>{summary}</span>
                   {!closed ? (
-                    <Button
-                      type="button"
-                      size="xs"
-                      variant="ghost"
-                      className="rounded-[2px] text-[#DC2626]"
-                      disabled={pending}
-                      onClick={() =>
-                        run(() => deleteMatchEvent(orgSlug, matchId, ev.id))
+                    <ConfirmDialog
+                      trigger={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          disabled={pending}
+                        />
                       }
-                    >
-                      <Trash2Icon />
-                      Quitar
-                    </Button>
+                      triggerContent={
+                        <>
+                          <Trash2Icon data-icon="inline-start" />
+                          Quitar
+                        </>
+                      }
+                      title="¿Quitar este evento?"
+                      description={summary}
+                      confirmLabel="Quitar evento"
+                      pendingLabel="Quitando…"
+                      successMessage="Evento eliminado."
+                      onConfirm={() => deleteMatchEvent(orgSlug, matchId, ev.id)}
+                      onSuccess={() => router.refresh()}
+                    />
                   ) : null}
                 </li>
               );
@@ -481,20 +476,18 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
         )}
       </section>
 
-      <section className="border border-border bg-card p-4">
+      <section className="rounded-xl border border-border bg-card p-4">
         <h2 className="text-base font-semibold text-foreground">Cierre</h2>
-        <form
-          action={closed ? onSaveMeta : onClose}
-          className="mt-4 grid gap-4"
-        >
+        <form ref={closeFormRef} onSubmit={onRequestClose} className="mt-4 grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="referee_name">Nombre del árbitro</Label>
             <Input
               id="referee_name"
               name="referee_name"
               required={!closed}
+              autoComplete="name"
               defaultValue={refereeName}
-              className="rounded-[4px]"
+              className="h-11"
               disabled={closed || pending}
             />
           </div>
@@ -504,66 +497,54 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
               id="observations"
               name="observations"
               rows={3}
+              maxLength={2000}
               defaultValue={observations}
               disabled={closed || pending}
-              className="w-full rounded-[4px] border border-border bg-card px-2.5 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+              className="w-full rounded-lg border border-input bg-card px-3 py-2 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50 md:text-sm"
             />
           </div>
           {showShootout || shootoutWinnerTeamId ? (
             <div className="grid gap-2">
-              <Label htmlFor="shootout_winner_team_id">
-                Ganador por penales (J.E.G.)
-              </Label>
-              <select
+              <Label htmlFor="shootout_winner_team_id">Ganador por penales (J.E.G.)</Label>
+              <NativeSelect
                 id="shootout_winner_team_id"
                 name="shootout_winner_team_id"
-                defaultValue={shootoutWinnerTeamId ?? ""}
+                value={shootoutChoice}
+                onChange={(e) => setShootoutChoice(e.target.value)}
                 disabled={closed || pending}
-                className="h-8 max-w-sm rounded-[4px] border border-border bg-card px-2 text-sm"
+                aria-invalid={closeError ? true : undefined}
+                aria-describedby={closeError ? "close-error" : undefined}
+                className="h-11 max-w-sm"
               >
                 <option value="">Sin definir</option>
                 <option value={homeTeamId}>{homeTeamName}</option>
                 <option value={awayTeamId}>{awayTeamName}</option>
-              </select>
+              </NativeSelect>
             </div>
           ) : (
             <input type="hidden" name="shootout_winner_team_id" value="" />
           )}
+          {closeError ? (
+            <p id="close-error" className="text-sm text-destructive" role="alert">
+              {closeError}
+            </p>
+          ) : null}
           {!closed ? (
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
-                className="rounded-[2px]"
+                size="lg"
                 disabled={pending}
-                onClick={() => {
-                  const fd = new FormData();
-                  fd.set("sheet_id", sheetId);
-                  const nameEl = document.getElementById(
-                    "referee_name"
-                  ) as HTMLInputElement | null;
-                  const obsEl = document.getElementById(
-                    "observations"
-                  ) as HTMLTextAreaElement | null;
-                  const shootEl = document.getElementById(
-                    "shootout_winner_team_id"
-                  ) as HTMLSelectElement | null;
-                  fd.set("referee_name", nameEl?.value ?? "");
-                  fd.set("observations", obsEl?.value ?? "");
-                  fd.set(
-                    "shootout_winner_team_id",
-                    shootEl?.value ?? ""
-                  );
-                  run(() => saveSheetMeta(orgSlug, matchId, fd));
-                }}
+                onClick={onSaveDraft}
               >
                 Guardar borrador
               </Button>
               <Button
                 type="submit"
+                size="lg"
                 disabled={pending}
-                className="rounded-[2px] bg-foreground text-background hover:bg-primary hover:text-foreground"
+                className="bg-foreground text-background hover:bg-primary hover:text-foreground"
               >
                 Cerrar cédula
               </Button>
@@ -572,12 +553,102 @@ export function MatchSheetForm(props: MatchSheetFormProps) {
         </form>
       </section>
 
-      {error ? (
-        <p className="text-sm text-[#DC2626]" role="alert">
-          {error}
-        </p>
-      ) : null}
+      <ConfirmDialog
+        open={confirmCloseOpen}
+        onOpenChange={setConfirmCloseOpen}
+        variant="default"
+        title="¿Cerrar la cédula?"
+        description="Al cerrarla, el marcador se vuelve oficial y la cédula queda en solo lectura. Solo el administrador puede reabrirla."
+        confirmLabel="Sí, cerrar cédula"
+        pendingLabel="Cerrando…"
+        successMessage="Cédula cerrada. El resultado ya es oficial."
+        onConfirm={confirmClose}
+        onSuccess={() => router.refresh()}
+      >
+        <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 rounded-lg border border-border bg-secondary/50 p-3 text-sm">
+          <dt className="text-muted-foreground">{homeTeamName}</dt>
+          <dd className="font-mono font-semibold tabular-nums">{estimatedHome}</dd>
+          <dt className="text-muted-foreground">{awayTeamName}</dt>
+          <dd className="font-mono font-semibold tabular-nums">{estimatedAway}</dd>
+          {showShootout ? (
+            <>
+              <dt className="text-muted-foreground">Ganador por penales</dt>
+              <dd className="font-semibold">{shootoutWinnerName ?? "Sin definir"}</dd>
+            </>
+          ) : null}
+          <dt className="text-muted-foreground">Participantes</dt>
+          <dd className="font-mono font-semibold tabular-nums">{selected.size}</dd>
+        </dl>
+      </ConfirmDialog>
     </div>
+  );
+}
+
+function SetInputs({
+  idPrefix,
+  setNumber,
+  home,
+  away,
+  homeTeamName,
+  awayTeamName,
+  disabled,
+}: {
+  idPrefix: string;
+  setNumber: number;
+  home: number;
+  away: number;
+  homeTeamName: string;
+  awayTeamName: string;
+  disabled: boolean;
+}) {
+  return (
+    <>
+      <div className="grid gap-1">
+        <Label htmlFor={`${idPrefix}-number`} className="text-xs">
+          Set
+        </Label>
+        <Input
+          id={`${idPrefix}-number`}
+          name="set_number"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          defaultValue={setNumber}
+          className="h-11 w-16 font-mono"
+          disabled={disabled}
+        />
+      </div>
+      <div className="grid gap-1">
+        <Label htmlFor={`${idPrefix}-home`} className="max-w-24 truncate text-xs">
+          {homeTeamName}
+        </Label>
+        <Input
+          id={`${idPrefix}-home`}
+          name="home_set_score"
+          type="number"
+          inputMode="numeric"
+          min={0}
+          defaultValue={home}
+          className="h-11 w-20 font-mono"
+          disabled={disabled}
+        />
+      </div>
+      <div className="grid gap-1">
+        <Label htmlFor={`${idPrefix}-away`} className="max-w-24 truncate text-xs">
+          {awayTeamName}
+        </Label>
+        <Input
+          id={`${idPrefix}-away`}
+          name="away_set_score"
+          type="number"
+          inputMode="numeric"
+          min={0}
+          defaultValue={away}
+          className="h-11 w-20 font-mono"
+          disabled={disabled}
+        />
+      </div>
+    </>
   );
 }
 
@@ -595,18 +666,18 @@ function PlayerColumn({
   onToggle: (id: string) => void;
 }) {
   return (
-    <div>
-      <h3 className="mb-2 text-sm font-semibold text-foreground">{title}</h3>
+    <fieldset>
+      <legend className="mb-2 text-sm font-semibold text-foreground">{title}</legend>
       {players.length === 0 ? (
         <p className="text-sm text-muted-foreground">Sin elegibles.</p>
       ) : (
-        <ul className="space-y-2">
+        <ul className="space-y-1">
           {players.map((p) => (
             <li key={p.id}>
-              <label className="flex cursor-pointer items-start gap-2 text-sm">
+              <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg px-2 text-sm hover:bg-secondary/60">
                 <input
                   type="checkbox"
-                  className="mt-0.5 size-4 accent-primary"
+                  className="size-5 accent-primary"
                   checked={selected.has(p.id)}
                   disabled={disabled}
                   onChange={() => onToggle(p.id)}
@@ -620,6 +691,6 @@ function PlayerColumn({
           ))}
         </ul>
       )}
-    </div>
+    </fieldset>
   );
 }

@@ -73,7 +73,7 @@
   --accent-foreground: #191919;
   --destructive: #c62828;
   --border: #c4c3bf;
-  --input: #c4c3bf;
+  --input: #8f8e8a;
   --ring: #2f6fed;
   --chart-1: #dae937;
   --chart-2: #2f6fed;
@@ -197,5 +197,30 @@
     .tablero-enter {
       animation: none;
     }
+  }
+}
+
+/* Impresión de credencial: solo la ficha, sin shell ni fondo. */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+  body {
+    background: #fff !important;
+  }
+  body:has(.credential-print) * {
+    visibility: hidden;
+  }
+  body:has(.credential-print) .credential-print,
+  body:has(.credential-print) .credential-print * {
+    visibility: visible;
+  }
+  body:has(.credential-print) .credential-print {
+    position: absolute;
+    inset: 0 auto auto 0;
+    margin: 0;
+    box-shadow: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

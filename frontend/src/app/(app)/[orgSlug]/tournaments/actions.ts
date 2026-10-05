@@ -1,5 +1,6 @@
 "use server";
 
+import { lengthError } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import { requireOrgRole } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
@@ -49,6 +50,14 @@ export async function createTournament(
         ok: false,
         error: "Faltan datos: nombre y temporada son obligatorios.",
       };
+    }
+    const tooLong = lengthError([
+      [name, 120],
+      [season, 40],
+    ]);
+    if (tooLong) return tooLong;
+    if (startDateRaw && Number.isNaN(new Date(startDateRaw).getTime())) {
+      return { ok: false, error: "La fecha de inicio no es válida." };
     }
     if (!FORMATS.has(format)) {
       return { ok: false, error: "Ese formato de torneo no es válido." };
@@ -101,6 +110,14 @@ export async function updateTournament(
         ok: false,
         error: "Faltan datos: nombre y temporada son obligatorios.",
       };
+    }
+    const tooLong = lengthError([
+      [name, 120],
+      [season, 40],
+    ]);
+    if (tooLong) return tooLong;
+    if (startDateRaw && Number.isNaN(new Date(startDateRaw).getTime())) {
+      return { ok: false, error: "La fecha de inicio no es válida." };
     }
     if (!FORMATS.has(format)) {
       return { ok: false, error: "Ese formato de torneo no es válido." };
@@ -187,6 +204,8 @@ export async function createDivision(
     if (!BRANCHES.has(branch)) {
       return { ok: false, error: "Esa rama no es válida." };
     }
+    const tooLong = lengthError([[name, 120]]);
+    if (tooLong) return tooLong;
 
     const supabase = await createClient();
     const { error } = await supabase.from("divisions").insert({
@@ -260,6 +279,8 @@ export async function createGroup(
         error: "Elige una división y escribe el nombre del grupo.",
       };
     }
+    const tooLong = lengthError([[name, 80]]);
+    if (tooLong) return tooLong;
 
     const supabase = await createClient();
     const { error } = await supabase.from("groups").insert({

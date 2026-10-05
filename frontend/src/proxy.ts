@@ -6,7 +6,16 @@ import { updateSession } from "@/lib/supabase/proxy";
  * `(app)/[orgSlug]/…` vive en URLs `/{orgSlug}/…` (el group no aparece).
  */
 function isPublicPath(pathname: string): boolean {
-  if (pathname === "/" || pathname === "/login" || pathname === "/signup") {
+  if (
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password"
+  ) {
+    return true;
+  }
+  if (pathname.startsWith("/auth/")) {
     return true;
   }
   if (pathname === "/pending" || pathname.startsWith("/pending/")) {

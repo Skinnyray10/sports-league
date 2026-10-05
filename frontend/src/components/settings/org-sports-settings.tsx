@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { sportLabel } from "@/lib/labels";
+import { toast } from "sonner";
 
 export type OrgSportRow = {
   id: string;
@@ -61,6 +62,7 @@ function OrgSportCard({
         setError(result.error);
         return;
       }
+      toast.success("Deporte actualizado.");
       router.refresh();
     });
   }
@@ -80,7 +82,7 @@ function OrgSportCard({
             name="active"
             defaultChecked={row.active}
             disabled={pending}
-            className="size-4 rounded-[2px] border-border accent-primary"
+            className="size-4 border-border accent-primary"
           />
           Activo
         </label>
@@ -116,7 +118,6 @@ function OrgSportCard({
               type="number"
               step={1}
               defaultValue={pointValue(override, fallback)}
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
@@ -131,7 +132,7 @@ function OrgSportCard({
             row.draw_requires_shootout ?? sport.draw_requires_shootout
           }
           disabled={pending}
-          className="size-4 rounded-[2px] border-border accent-primary"
+          className="size-4 border-border accent-primary"
         />
         Empate define por penales / shootout
       </label>
@@ -147,7 +148,6 @@ function OrgSportCard({
           type="submit"
           variant="outline"
           size="sm"
-          className="rounded-[2px]"
           disabled={pending}
         >
           {pending ? "Guardando…" : "Guardar deporte"}

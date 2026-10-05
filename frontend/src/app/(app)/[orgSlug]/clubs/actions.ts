@@ -1,5 +1,6 @@
 "use server";
 
+import { imageUrl, parseForm, requiredText } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import { requireOrgRole } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
@@ -16,18 +17,18 @@ export async function createClub(
 ): Promise<ActionResult> {
   try {
     const membership = await requireOrgRole(orgSlug, ["admin"]);
-    const name = String(formData.get("name") ?? "").trim();
-    const logoUrl = String(formData.get("logo_url") ?? "").trim();
-
-    if (!name) {
-      return { ok: false, error: "Escribe el nombre del club." };
-    }
+    const parsed = parseForm(
+      { name: requiredText("Escribe el nombre del club."), logo_url: imageUrl },
+      formData
+    );
+    if (!parsed.ok) return parsed;
+    const { name, logo_url: logoUrl } = parsed.data;
 
     const supabase = await createClient();
     const { error } = await supabase.from("clubs").insert({
       organization_id: membership.organization_id,
       name,
-      logo_url: logoUrl || null,
+      logo_url: logoUrl,
     });
 
     if (error) {
@@ -52,19 +53,19 @@ export async function updateClub(
 ): Promise<ActionResult> {
   try {
     const membership = await requireOrgRole(orgSlug, ["admin"]);
-    const name = String(formData.get("name") ?? "").trim();
-    const logoUrl = String(formData.get("logo_url") ?? "").trim();
-
-    if (!name) {
-      return { ok: false, error: "Escribe el nombre del club." };
-    }
+    const parsed = parseForm(
+      { name: requiredText("Escribe el nombre del club."), logo_url: imageUrl },
+      formData
+    );
+    if (!parsed.ok) return parsed;
+    const { name, logo_url: logoUrl } = parsed.data;
 
     const supabase = await createClient();
     const { error } = await supabase
       .from("clubs")
       .update({
         name,
-        logo_url: logoUrl || null,
+        logo_url: logoUrl,
       })
       .eq("id", clubId)
       .eq("organization_id", membership.organization_id);

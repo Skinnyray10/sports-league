@@ -1757,10 +1757,11 @@ export type Database = {
         Args: { p_folio: string };
         Returns: {
           folio: string;
-          first_names: string;
-          last_names: string;
-          team_name: string;
-          club_name: string;
+          /** null si la credencial no está aprobada. */
+          first_names: string | null;
+          last_names: string | null;
+          team_name: string | null;
+          club_name: string | null;
           sport_name: string;
           branch: Branch;
           category_name: string;

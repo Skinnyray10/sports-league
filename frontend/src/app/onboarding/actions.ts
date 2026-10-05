@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createOrganization } from "@/lib/org";
+import { isReservedRoot } from "@/lib/safe-redirect";
 
 export type OnboardingActionState = {
   error: string | null;
@@ -26,6 +27,14 @@ export async function createOrganizationAction(
 
   if (!name) {
     return { error: "Escribe el nombre de tu organización." };
+  }
+  if (name.length > 120) {
+    return { error: "El nombre puede tener como máximo 120 caracteres." };
+  }
+  if (isReservedRoot(slug)) {
+    return {
+      error: `La dirección "${slug}" está reservada por la plataforma. Elige otra.`,
+    };
   }
   if (!slug || slug.length < 2) {
     return {

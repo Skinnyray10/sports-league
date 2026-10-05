@@ -5,15 +5,11 @@ import { CreateTeamDialog } from "@/components/teams/create-team-dialog";
 import { TeamsTable, type TeamListRow } from "@/components/teams/teams-table";
 import { BRANCH_LABELS, sportLabel } from "@/lib/labels";
 import type { Branch } from "@/types/database";
+import { unwrapOne } from "@/lib/utils";
 
 type TeamsPageProps = {
   params: Promise<{ orgSlug: string }>;
 };
-
-function one<T>(value: T | T[] | null): T | null {
-  if (!value) return null;
-  return Array.isArray(value) ? value[0] ?? null : value;
-}
 
 export default async function TeamsPage({ params }: TeamsPageProps) {
   const { orgSlug } = await params;
@@ -59,13 +55,13 @@ export default async function TeamsPage({ params }: TeamsPageProps) {
   if (groupsError) throw groupsError;
 
   const teams: TeamListRow[] = (teamsRaw ?? []).flatMap((row) => {
-    const club = one(
+    const club = unwrapOne(
       row.club as { name: string } | { name: string }[] | null
     );
-    const group = one(
+    const group = unwrapOne(
       row.group as { name: string } | { name: string }[] | null
     );
-    const division = one(
+    const division = unwrapOne(
       row.division as
         | {
             name: string | null;
@@ -84,8 +80,8 @@ export default async function TeamsPage({ params }: TeamsPageProps) {
         | null
     );
     if (!club || !division) return [];
-    const sport = one(division.sport);
-    const category = one(division.category);
+    const sport = unwrapOne(division.sport);
+    const category = unwrapOne(division.category);
     if (!sport || !category) return [];
 
     return [
@@ -104,16 +100,16 @@ export default async function TeamsPage({ params }: TeamsPageProps) {
   });
 
   const divisions = (divisionsRaw ?? []).flatMap((row) => {
-    const sport = one(
+    const sport = unwrapOne(
       row.sport as
         | { key: string; name: string }
         | { key: string; name: string }[]
         | null
     );
-    const category = one(
+    const category = unwrapOne(
       row.category as { name: string } | { name: string }[] | null
     );
-    const tournament = one(
+    const tournament = unwrapOne(
       row.tournament as { name: string } | { name: string }[] | null
     );
     if (!sport || !category || !tournament) return [];
@@ -132,7 +128,7 @@ export default async function TeamsPage({ params }: TeamsPageProps) {
   });
 
   return (
-    <section className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+    <section className="mx-auto w-full max-w-5xl">
       <ModulePageHeader
         band="teams"
         title="Equipos"

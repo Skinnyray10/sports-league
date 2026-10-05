@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { BRANCH_LABELS, sportLabel } from "@/lib/labels";
 import type { Branch } from "@/types/database";
+import { toast } from "sonner";
 
 export type ClubOption = { id: string; name: string };
 export type DivisionOption = {
@@ -80,6 +81,7 @@ export function CreateTeamDialog({
         setError(result.error);
         return;
       }
+      toast.success("Equipo creado.");
       setOpen(false);
       router.refresh();
     });
@@ -90,7 +92,6 @@ export function CreateTeamDialog({
       <DialogTrigger
         render={
           <Button
-            className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
             disabled={!canCreate}
           />
         }
@@ -98,7 +99,7 @@ export function CreateTeamDialog({
         <PlusIcon data-icon="inline-start" />
         Agregar equipo
       </DialogTrigger>
-      <DialogContent className="rounded-[4px] sm:max-w-md" showCloseButton>
+      <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle>Agregar equipo</DialogTitle>
           <DialogDescription>
@@ -121,18 +122,17 @@ export function CreateTeamDialog({
                 required
                 maxLength={80}
                 placeholder="Ej. Norte FC"
-                className="rounded-[4px]"
                 disabled={pending}
               />
             </div>
             <div className="grid gap-2">
-              <Label>Club</Label>
+              <Label htmlFor="new-team-1">Club</Label>
               <Select
                 value={clubId}
                 onValueChange={(value) => setClubId(value ?? "")}
                 disabled={pending}
               >
-                <SelectTrigger className="w-full rounded-[4px]">
+                <SelectTrigger id="new-team-1" className="w-full">
                   <SelectValue placeholder="Elige un club" />
                 </SelectTrigger>
                 <SelectContent>
@@ -145,13 +145,13 @@ export function CreateTeamDialog({
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label>División</Label>
+              <Label htmlFor="new-team-2">División</Label>
               <Select
                 value={divisionId}
                 onValueChange={(value) => setDivisionId(value ?? "")}
                 disabled={pending}
               >
-                <SelectTrigger className="w-full rounded-[4px]">
+                <SelectTrigger id="new-team-2" className="w-full">
                   <SelectValue placeholder="Elige una división" />
                 </SelectTrigger>
                 <SelectContent>
@@ -165,7 +165,7 @@ export function CreateTeamDialog({
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label>Grupo (opcional)</Label>
+              <Label htmlFor="new-team-3">Grupo (opcional)</Label>
               <Select
                 value={resolvedGroupId || "__none__"}
                 onValueChange={(value) =>
@@ -173,7 +173,7 @@ export function CreateTeamDialog({
                 }
                 disabled={pending || groupsForDivision.length === 0}
               >
-                <SelectTrigger className="w-full rounded-[4px]">
+                <SelectTrigger id="new-team-3" className="w-full">
                   <SelectValue
                     placeholder={
                       groupsForDivision.length === 0
@@ -199,7 +199,6 @@ export function CreateTeamDialog({
                 name="logo_url"
                 type="url"
                 placeholder="https://"
-                className="rounded-[4px]"
                 disabled={pending}
               />
             </div>
@@ -208,11 +207,10 @@ export function CreateTeamDialog({
                 {error}
               </p>
             ) : null}
-            <DialogFooter className="rounded-b-[4px]">
+            <DialogFooter>
               <Button
                 type="button"
                 variant="outline"
-                className="rounded-[2px]"
                 disabled={pending}
                 onClick={() => setOpen(false)}
               >
@@ -220,7 +218,6 @@ export function CreateTeamDialog({
               </Button>
               <Button
                 type="submit"
-                className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
                 disabled={pending || !clubId || !divisionId}
               >
                 {pending ? "Guardando…" : "Crear equipo"}

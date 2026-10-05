@@ -6,6 +6,7 @@ import { updateOrganization } from "@/app/(app)/[orgSlug]/settings/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 type OrgSettingsFormProps = {
   orgSlug: string;
@@ -30,6 +31,7 @@ export function OrgSettingsForm({ orgSlug, initial }: OrgSettingsFormProps) {
         setError(result.error);
         return;
       }
+      toast.success("Configuración guardada.");
       router.refresh();
     });
   }
@@ -44,7 +46,6 @@ export function OrgSettingsForm({ orgSlug, initial }: OrgSettingsFormProps) {
           required
           maxLength={100}
           defaultValue={initial.name}
-          className="rounded-[4px]"
           disabled={pending}
         />
       </div>
@@ -56,7 +57,6 @@ export function OrgSettingsForm({ orgSlug, initial }: OrgSettingsFormProps) {
           maxLength={160}
           defaultValue={initial.tagline ?? ""}
           placeholder="Ej. Liga amateur del norte"
-          className="rounded-[4px]"
           disabled={pending}
         />
       </div>
@@ -68,7 +68,6 @@ export function OrgSettingsForm({ orgSlug, initial }: OrgSettingsFormProps) {
           type="url"
           defaultValue={initial.logoUrl ?? ""}
           placeholder="https://"
-          className="rounded-[4px]"
           disabled={pending}
         />
       </div>
@@ -78,7 +77,7 @@ export function OrgSettingsForm({ orgSlug, initial }: OrgSettingsFormProps) {
           name="is_public"
           defaultChecked={initial.isPublic}
           disabled={pending}
-          className="size-4 rounded-[2px] border-border accent-primary"
+          className="size-4 border-border accent-primary"
         />
         Organización pública (visible sin iniciar sesión)
       </label>
@@ -103,7 +102,6 @@ export function OrgSettingsForm({ orgSlug, initial }: OrgSettingsFormProps) {
       <div>
         <Button
           type="submit"
-          className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
           disabled={pending}
         >
           {pending ? "Guardando…" : "Guardar organización"}

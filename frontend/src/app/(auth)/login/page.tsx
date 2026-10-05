@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
 import { getUser } from "@/lib/auth";
 import { homePathAfterAuth, listUserOrganizations } from "@/lib/org";
+import { operateDeepLink } from "@/lib/safe-redirect";
 
 type LoginPageProps = {
   searchParams: Promise<{ next?: string }>;
@@ -13,15 +14,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const user = await getUser();
 
   if (user) {
-    if (next?.startsWith("/") && !next.startsWith("//") && !next.startsWith("/p/")) {
-      const segment = next.split("/").filter(Boolean)[0];
-      if (
-        segment &&
-        !["login", "signup", "onboarding", "c", "join"].includes(segment) &&
-        next !== `/${segment}`
-      ) {
-        redirect(next);
-      }
+    const deepLink = operateDeepLink(next);
+    if (deepLink) {
+      redirect(deepLink);
     }
     const orgs = await listUserOrganizations();
     if (orgs.length === 0) {

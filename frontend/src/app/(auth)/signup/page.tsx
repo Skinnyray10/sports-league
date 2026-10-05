@@ -34,7 +34,7 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
   ]);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div data-wide className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold tracking-tight">Registro de usuario</h1>
         <p className="text-[0.9375rem] text-muted-foreground">

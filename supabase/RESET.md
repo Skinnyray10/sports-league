@@ -11,7 +11,8 @@ npx supabase db reset
 # supabase db reset
 ```
 
-Esto aplica todas las migraciones de `supabase/migrations/` desde cero.
+Esto aplica todas las migraciones de `supabase/migrations/` desde cero y
+después `supabase/seed.sql` (datos demo, solo para desarrollo/testing).
 
 ## Proyecto remoto (hosted)
 

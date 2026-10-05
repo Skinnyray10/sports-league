@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MatchSheetForm } from "@/components/referee/match-sheet-form";
 import { ensureMatchSheet } from "@/app/(app)/[orgSlug]/referee/actions";
 import type { Branch, MatchEventType, ScoreType } from "@/types/database";
+import { unwrapOne } from "@/lib/utils";
 
 type PageProps = {
   params: Promise<{ orgSlug: string; matchId: string }>;
@@ -59,10 +60,10 @@ export default async function RefereeMatchSheetPage({ params }: PageProps) {
     .eq("id", sheetId)
     .single();
 
-  const home = unwrap(match.home_team);
-  const away = unwrap(match.away_team);
-  const division = unwrap(match.division);
-  const sport = unwrap(division?.sport ?? null);
+  const home = unwrapOne(match.home_team);
+  const away = unwrapOne(match.away_team);
+  const division = unwrapOne(match.division);
+  const sport = unwrapOne(division?.sport ?? null);
 
   const [{ data: homeRegs }, { data: awayRegs }, { data: participants }, { data: events }, { data: sets }] =
     await Promise.all([
@@ -104,7 +105,7 @@ export default async function RefereeMatchSheetPage({ params }: PageProps) {
     teamName: string
   ) =>
     (regs ?? []).map((r) => {
-      const p = unwrap(r.player);
+      const p = unwrapOne(r.player);
       return {
         id: r.id,
         teamId,
@@ -159,7 +160,3 @@ export default async function RefereeMatchSheetPage({ params }: PageProps) {
   );
 }
 
-function unwrap<T>(value: T | T[] | null | undefined): T | null {
-  if (value == null) return null;
-  return Array.isArray(value) ? (value[0] ?? null) : value;
-}

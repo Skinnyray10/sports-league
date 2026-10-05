@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { PlusIcon, Trash2Icon } from "lucide-react";
+import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
+import { toast } from "sonner";
 import {
   createDivision,
   createGroup,
@@ -10,6 +11,7 @@ import {
   deleteGroup,
 } from "@/app/(app)/[orgSlug]/tournaments/actions";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -87,18 +89,7 @@ export function TournamentDivisions({
         setError(result.error);
         return;
       }
-      router.refresh();
-    });
-  }
-
-  function onDeleteDivision(divisionId: string) {
-    setError(null);
-    startTransition(async () => {
-      const result = await deleteDivision(orgSlug, tournamentId, divisionId);
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
+      toast.success("División creada.");
       router.refresh();
     });
   }
@@ -112,18 +103,7 @@ export function TournamentDivisions({
         setError(result.error);
         return;
       }
-      router.refresh();
-    });
-  }
-
-  function onDeleteGroup(groupId: string) {
-    setError(null);
-    startTransition(async () => {
-      const result = await deleteGroup(orgSlug, tournamentId, groupId);
-      if (!result.ok) {
-        setError(result.error);
-        return;
-      }
+      toast.success("Grupo creado.");
       router.refresh();
     });
   }
@@ -136,13 +116,13 @@ export function TournamentDivisions({
           className="grid gap-3 border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end"
         >
           <div className="grid gap-2">
-            <Label>Deporte</Label>
+            <Label htmlFor="division-sport">Deporte</Label>
             <Select
               value={sportId}
               onValueChange={(value) => setSportId(value ?? "")}
               disabled={pending || sports.length === 0}
             >
-              <SelectTrigger className="w-full rounded-[4px]">
+              <SelectTrigger id="division-sport" className="w-full">
                 <SelectValue placeholder="Deporte" />
               </SelectTrigger>
               <SelectContent>
@@ -155,7 +135,7 @@ export function TournamentDivisions({
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label>Rama</Label>
+            <Label htmlFor="division-branch">Rama</Label>
             <Select
               value={selectedBranch}
               onValueChange={(value) =>
@@ -163,7 +143,7 @@ export function TournamentDivisions({
               }
               disabled={pending || branchesForSport.length === 0}
             >
-              <SelectTrigger className="w-full rounded-[4px]">
+              <SelectTrigger id="division-branch" className="w-full">
                 <SelectValue placeholder="Rama" />
               </SelectTrigger>
               <SelectContent>
@@ -176,13 +156,13 @@ export function TournamentDivisions({
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label>Categoría</Label>
+            <Label htmlFor="division-category">Categoría</Label>
             <Select
               value={categoryId}
               onValueChange={(value) => setCategoryId(value ?? "")}
               disabled={pending || categories.length === 0}
             >
-              <SelectTrigger className="w-full rounded-[4px]">
+              <SelectTrigger id="division-category" className="w-full">
                 <SelectValue placeholder="Categoría" />
               </SelectTrigger>
               <SelectContent>
@@ -201,13 +181,12 @@ export function TournamentDivisions({
               name="name"
               maxLength={80}
               placeholder="Ej. Grupo A libre"
-              className="rounded-[4px]"
+              
               disabled={pending}
             />
           </div>
           <Button
             type="submit"
-            className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
             disabled={
               pending ||
               !sportId ||
@@ -261,17 +240,32 @@ export function TournamentDivisions({
                     </p>
                   </div>
                   {canManageStaff ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="rounded-[2px] text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      disabled={pending}
-                      onClick={() => onDeleteDivision(division.id)}
-                    >
-                      <Trash2Icon data-icon="inline-start" />
-                      Eliminar
-                    </Button>
+                    <ConfirmDialog
+                      trigger={
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          disabled={pending}
+                        />
+                      }
+                      triggerContent={
+                        <>
+                          <Trash2Icon data-icon="inline-start" />
+                          Eliminar
+                        </>
+                      }
+                      title={`¿Eliminar la división ${title}?`}
+                      description="Se eliminan también sus grupos. No se puede deshacer; si tiene equipos o partidos, primero tendrás que quitarlos."
+                      confirmLabel="Eliminar división"
+                      pendingLabel="Eliminando…"
+                      successMessage="División eliminada."
+                      onConfirm={() =>
+                        deleteDivision(orgSlug, tournamentId, division.id)
+                      }
+                      onSuccess={() => router.refresh()}
+                    />
                   ) : null}
                 </div>
                 <div className="px-4 py-3">
@@ -282,19 +276,32 @@ export function TournamentDivisions({
                       {division.groups.map((group) => (
                         <li
                           key={group.id}
-                          className="inline-flex items-center gap-1 border border-border bg-secondary px-2 py-1 text-sm text-foreground"
+                          className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary py-1 pr-1 pl-3 text-sm text-foreground"
                         >
                           {group.name}
                           {canManageStaff ? (
-                            <button
-                              type="button"
-                              className="ml-1 text-muted-foreground hover:text-destructive"
-                              disabled={pending}
-                              onClick={() => onDeleteGroup(group.id)}
-                              aria-label={`Eliminar grupo ${group.name}`}
-                            >
-                              ×
-                            </button>
+                            <ConfirmDialog
+                              trigger={
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon-sm"
+                                  className="text-muted-foreground hover:text-destructive"
+                                  disabled={pending}
+                                  aria-label={`Eliminar grupo ${group.name}`}
+                                />
+                              }
+                              triggerContent={<XIcon />}
+                              title={`¿Eliminar el grupo ${group.name}?`}
+                              description="Los equipos del grupo quedan sin grupo asignado. No se puede deshacer."
+                              confirmLabel="Eliminar grupo"
+                              pendingLabel="Eliminando…"
+                              successMessage="Grupo eliminado."
+                              onConfirm={() =>
+                                deleteGroup(orgSlug, tournamentId, group.id)
+                              }
+                              onSuccess={() => router.refresh()}
+                            />
                           ) : null}
                         </li>
                       ))}
@@ -313,13 +320,13 @@ export function TournamentDivisions({
           className="flex flex-col gap-3 border border-border bg-card p-4 sm:flex-row sm:items-end"
         >
           <div className="grid min-w-0 flex-1 gap-2">
-            <Label>División</Label>
+            <Label htmlFor="group-division">División</Label>
             <Select
               value={resolvedGroupDivisionId}
               onValueChange={(value) => setGroupDivisionId(value ?? "")}
               disabled={pending}
             >
-              <SelectTrigger className="w-full rounded-[4px]">
+              <SelectTrigger id="group-division" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -340,13 +347,12 @@ export function TournamentDivisions({
               required
               maxLength={40}
               placeholder="Ej. Grupo A"
-              className="rounded-[4px]"
+              
               disabled={pending}
             />
           </div>
           <Button
             type="submit"
-            className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
             disabled={pending || !resolvedGroupDivisionId}
           >
             <PlusIcon data-icon="inline-start" />

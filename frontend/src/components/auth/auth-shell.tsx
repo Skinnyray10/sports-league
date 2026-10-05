@@ -11,8 +11,8 @@ export function AuthShell({ children }: { children: React.ReactNode }) {
           Sports League
         </Link>
       </header>
-      <main className="flex flex-1 items-start justify-center px-4 py-10 sm:items-center sm:py-16">
-        <div className="w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-[0_10px_28px_rgba(25,25,25,0.08)]">
+      <main id="contenido" className="flex flex-1 items-start justify-center px-4 py-10 sm:items-center sm:py-16">
+        <div className="w-full max-w-md rounded-2xl has-[[data-wide]]:max-w-2xl border border-border bg-card p-6 shadow-[0_10px_28px_rgba(25,25,25,0.08)]">
           {children}
         </div>
       </main>

@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const initialState: AuthActionState = { error: null, notice: null };
+const CAPTCHA_ENABLED = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
 
 type PublicAccessPanelProps = {
   orgSlug: string;
@@ -24,15 +25,15 @@ export function PublicAccessPanel({
   if (panelHref) {
     return (
       <div className="space-y-3">
-        <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-muted-foreground">
+        <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-sidebar-foreground/70">
           Acceso
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-sidebar-foreground/70">
           Ya tienes sesión. Entra a tu panel o sigue consultando en público.
         </p>
         <Link
           href={panelHref}
-          className="inline-flex h-8 w-full items-center justify-center rounded-full bg-primary px-2.5 text-sm font-medium text-foreground hover:bg-foreground hover:text-background"
+          className="inline-flex h-10 w-full items-center justify-center rounded-full bg-primary px-2.5 text-sm font-medium text-foreground hover:bg-foreground hover:text-background"
         >
           Ir a mi panel
         </Link>
@@ -40,7 +41,7 @@ export function PublicAccessPanel({
           <Button
             type="submit"
             variant="outline"
-            className="h-8 w-full rounded-full"
+            className="h-10 w-full rounded-full text-foreground"
           >
             Salir
           </Button>
@@ -52,9 +53,37 @@ export function PublicAccessPanel({
     );
   }
 
+  // Con CAPTCHA activo el widget no cabe en la barra lateral: se usa /login.
+  if (CAPTCHA_ENABLED) {
+    return (
+      <div className="space-y-3">
+        <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-sidebar-foreground/70">
+          Acceso
+        </p>
+        <div className="flex gap-2">
+          <Link
+            href={`/login?next=${encodeURIComponent(`/${orgSlug}`)}`}
+            className="inline-flex h-10 flex-1 items-center justify-center rounded-full bg-primary px-2.5 text-sm font-medium text-foreground hover:bg-foreground hover:text-background"
+          >
+            Entrar
+          </Link>
+          <Link
+            href="/signup"
+            className="inline-flex h-10 flex-1 items-center justify-center rounded-full border border-border bg-background px-2.5 text-sm font-medium text-foreground hover:bg-muted"
+          >
+            Registrarse
+          </Link>
+        </div>
+        <p className="text-[0.6875rem] leading-snug text-sidebar-foreground/70">
+          Acceso restringido a administración, delegados y árbitros autorizados.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3">
-      <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-muted-foreground">
+      <p className="text-[0.6875rem] font-medium uppercase tracking-wide text-sidebar-foreground/70">
         Acceso
       </p>
       <form action={formAction} className="flex flex-col gap-2.5">
@@ -70,7 +99,8 @@ export function PublicAccessPanel({
             autoComplete="email"
             required
             placeholder="correo"
-            className="h-8 rounded-full bg-card text-sm"
+            defaultValue={state.values?.email ?? ""}
+            className="h-10 rounded-full bg-card text-sm text-foreground"
             disabled={pending}
           />
         </div>
@@ -85,7 +115,7 @@ export function PublicAccessPanel({
             autoComplete="current-password"
             required
             placeholder="contraseña"
-            className="h-8 rounded-full bg-card text-sm"
+            className="h-10 rounded-full bg-card text-sm text-foreground"
             disabled={pending}
           />
         </div>
@@ -98,19 +128,19 @@ export function PublicAccessPanel({
           <Button
             type="submit"
             disabled={pending}
-            className="h-8 flex-1 rounded-full bg-primary text-foreground hover:bg-foreground hover:text-background"
+            className="h-10 flex-1 rounded-full bg-primary text-foreground hover:bg-foreground hover:text-background"
           >
             {pending ? "…" : "Entrar"}
           </Button>
           <Link
             href="/signup"
-            className="inline-flex h-8 flex-1 items-center justify-center rounded-full border border-border bg-background px-2.5 text-sm font-medium hover:bg-muted"
+            className="inline-flex h-10 flex-1 items-center justify-center rounded-full border border-border bg-background px-2.5 text-sm font-medium text-foreground hover:bg-muted"
           >
             Registrarse
           </Link>
         </div>
       </form>
-      <p className="text-[0.6875rem] leading-snug text-muted-foreground">
+      <p className="text-[0.6875rem] leading-snug text-sidebar-foreground/70">
         Acceso restringido a administración, delegados y árbitros autorizados.
       </p>
       <p className="rounded-full bg-primary/20 px-2 py-1.5 text-center text-[0.75rem] font-medium text-foreground">

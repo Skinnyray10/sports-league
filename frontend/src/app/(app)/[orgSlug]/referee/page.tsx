@@ -4,6 +4,8 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { ModulePageHeader } from "@/components/ops/module-page-header";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
+import { formatPublicWhen } from "@/lib/public-org";
+import { unwrapOne } from "@/lib/utils";
 import type { MatchStatus } from "@/types/database";
 
 type PageProps = {
@@ -13,7 +15,6 @@ type PageProps = {
 export default async function RefereeMatchesPage({ params }: PageProps) {
   const { orgSlug } = await params;
   const user = await requireUser();
-  await requireOrgRole(orgSlug, ["referee", "admin"]);
   const membership = await requireOrgRole(orgSlug, ["referee", "admin"]);
   const supabase = await createClient();
 
@@ -46,17 +47,13 @@ export default async function RefereeMatchesPage({ params }: PageProps) {
           </li>
         ) : (
           (matches ?? []).map((m) => {
-            const home = Array.isArray(m.home_team)
-              ? m.home_team[0]
-              : m.home_team;
-            const away = Array.isArray(m.away_team)
-              ? m.away_team[0]
-              : m.away_team;
+            const home = unwrapOne(m.home_team);
+            const away = unwrapOne(m.away_team);
             return (
               <li key={m.id}>
                 <Link
                   href={`/${orgSlug}/referee/${m.id}`}
-                  className="flex flex-col gap-1 px-4 py-3 transition-colors hover:bg-secondary/70"
+                  className="flex min-h-14 flex-col gap-1 px-4 py-3 transition-colors hover:bg-secondary/70"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium">
@@ -64,6 +61,13 @@ export default async function RefereeMatchesPage({ params }: PageProps) {
                     </span>
                     <MatchStatusBadge status={m.status as MatchStatus} />
                   </div>
+                  <span className="text-sm text-foreground">
+                    {m.scheduled_at ? (
+                      <time dateTime={m.scheduled_at}>{formatPublicWhen(m.scheduled_at)}</time>
+                    ) : (
+                      "Sin fecha"
+                    )}
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     {m.jornada != null ? `Jornada ${m.jornada}` : "Sin jornada"}
                     {m.venue ? ` · ${m.venue}` : ""}

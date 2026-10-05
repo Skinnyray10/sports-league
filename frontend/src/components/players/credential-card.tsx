@@ -28,6 +28,9 @@ export type CredentialView = {
   organizationLogoUrl: string | null;
   /** Logo del equipo; solo se muestra si hay URL. */
   teamLogoUrl: string | null;
+  /** URL pública de verificación (`/c/{folio}`) y su QR como data URL. */
+  verifyUrl: string;
+  qrDataUrl: string;
 };
 
 type CredentialCardProps = {
@@ -38,7 +41,7 @@ export function CredentialCard({ credential }: CredentialCardProps) {
   const fullName = `${credential.firstNames} ${credential.lastNames}`;
 
   return (
-    <article className="credential-print mx-auto w-full max-w-md border border-border bg-card">
+    <article className="credential-print mx-auto w-full max-w-md overflow-hidden rounded-xl border border-border bg-card">
       <div className="h-1.5 w-full bg-band-tournaments" aria-hidden />
       <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -139,6 +142,26 @@ export function CredentialCard({ credential }: CredentialCardProps) {
               </dd>
             </div>
           </dl>
+        </div>
+      </div>
+      <div className="flex items-center gap-4 border-t border-border px-5 py-4">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={credential.qrDataUrl}
+          alt={`Código QR para verificar el folio ${credential.folio}`}
+          width={96}
+          height={96}
+          className="size-24 shrink-0"
+        />
+        <div className="min-w-0 space-y-1 text-sm">
+          <p className="font-medium text-foreground">Verificación pública</p>
+          <p className="text-muted-foreground">
+            Escanea el código o abre el enlace para confirmar que la credencial
+            está vigente.
+          </p>
+          <p className="break-all font-mono text-xs text-foreground">
+            {credential.verifyUrl}
+          </p>
         </div>
       </div>
     </article>

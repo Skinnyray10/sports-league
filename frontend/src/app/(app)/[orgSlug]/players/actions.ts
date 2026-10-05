@@ -1,5 +1,6 @@
 "use server";
 
+import { imageUrl, optionalText, parseForm, requiredText } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import {
   actionError,
@@ -8,14 +9,22 @@ import {
 } from "@/components/ops/access";
 import { createClient } from "@/lib/supabase/server";
 
+const PLAYER_FIELDS = {
+  first_names: requiredText("Escribe el nombre y los apellidos del jugador."),
+  last_names: requiredText("Escribe el nombre y los apellidos del jugador."),
+  id_number: optionalText(40),
+  classification: optionalText(60),
+  photo_url: imageUrl,
+};
+
 function parseOptionalPositiveInt(
   value: FormDataEntryValue | null
 ): { ok: true; value: number | null } | { ok: false; error: string } {
   const raw = String(value ?? "").trim();
   if (!raw) return { ok: true, value: null };
   const n = Number.parseInt(raw, 10);
-  if (!Number.isFinite(n) || n < 1) {
-    return { ok: false, error: "El número de playera debe ser 1 o mayor." };
+  if (!Number.isFinite(n) || n < 1 || n > 999) {
+    return { ok: false, error: "El número de playera debe estar entre 1 y 999." };
   }
   return { ok: true, value: n };
 }
@@ -34,21 +43,17 @@ export async function registerPlayer(
       };
     }
 
-    const firstNames = String(formData.get("first_names") ?? "").trim();
-    const lastNames = String(formData.get("last_names") ?? "").trim();
-    const idNumber = String(formData.get("id_number") ?? "").trim() || null;
-    const classification =
-      String(formData.get("classification") ?? "").trim() || null;
-    const photoUrl = String(formData.get("photo_url") ?? "").trim() || null;
+    const parsed = parseForm(PLAYER_FIELDS, formData);
+    if (!parsed.ok) return parsed;
+    const {
+      first_names: firstNames,
+      last_names: lastNames,
+      id_number: idNumber,
+      classification,
+      photo_url: photoUrl,
+    } = parsed.data;
     const jersey = parseOptionalPositiveInt(formData.get("jersey_number"));
     if (!jersey.ok) return jersey;
-
-    if (!firstNames || !lastNames) {
-      return {
-        ok: false,
-        error: "Escribe el nombre y los apellidos del jugador.",
-      };
-    }
 
     const supabase = await createClient();
     const orgId = access.membership.organization_id;
@@ -132,21 +137,17 @@ export async function updatePendingPlayer(
       };
     }
 
-    const firstNames = String(formData.get("first_names") ?? "").trim();
-    const lastNames = String(formData.get("last_names") ?? "").trim();
-    const idNumber = String(formData.get("id_number") ?? "").trim() || null;
-    const classification =
-      String(formData.get("classification") ?? "").trim() || null;
-    const photoUrl = String(formData.get("photo_url") ?? "").trim() || null;
+    const parsed = parseForm(PLAYER_FIELDS, formData);
+    if (!parsed.ok) return parsed;
+    const {
+      first_names: firstNames,
+      last_names: lastNames,
+      id_number: idNumber,
+      classification,
+      photo_url: photoUrl,
+    } = parsed.data;
     const jersey = parseOptionalPositiveInt(formData.get("jersey_number"));
     if (!jersey.ok) return jersey;
-
-    if (!firstNames || !lastNames) {
-      return {
-        ok: false,
-        error: "Escribe el nombre y los apellidos del jugador.",
-      };
-    }
 
     const supabase = await createClient();
     const orgId = access.membership.organization_id;

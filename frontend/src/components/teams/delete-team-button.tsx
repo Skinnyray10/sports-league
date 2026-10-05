@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 type DeleteTeamButtonProps = {
   orgSlug: string;
@@ -39,6 +40,7 @@ export function DeleteTeamButton({
         setError(result.error);
         return;
       }
+      toast.success("Equipo eliminado.");
       setOpen(false);
       router.push(`/${orgSlug}/teams`);
       router.refresh();
@@ -47,11 +49,11 @@ export function DeleteTeamButton({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="destructive" className="rounded-[2px]" />}>
+      <DialogTrigger render={<Button variant="destructive" />}>
         <Trash2Icon data-icon="inline-start" />
         Eliminar
       </DialogTrigger>
-      <DialogContent className="rounded-[4px] sm:max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>¿Eliminar {teamName}?</DialogTitle>
           <DialogDescription>
@@ -64,11 +66,10 @@ export function DeleteTeamButton({
             {error}
           </p>
         ) : null}
-        <DialogFooter className="rounded-b-[4px]">
+        <DialogFooter>
           <Button
             type="button"
             variant="outline"
-            className="rounded-[2px]"
             disabled={pending}
             onClick={() => setOpen(false)}
           >
@@ -77,7 +78,6 @@ export function DeleteTeamButton({
           <Button
             type="button"
             variant="destructive"
-            className="rounded-[2px]"
             disabled={pending}
             onClick={onConfirm}
           >

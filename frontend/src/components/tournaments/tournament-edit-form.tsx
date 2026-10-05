@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { TournamentStatus } from "@/types/database";
+import { toast } from "sonner";
 
 type TournamentEditFormProps = {
   orgSlug: string;
@@ -57,6 +58,7 @@ export function TournamentEditForm({
         setError(result.error);
         return;
       }
+      toast.success("Torneo actualizado.");
       router.refresh();
     });
   }
@@ -71,7 +73,6 @@ export function TournamentEditForm({
           required
           maxLength={100}
           defaultValue={initial.name}
-          className="rounded-[4px]"
           disabled={pending}
         />
       </div>
@@ -83,19 +84,18 @@ export function TournamentEditForm({
           required
           maxLength={40}
           defaultValue={initial.season}
-          className="rounded-[4px]"
           disabled={pending}
         />
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="grid gap-2">
-          <Label>Formato</Label>
+          <Label htmlFor="edit-tournament-1">Formato</Label>
           <Select
             value={format}
             onValueChange={(value) => setFormat(value ?? format)}
             disabled={pending}
           >
-            <SelectTrigger className="w-full rounded-[4px]">
+            <SelectTrigger id="edit-tournament-1" className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -106,13 +106,13 @@ export function TournamentEditForm({
           </Select>
         </div>
         <div className="grid gap-2">
-          <Label>Vueltas</Label>
+          <Label htmlFor="edit-tournament-2">Vueltas</Label>
           <Select
             value={legs}
             onValueChange={(value) => setLegs(value ?? legs)}
             disabled={pending}
           >
-            <SelectTrigger className="w-full rounded-[4px]">
+            <SelectTrigger id="edit-tournament-2" className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -123,7 +123,7 @@ export function TournamentEditForm({
         </div>
       </div>
       <div className="grid gap-2">
-        <Label>Estado</Label>
+        <Label htmlFor="edit-tournament-3">Estado</Label>
         <Select
           value={status}
           onValueChange={(value) =>
@@ -131,7 +131,7 @@ export function TournamentEditForm({
           }
           disabled={pending}
         >
-          <SelectTrigger className="w-full rounded-[4px]">
+          <SelectTrigger id="edit-tournament-3" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -148,7 +148,6 @@ export function TournamentEditForm({
           name="start_date"
           type="date"
           defaultValue={toDateInputValue(initial.startDate)}
-          className="rounded-[4px]"
           disabled={pending}
         />
       </div>
@@ -160,7 +159,6 @@ export function TournamentEditForm({
       <div>
         <Button
           type="submit"
-          className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
           disabled={pending}
         >
           {pending ? "Guardando…" : "Guardar cambios"}

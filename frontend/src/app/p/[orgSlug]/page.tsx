@@ -16,13 +16,14 @@ type PageProps = {
 
 export default async function PublicPanelPage({ params }: PageProps) {
   const { orgSlug } = await params;
-  await requirePublicOrg(orgSlug);
+  const org = await requirePublicOrg(orgSlug);
   const matches = await loadPublicMatches(orgSlug);
   const nextMatch = pickNextMatch(matches);
   const lastResult = pickLastResult(matches);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
+      <h1 className="sr-only">{org.name} · Inicio</h1>
       <NextMatchCard match={nextMatch} />
       <LastResultCard match={lastResult} orgSlug={orgSlug} />
       <RolCtaCard orgSlug={orgSlug} />

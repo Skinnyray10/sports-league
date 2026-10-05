@@ -27,7 +27,7 @@ export default async function RootPage() {
     const otherPublic = publicOrgs.filter((org) => !memberSlugs.has(org.slug));
 
     return (
-      <main className="mx-auto flex min-h-full max-w-lg flex-col gap-6 px-4 py-16">
+      <main id="contenido" className="mx-auto flex min-h-full max-w-lg flex-col gap-6 px-4 py-16">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold tracking-tight">Elige una liga</h1>
           <p className="text-sm text-muted-foreground">
@@ -88,7 +88,7 @@ export default async function RootPage() {
 
   if (publicOrgs.length > 1) {
     return (
-      <main className="mx-auto flex min-h-full max-w-lg flex-col gap-6 px-4 py-16">
+      <main id="contenido" className="mx-auto flex min-h-full max-w-lg flex-col gap-6 px-4 py-16">
         <div className="space-y-2">
           <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
             Vista pública
@@ -133,7 +133,7 @@ export default async function RootPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-full max-w-md flex-col justify-center gap-6 px-4 py-16">
+    <main id="contenido" className="mx-auto flex min-h-full max-w-md flex-col justify-center gap-6 px-4 py-16">
       <div className="space-y-2">
         <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
           Sports League

@@ -18,15 +18,11 @@ import {
   formatLabel,
   legsLabel,
 } from "@/lib/labels";
+import { unwrapOne } from "@/lib/utils";
 
 type TournamentDetailPageProps = {
   params: Promise<{ orgSlug: string; tournamentId: string }>;
 };
-
-function one<T>(value: T | T[] | null): T | null {
-  if (!value) return null;
-  return Array.isArray(value) ? value[0] ?? null : value;
-}
 
 export default async function TournamentDetailPage({
   params,
@@ -96,13 +92,13 @@ export default async function TournamentDetailPage({
   }
 
   const divisions: DivisionView[] = (divisionsRaw ?? []).flatMap((row) => {
-    const sport = one(
+    const sport = unwrapOne(
       row.sport as
         | { id: string; key: string; name: string }
         | { id: string; key: string; name: string }[]
         | null
     );
-    const category = one(
+    const category = unwrapOne(
       row.category as
         | { id: string; name: string }
         | { id: string; name: string }[]
@@ -122,7 +118,7 @@ export default async function TournamentDetailPage({
   });
 
   const sports = (orgSportsRaw ?? []).flatMap((row) => {
-    const sport = one(
+    const sport = unwrapOne(
       row.sport as
         | { id: string; key: string; name: string }
         | { id: string; key: string; name: string }[]
@@ -137,11 +133,11 @@ export default async function TournamentDetailPage({
   }));
 
   return (
-    <section className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+    <section className="mx-auto w-full max-w-5xl">
       <Button
         variant="ghost"
         size="sm"
-        className="mb-4 rounded-[2px] px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
+        className="mb-4 px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
         render={<Link href={`/${orgSlug}/tournaments`} />}
       >
         <ArrowLeftIcon data-icon="inline-start" />
@@ -165,10 +161,10 @@ export default async function TournamentDetailPage({
 
       <Tabs defaultValue="divisions">
         <TabsList variant="line" className="mb-5 rounded-none">
-          <TabsTrigger value="divisions" className="rounded-[2px]">
+          <TabsTrigger value="divisions">
             Divisiones
           </TabsTrigger>
-          <TabsTrigger value="settings" className="rounded-[2px]">
+          <TabsTrigger value="settings">
             Configuración
           </TabsTrigger>
         </TabsList>

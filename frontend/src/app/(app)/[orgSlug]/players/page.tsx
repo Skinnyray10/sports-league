@@ -5,6 +5,7 @@ import { PlayersTable } from "@/components/players/players-table";
 import { RegisterPlayerDialog } from "@/components/players/register-player-dialog";
 import { createClient } from "@/lib/supabase/server";
 import type { ApprovalStatus, EligibilityStatus } from "@/types/database";
+import { unwrapOne } from "@/lib/utils";
 
 type PageProps = {
   params: Promise<{ orgSlug: string }>;
@@ -111,7 +112,3 @@ export default async function PlayersPage({ params }: PageProps) {
   );
 }
 
-function unwrapOne<T>(value: T | T[] | null | undefined): T | null {
-  if (value == null) return null;
-  return Array.isArray(value) ? (value[0] ?? null) : value;
-}

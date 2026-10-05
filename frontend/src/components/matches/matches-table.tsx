@@ -35,6 +35,8 @@ type MatchesTableProps = {
   orgSlug: string;
   matches: MatchListRow[];
   canCreateMatch: boolean;
+  /** Hay filtros activos: el vacío significa "sin coincidencias", no "sin partidos". */
+  clearFiltersHref?: string | null;
 };
 
 function formatWhen(iso: string | null): string {
@@ -53,10 +55,27 @@ export function MatchesTable({
   orgSlug,
   matches,
   canCreateMatch,
+  clearFiltersHref,
 }: MatchesTableProps) {
+  if (matches.length === 0 && clearFiltersHref) {
+    return (
+      <div className="rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center">
+        <p className="text-base font-medium text-foreground">
+          Sin partidos con estos filtros
+        </p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Prueba con otra combinación o quita los filtros para ver todos.
+        </p>
+        <Button variant="outline" className="mt-4" render={<Link href={clearFiltersHref} />}>
+          Limpiar filtros
+        </Button>
+      </div>
+    );
+  }
+
   if (matches.length === 0) {
     return (
-      <div className="border border-dashed border-border bg-card px-6 py-12 text-center">
+      <div className="rounded-xl border border-dashed border-border bg-card px-6 py-12 text-center">
         <p className="text-base font-medium text-foreground">
           Todavía no hay partidos
         </p>
@@ -70,7 +89,44 @@ export function MatchesTable({
   }
 
   return (
-    <div className="overflow-hidden border border-border bg-card">
+    <>
+    <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-card md:hidden">
+      {matches.map((match) => (
+        <li key={match.id}>
+          <Link
+            href={`/${orgSlug}/matches/${match.id}`}
+            className="flex flex-col gap-1.5 px-4 py-3 hover:bg-secondary/40"
+          >
+            <span className="flex items-center justify-between gap-2">
+              <span className="font-mono text-xs text-muted-foreground tabular-nums">
+                {formatWhen(match.scheduledAt)}
+                {match.jornada != null ? ` · J${match.jornada}` : ""}
+              </span>
+              <MatchStatusBadge status={match.status} />
+            </span>
+            <span className="flex items-baseline justify-between gap-3">
+              <span className="font-medium text-foreground">
+                {match.homeTeamName}
+                <span className="mx-1.5 font-normal text-muted-foreground">vs</span>
+                {match.awayTeamName}
+              </span>
+              {match.status === "finalizado" ? (
+                <span className="font-mono text-sm font-semibold tabular-nums">
+                  {match.homeScore}–{match.awayScore}
+                </span>
+              ) : null}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {sportLabel(match.sportKey)}
+              {match.branch ? ` · ${BRANCH_LABELS[match.branch]}` : ""}
+              {match.categoryName ? ` · ${match.categoryName}` : ""}
+              {match.venue ? ` · ${match.venue}` : ""}
+            </span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+    <div className="hidden overflow-hidden rounded-xl border border-border bg-card md:block">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
@@ -143,7 +199,6 @@ export function MatchesTable({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="rounded-[2px]"
                   render={
                     <Link href={`/${orgSlug}/matches/${match.id}`} />
                   }
@@ -156,5 +211,6 @@ export function MatchesTable({
         </TableBody>
       </Table>
     </div>
+    </>
   );
 }

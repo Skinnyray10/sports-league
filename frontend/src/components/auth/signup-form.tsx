@@ -2,12 +2,23 @@
 
 import { useActionState, useMemo, useState } from "react";
 import Link from "next/link";
-import { signUpRequest, type AuthActionState } from "@/app/(auth)/actions";
+import {
+  signUpRequest,
+  type AuthActionState,
+  type AuthField,
+} from "@/app/(auth)/actions";
+import { FormAlert } from "@/components/auth/form-alert";
+import { PasswordInput } from "@/components/auth/password-input";
+import { Turnstile } from "@/components/auth/turnstile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { NativeSelect } from "@/components/ui/native-select";
 
 const initialState: AuthActionState = { error: null, notice: null };
+
+const fieldClass = "h-11 rounded-full bg-card";
+const selectClass = "h-11 rounded-full bg-card px-3";
 
 export type SignupOrgOption = {
   id: string;
@@ -41,11 +52,25 @@ export function SignupForm({
     organizations[0]?.id ??
     "";
   const [orgId, setOrgId] = useState(defaultOrgId);
+  const [role, setRole] = useState("team_manager");
 
   const clubsForOrg = useMemo(
     () => clubs.filter((c) => c.organizationId === orgId),
     [clubs, orgId]
   );
+  const clubRequired = role === "team_manager";
+  const v = state.values ?? {};
+
+  const a11y = (field: AuthField, hintId?: string) => {
+    const hasError = Boolean(state.error) && state.field === field;
+    const describedBy = [hintId, hasError ? "signup-error" : null]
+      .filter(Boolean)
+      .join(" ");
+    return {
+      "aria-invalid": hasError || undefined,
+      "aria-describedby": describedBy || undefined,
+    };
+  };
 
   if (organizations.length === 0) {
     return (
@@ -75,9 +100,12 @@ export function SignupForm({
           name="full_name"
           required
           maxLength={120}
+          autoComplete="name"
           placeholder="Tu nombre"
-          className="rounded-full bg-card"
+          defaultValue={v.full_name ?? ""}
+          className={fieldClass}
           disabled={pending}
+          {...a11y("full_name")}
         />
       </div>
 
@@ -91,8 +119,10 @@ export function SignupForm({
             maxLength={40}
             autoComplete="username"
             placeholder="usuario"
-            className="rounded-full bg-card"
+            defaultValue={v.username ?? ""}
+            className={fieldClass}
             disabled={pending}
+            {...a11y("username")}
           />
         </div>
         <div className="flex flex-col gap-1.5">
@@ -103,124 +133,124 @@ export function SignupForm({
             type="email"
             autoComplete="email"
             required
+            maxLength={254}
             placeholder="tu@liga.mx"
-            className="rounded-full bg-card"
+            defaultValue={v.email ?? ""}
+            className={fieldClass}
             disabled={pending}
+            {...a11y("email")}
           />
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="phone">Teléfono</Label>
+          <Label htmlFor="phone">
+            Teléfono <span className="font-normal text-muted-foreground">(opcional)</span>
+          </Label>
           <Input
             id="phone"
             name="phone"
             type="tel"
             autoComplete="tel"
             maxLength={30}
-            placeholder="opcional"
-            className="rounded-full bg-card"
+            defaultValue={v.phone ?? ""}
+            className={fieldClass}
             disabled={pending}
+            {...a11y("phone")}
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="organization_id">Liga</Label>
-          <select
+          <NativeSelect
             id="organization_id"
             name="organization_id"
             required
             value={orgId}
             onChange={(e) => setOrgId(e.target.value)}
-            className="h-8 w-full rounded-full border border-input bg-card px-2.5 text-sm"
+            className={selectClass}
             disabled={pending}
+            {...a11y("organization_id")}
           >
             {organizations.map((org) => (
               <option key={org.id} value={org.id}>
                 {org.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="club_id">Empresa / club</Label>
-          <select
+          <Label htmlFor="requested_role">Rol solicitado</Label>
+          <NativeSelect
+            id="requested_role"
+            name="requested_role"
+            required
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className={selectClass}
+            disabled={pending}
+            {...a11y("requested_role")}
+          >
+            <option value="team_manager">Delegado de equipo</option>
+            <option value="referee">Árbitro o Árbitra</option>
+          </NativeSelect>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="club_id">
+            Empresa / club{" "}
+            <span className="font-normal text-muted-foreground">
+              {clubRequired ? "(obligatorio)" : "(opcional)"}
+            </span>
+          </Label>
+          <NativeSelect
+            key={orgId}
             id="club_id"
             name="club_id"
-            className="h-8 w-full rounded-full border border-input bg-card px-2.5 text-sm"
+            required={clubRequired}
+            className={selectClass}
             disabled={pending || clubsForOrg.length === 0}
-            defaultValue=""
+            defaultValue={v.organization_id === orgId ? (v.club_id ?? "") : ""}
+            {...a11y("club_id")}
           >
             <option value="">
-              {clubsForOrg.length === 0
-                ? "Sin clubs aún"
-                : "Selecciona (opcional para árbitro)"}
+              {clubsForOrg.length === 0 ? "Sin clubs aún" : "Selecciona tu club"}
             </option>
             {clubsForOrg.map((club) => (
               <option key={club.clubId} value={club.clubId}>
                 {club.clubName}
               </option>
             ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="requested_role">Rol solicitado</Label>
-          <select
-            id="requested_role"
-            name="requested_role"
-            required
-            defaultValue="team_manager"
-            className="h-8 w-full rounded-full border border-input bg-card px-2.5 text-sm"
-            disabled={pending}
-          >
-            <option value="team_manager">Delegado de equipo</option>
-            <option value="referee">Árbitro o Árbitra</option>
-          </select>
+          </NativeSelect>
         </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="password">Contraseña</Label>
-        <Input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           autoComplete="new-password"
           required
           minLength={8}
-          className="rounded-full bg-card"
+          maxLength={72}
+          className={fieldClass}
           disabled={pending}
+          {...a11y("password", "password-hint")}
         />
-        <p className="text-xs text-muted-foreground">Mínimo 8 caracteres.</p>
+        <p id="password-hint" className="text-xs text-muted-foreground">
+          Mínimo 8 caracteres, con letras y números.
+        </p>
       </div>
 
-      {state.error ? (
-        <p
-          role="alert"
-          className="rounded-full border border-destructive/40 bg-card px-3 py-2 text-sm text-destructive"
-        >
-          {state.error}
-        </p>
-      ) : null}
+      <Turnstile resetKey={state} />
 
-      {state.notice ? (
-        <p
-          role="status"
-          className="rounded-full border border-border bg-secondary px-3 py-2 text-sm text-foreground"
-        >
-          {state.notice}
-        </p>
-      ) : null}
+      <FormAlert id="signup-error" error={state.error} notice={state.notice} />
 
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={pending}
-          className="rounded-full bg-primary text-foreground hover:bg-foreground hover:text-background"
-        >
+        <Button type="submit" disabled={pending} className="h-11 rounded-full">
           {pending ? "Enviando…" : "Enviar solicitud"}
         </Button>
       </div>

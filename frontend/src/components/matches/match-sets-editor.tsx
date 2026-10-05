@@ -120,38 +120,47 @@ export function MatchSetsEditor({
                       >
                         <input type="hidden" name="set_id" value={set.id} />
                         <div className="grid gap-1">
-                          <Label className="text-xs">#</Label>
+                          <Label htmlFor={`set-${set.id}-set_number`} className="text-xs">
+                            Set #
+                          </Label>
                           <Input
+                            id={`set-${set.id}-set_number`}
                             name="set_number"
                             type="number"
                             min={1}
                             required
                             defaultValue={set.set_number}
-                            className="w-16 rounded-[4px] font-mono tabular-nums"
+                            className="w-16 font-mono tabular-nums"
                             disabled={pending}
                           />
                         </div>
                         <div className="grid gap-1">
-                          <Label className="text-xs">Local</Label>
+                          <Label htmlFor={`set-${set.id}-home_set_score`} className="text-xs">
+                            Local
+                          </Label>
                           <Input
+                            id={`set-${set.id}-home_set_score`}
                             name="home_set_score"
                             type="number"
                             min={0}
                             required
                             defaultValue={set.home_set_score}
-                            className="w-20 rounded-[4px] font-mono tabular-nums"
+                            className="w-20 font-mono tabular-nums"
                             disabled={pending}
                           />
                         </div>
                         <div className="grid gap-1">
-                          <Label className="text-xs">Visitante</Label>
+                          <Label htmlFor={`set-${set.id}-away_set_score`} className="text-xs">
+                            Visitante
+                          </Label>
                           <Input
+                            id={`set-${set.id}-away_set_score`}
                             name="away_set_score"
                             type="number"
                             min={0}
                             required
                             defaultValue={set.away_set_score}
-                            className="w-20 rounded-[4px] font-mono tabular-nums"
+                            className="w-20 font-mono tabular-nums"
                             disabled={pending}
                           />
                         </div>
@@ -159,7 +168,6 @@ export function MatchSetsEditor({
                           type="submit"
                           size="sm"
                           variant="outline"
-                          className="rounded-[2px]"
                           disabled={pending}
                         >
                           Guardar
@@ -168,7 +176,7 @@ export function MatchSetsEditor({
                           type="button"
                           size="sm"
                           variant="ghost"
-                          className="rounded-[2px] text-[#DC2626]"
+                          className="text-destructive"
                           disabled={pending}
                           onClick={() => onDelete(set.id)}
                         >
@@ -210,7 +218,7 @@ export function MatchSetsEditor({
               min={1}
               required
               defaultValue={nextSetNumber}
-              className="w-16 rounded-[4px] font-mono tabular-nums"
+              className="w-16 font-mono tabular-nums"
               disabled={pending}
             />
           </div>
@@ -225,7 +233,7 @@ export function MatchSetsEditor({
               min={0}
               required
               defaultValue={0}
-              className="w-20 rounded-[4px] font-mono tabular-nums"
+              className="w-20 font-mono tabular-nums"
               disabled={pending}
             />
           </div>
@@ -240,7 +248,7 @@ export function MatchSetsEditor({
               min={0}
               required
               defaultValue={0}
-              className="w-20 rounded-[4px] font-mono tabular-nums"
+              className="w-20 font-mono tabular-nums"
               disabled={pending}
             />
           </div>
@@ -248,7 +256,6 @@ export function MatchSetsEditor({
             type="submit"
             size="sm"
             disabled={pending}
-            className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
           >
             <PlusIcon data-icon="inline-start" />
             Agregar set
@@ -257,7 +264,7 @@ export function MatchSetsEditor({
       ) : null}
 
       {error ? (
-        <p className="mt-3 text-sm text-[#DC2626]" role="alert">
+        <p className="mt-3 text-sm text-destructive" role="alert">
           {error}
         </p>
       ) : null}

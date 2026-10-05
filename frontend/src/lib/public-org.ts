@@ -2,10 +2,26 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database";
 
-export type PublicOrg = Pick<
-  Tables<"organizations">,
-  "id" | "name" | "slug" | "tagline" | "logo_url" | "is_public"
->;
+export type PublicOrg = {
+  id: string;
+  name: string;
+  slug: string;
+  tagline: string | null;
+  logo_url: string | null;
+};
+
+type PublicOrgRow = Tables<"public_organizations">;
+
+function toPublicOrg(row: PublicOrgRow): PublicOrg | null {
+  if (!row.id || !row.name || !row.slug) return null;
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    tagline: row.tagline ?? null,
+    logo_url: row.logo_url ?? null,
+  };
+}
 
 export type PublicMatch = Tables<"public_matches">;
 export type PublicStanding = Tables<"public_standings">;
@@ -18,28 +34,30 @@ export type PublicNotice = Tables<"public_notices">;
 export async function requirePublicOrg(orgSlug: string): Promise<PublicOrg> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("organizations")
-    .select("id, name, slug, tagline, logo_url, is_public")
+    .from("public_organizations")
+    .select("id, name, slug, tagline, logo_url")
     .eq("slug", orgSlug)
-    .eq("is_public", true)
     .maybeSingle();
 
   if (error) throw error;
-  if (!data) notFound();
-  return data;
+  const org = data ? toPublicOrg(data) : null;
+  if (!org) notFound();
+  return org;
 }
 
 /** Ligas visibles sin sesión (ordenadas por nombre). */
 export async function listPublicOrganizations(): Promise<PublicOrg[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("organizations")
-    .select("id, name, slug, tagline, logo_url, is_public")
-    .eq("is_public", true)
+    .from("public_organizations")
+    .select("id, name, slug, tagline, logo_url")
     .order("name", { ascending: true });
 
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).flatMap((row) => {
+    const org = toPublicOrg(row);
+    return org ? [org] : [];
+  });
 }
 
 export async function loadPublicMatches(

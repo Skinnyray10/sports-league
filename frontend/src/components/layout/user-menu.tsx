@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, UserIcon } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,11 +30,13 @@ export function UserMenu({ email, organizations, currentSlug }: UserMenuProps) {
         render={
           <Button
             variant="outline"
-            className="rounded-sm border-border bg-card"
+            className="border-border bg-card"
+            aria-label="Menú de cuenta"
           />
         }
       >
-        <span className="max-w-[10rem] truncate text-[0.8125rem]">
+        <UserIcon className="size-4 sm:hidden" aria-hidden />
+        <span className="hidden max-w-[10rem] truncate text-[0.8125rem] sm:inline">
           {email ?? "Mi cuenta"}
         </span>
         <ChevronDownIcon className="size-3.5 opacity-70" />
@@ -52,9 +54,13 @@ export function UserMenu({ email, organizations, currentSlug }: UserMenuProps) {
           <DropdownMenuItem
             key={org.id}
             onClick={() => router.push(`/${org.slug}`)}
-            className={org.slug === currentSlug ? "bg-muted" : undefined}
+            aria-current={org.slug === currentSlug ? "true" : undefined}
+            className={org.slug === currentSlug ? "bg-muted font-semibold" : undefined}
           >
             {org.name}
+            {org.slug === currentSlug ? (
+              <span className="sr-only"> (liga actual)</span>
+            ) : null}
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />

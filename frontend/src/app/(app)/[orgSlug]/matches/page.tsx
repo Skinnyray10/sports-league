@@ -11,7 +11,8 @@ import {
   type MatchFilterOption,
   type MatchFiltersState,
 } from "@/components/matches/matches-filters";
-import { MatchPageHeader } from "@/components/matches/page-header";
+import { ModulePageHeader } from "@/components/ops/module-page-header";
+import { Pagination, pageRange, parsePage } from "@/components/ops/pagination";
 import {
   MatchesTable,
   type MatchListRow,
@@ -19,6 +20,7 @@ import {
 import { BRANCH_LABELS, sportLabel } from "@/lib/labels";
 import { createClient } from "@/lib/supabase/server";
 import type { Branch, MatchStatus } from "@/types/database";
+import { unwrapOne } from "@/lib/utils";
 
 type PageProps = {
   params: Promise<{ orgSlug: string }>;
@@ -28,6 +30,7 @@ type PageProps = {
     categoria?: string | string[];
     grupo?: string | string[];
     jornada?: string | string[];
+    page?: string | string[];
   }>;
 };
 
@@ -176,6 +179,10 @@ export default async function MatchesPage({ params, searchParams }: PageProps) {
     return true;
   });
 
+  const page = parsePage(firstParam(sp.page));
+  const [from, to] = pageRange(page);
+  const pageMatches = matches.slice(from, to + 1);
+
   const divisions: DivisionOption[] = (divisionsRaw ?? []).map((d) => {
     const tournament = unwrapOne(d.tournament);
     const sport = unwrapOne(d.sport);
@@ -240,7 +247,8 @@ export default async function MatchesPage({ params, searchParams }: PageProps) {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <MatchPageHeader
+      <ModulePageHeader
+        band="matches"
         title="Partidos"
         description="Programa la jornada, aplaza o cancela con historial, y asigna árbitros. El marcador se cierra en la cédula."
         actions={
@@ -277,14 +285,28 @@ export default async function MatchesPage({ params, searchParams }: PageProps) {
       />
       <MatchesTable
         orgSlug={orgSlug}
-        matches={matches}
+        matches={pageMatches}
         canCreateMatch={access.canCreateMatch}
+        clearFiltersHref={
+          Object.values(filters).some(Boolean) ? `/${orgSlug}/matches` : null
+        }
+      />
+      <Pagination
+        page={page}
+        total={matches.length}
+        hrefFor={(p) => {
+          const qs = new URLSearchParams();
+          if (filters.sport) qs.set("deporte", filters.sport);
+          if (filters.branch) qs.set("rama", filters.branch);
+          if (filters.category) qs.set("categoria", filters.category);
+          if (filters.group) qs.set("grupo", filters.group);
+          if (filters.jornada) qs.set("jornada", filters.jornada);
+          if (p > 1) qs.set("page", String(p));
+          const q = qs.toString();
+          return q ? `/${orgSlug}/matches?${q}` : `/${orgSlug}/matches`;
+        }}
       />
     </div>
   );
 }
 
-function unwrapOne<T>(value: T | T[] | null | undefined): T | null {
-  if (value == null) return null;
-  return Array.isArray(value) ? (value[0] ?? null) : value;
-}

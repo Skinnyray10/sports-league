@@ -107,8 +107,10 @@ export function StandingsTable({ rows, hasTournament }: StandingsTableProps) {
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="bg-secondary w-12 text-foreground">#</TableHead>
-            <TableHead className="bg-secondary text-foreground">Equipo</TableHead>
+            <TableHead className="sticky left-0 z-10 w-12 min-w-12 bg-secondary text-foreground">#</TableHead>
+            <TableHead className="sticky left-12 z-10 min-w-36 bg-secondary text-foreground shadow-[1px_0_0_var(--border)]">
+              Equipo
+            </TableHead>
             {cols.map((c) => (
               <TableHead
                 key={c.key}
@@ -124,10 +126,12 @@ export function StandingsTable({ rows, hasTournament }: StandingsTableProps) {
         <TableBody>
           {sorted.map((row, i) => (
             <TableRow key={row.teamId}>
-              <TableCell className="font-mono text-muted-foreground">
+              <TableCell className="sticky left-0 z-10 w-12 min-w-12 bg-card font-mono text-muted-foreground">
                 {i + 1}
               </TableCell>
-              <TableCell className="font-medium">{row.teamName}</TableCell>
+              <TableCell className="sticky left-12 z-10 min-w-36 max-w-48 truncate bg-card font-medium shadow-[1px_0_0_var(--border)]">
+                {row.teamName}
+              </TableCell>
               {cols.map((c) => (
                 <TableCell
                   key={c.key}

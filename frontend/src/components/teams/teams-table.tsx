@@ -53,7 +53,40 @@ export function TeamsTable({
   }
 
   return (
-    <div className="overflow-hidden border border-border bg-card">
+    <>
+    <ul className="grid gap-2 md:hidden" aria-label="Equipos">
+      {teams.map((team) => {
+        const canEdit = canManageStaff || managedTeamId === team.id;
+        return (
+          <li key={team.id}>
+            <Link
+              href={`/${orgSlug}/teams/${team.id}`}
+              className="flex min-h-11 items-center justify-between gap-3 border border-border bg-card px-4 py-3 hover:bg-muted"
+            >
+              <span className="min-w-0">
+                <span className="flex items-center gap-2 font-medium text-foreground">
+                  <span className="truncate">{team.name}</span>
+                  {managedTeamId === team.id ? (
+                    <Badge variant="secondary" className="text-xs">
+                      Tu equipo
+                    </Badge>
+                  ) : null}
+                </span>
+                <span className="mt-0.5 block truncate text-sm text-muted-foreground">
+                  {team.club_name} · {sportLabel(team.sport_key)} ·{" "}
+                  {BRANCH_LABELS[team.branch]} · {team.category_name}
+                  {team.group_name ? ` · ${team.group_name}` : ""}
+                </span>
+              </span>
+              <span className="shrink-0 text-sm font-medium text-foreground">
+                {canEdit ? (canManageStaff ? "Administrar" : "Editar") : "Ver"}
+              </span>
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+    <div className="hidden overflow-hidden border border-border bg-card md:block">
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
@@ -86,7 +119,7 @@ export function TeamsTable({
                   {managedTeamId === team.id ? (
                     <Badge
                       variant="secondary"
-                      className="ml-2 rounded-[2px] text-xs"
+                      className="ml-2 text-xs"
                     >
                       Tu equipo
                     </Badge>
@@ -112,7 +145,6 @@ export function TeamsTable({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="rounded-[2px]"
                       render={
                         <Link href={`/${orgSlug}/teams/${team.id}`} />
                       }
@@ -123,7 +155,6 @@ export function TeamsTable({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="rounded-[2px]"
                       render={
                         <Link href={`/${orgSlug}/teams/${team.id}`} />
                       }
@@ -138,5 +169,6 @@ export function TeamsTable({
         </TableBody>
       </Table>
     </div>
+    </>
   );
 }

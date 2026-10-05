@@ -6,6 +6,7 @@ import { updateTeam } from "@/app/(app)/[orgSlug]/teams/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 type TeamEditFormProps = {
   orgSlug: string;
@@ -32,6 +33,7 @@ export function TeamEditForm({
         setError(result.error);
         return;
       }
+      toast.success("Equipo actualizado.");
       router.refresh();
     });
   }
@@ -46,7 +48,6 @@ export function TeamEditForm({
           required
           maxLength={80}
           defaultValue={initialName}
-          className="rounded-[4px]"
           disabled={pending}
         />
       </div>
@@ -58,7 +59,6 @@ export function TeamEditForm({
           type="url"
           defaultValue={initialLogoUrl ?? ""}
           placeholder="https://"
-          className="rounded-[4px]"
           disabled={pending}
         />
       </div>
@@ -70,7 +70,6 @@ export function TeamEditForm({
       <div>
         <Button
           type="submit"
-          className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
           disabled={pending}
         >
           {pending ? "Guardando…" : "Guardar cambios"}

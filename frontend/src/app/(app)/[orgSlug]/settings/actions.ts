@@ -1,5 +1,7 @@
 "use server";
 
+import { lengthError } from "@/lib/validation";
+import { imageUrl, optionalText, parseForm, requiredText } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import { requireOrgRole } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
@@ -23,22 +25,25 @@ export async function updateOrganization(
 ): Promise<ActionResult> {
   try {
     const membership = await requireOrgRole(orgSlug, ["admin"]);
-    const name = String(formData.get("name") ?? "").trim();
-    const tagline = String(formData.get("tagline") ?? "").trim();
-    const logoUrl = String(formData.get("logo_url") ?? "").trim();
+    const parsed = parseForm(
+      {
+        name: requiredText("Escribe el nombre de la organización."),
+        tagline: optionalText(160),
+        logo_url: imageUrl,
+      },
+      formData
+    );
+    if (!parsed.ok) return parsed;
+    const { name, tagline, logo_url: logoUrl } = parsed.data;
     const isPublic = formData.get("is_public") === "on";
-
-    if (!name) {
-      return { ok: false, error: "Escribe el nombre de la organización." };
-    }
 
     const supabase = await createClient();
     const { error } = await supabase
       .from("organizations")
       .update({
         name,
-        tagline: tagline || null,
-        logo_url: logoUrl || null,
+        tagline,
+        logo_url: logoUrl,
         is_public: isPublic,
       })
       .eq("id", membership.organization_id);
@@ -159,6 +164,8 @@ export async function createCategory(
     if (!name) {
       return { ok: false, error: "Escribe el nombre de la categoría." };
     }
+    const tooLong = lengthError([[name, 80]]);
+    if (tooLong) return tooLong;
 
     const supabase = await createClient();
     const { error } = await supabase.from("categories").insert({
@@ -199,6 +206,8 @@ export async function updateCategory(
     if (!name) {
       return { ok: false, error: "Escribe el nombre de la categoría." };
     }
+    const tooLong = lengthError([[name, 80]]);
+    if (tooLong) return tooLong;
 
     const supabase = await createClient();
     const { error } = await supabase

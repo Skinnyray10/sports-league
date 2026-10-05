@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMatchAccess, isAssignedReferee } from "@/components/matches/access";
-import { MatchPageHeader } from "@/components/matches/page-header";
+import { ModulePageHeader } from "@/components/ops/module-page-header";
 import { MatchResultForm } from "@/components/matches/match-result-form";
 import { MatchSetsEditor } from "@/components/matches/match-sets-editor";
 import { MatchStatusBadge } from "@/components/matches/match-status-badge";
@@ -17,6 +17,7 @@ import {
   scoreNoun,
   sportLabel,
 } from "@/lib/labels";
+import { unwrapOne } from "@/lib/utils";
 
 type PageProps = {
   params: Promise<{ orgSlug: string; matchId: string }>;
@@ -159,7 +160,8 @@ export default async function MatchDetailPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <MatchPageHeader
+      <ModulePageHeader
+        band="matches"
         title={`${homeTeam?.name ?? "Local"} vs ${awayTeam?.name ?? "Visitante"}`}
         description={
           descriptionParts.length > 0
@@ -173,12 +175,6 @@ export default async function MatchDetailPage({ params }: PageProps) {
               className="text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             >
               Volver a partidos
-            </Link>
-            <Link
-              href={`/${orgSlug}/tournaments`}
-              className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
-            >
-              Torneos
             </Link>
             <Link
               href={`/p/${orgSlug}`}
@@ -256,6 +252,9 @@ export default async function MatchDetailPage({ params }: PageProps) {
           scheduledAt={match.scheduled_at}
           refereeId={match.referee_id}
           referees={referees}
+          sheetHref={
+            assigned || canViewSheet ? `/${orgSlug}/referee/${match.id}` : null
+          }
         />
 
         <ScheduleChangeHistory changes={changes} />
@@ -273,7 +272,3 @@ export default async function MatchDetailPage({ params }: PageProps) {
   );
 }
 
-function unwrapOne<T>(value: T | T[] | null | undefined): T | null {
-  if (value == null) return null;
-  return Array.isArray(value) ? (value[0] ?? null) : value;
-}

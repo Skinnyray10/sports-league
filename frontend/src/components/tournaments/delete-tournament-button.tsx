@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 type DeleteTournamentButtonProps = {
   orgSlug: string;
@@ -39,6 +40,7 @@ export function DeleteTournamentButton({
         setError(result.error);
         return;
       }
+      toast.success("Torneo eliminado.");
       setOpen(false);
       router.push(`/${orgSlug}/tournaments`);
       router.refresh();
@@ -48,12 +50,12 @@ export function DeleteTournamentButton({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        render={<Button variant="destructive" className="rounded-[2px]" />}
+        render={<Button variant="destructive" />}
       >
         <Trash2Icon data-icon="inline-start" />
         Eliminar
       </DialogTrigger>
-      <DialogContent className="rounded-[4px] sm:max-w-md">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>¿Eliminar {tournamentName}?</DialogTitle>
           <DialogDescription>
@@ -67,11 +69,10 @@ export function DeleteTournamentButton({
             {error}
           </p>
         ) : null}
-        <DialogFooter className="rounded-b-[4px]">
+        <DialogFooter>
           <Button
             type="button"
             variant="outline"
-            className="rounded-[2px]"
             disabled={pending}
             onClick={() => setOpen(false)}
           >
@@ -80,7 +81,6 @@ export function DeleteTournamentButton({
           <Button
             type="button"
             variant="destructive"
-            className="rounded-[2px]"
             disabled={pending}
             onClick={onConfirm}
           >

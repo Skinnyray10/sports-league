@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   assignReferee,
@@ -22,6 +23,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { NativeSelect } from "@/components/ui/native-select";
 
 export type RefereeOption = {
   userId: string;
@@ -44,6 +47,8 @@ type MatchResultFormProps = {
   scheduledAt: string | null;
   refereeId: string | null;
   referees: RefereeOption[];
+  /** Enlace a la cédula si quien mira puede abrirla. */
+  sheetHref?: string | null;
 };
 
 function toDatetimeLocal(iso: string | null): string {
@@ -54,8 +59,6 @@ function toDatetimeLocal(iso: string | null): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-const selectClass =
-  "h-8 w-full rounded-[4px] border border-border bg-card px-2.5 text-sm text-foreground outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring/35";
 
 export function MatchResultForm({
   orgSlug,
@@ -71,6 +74,7 @@ export function MatchResultForm({
   scheduledAt,
   refereeId,
   referees,
+  sheetHref,
 }: MatchResultFormProps) {
   const router = useRouter();
   const [error, setError] = React.useState<string | null>(null);
@@ -91,6 +95,7 @@ export function MatchResultForm({
         setError(result.error);
         return;
       }
+      toast.success("Partido actualizado.");
       router.refresh();
     });
   }
@@ -104,6 +109,7 @@ export function MatchResultForm({
         setConfirmingDelete(false);
         return;
       }
+      toast.success("Partido eliminado.");
       router.push(`/${orgSlug}/matches`);
       router.refresh();
     });
@@ -116,8 +122,16 @@ export function MatchResultForm({
         <p className="mt-1 text-sm text-muted-foreground">
           {status === "finalizado"
             ? `Resultado final: ${homeScore}–${awayScore} ${scoreLabel}.`
-            : "El marcador se captura en la cédula del árbitro (próximamente)."}
+            : "El marcador se captura en la cédula del árbitro el día del partido."}
         </p>
+        {sheetHref && status !== "finalizado" ? (
+          <Link
+            href={sheetHref}
+            className="mt-3 inline-flex font-medium text-foreground underline underline-offset-4"
+          >
+            Abrir cédula
+          </Link>
+        ) : null}
       </section>
     );
   }
@@ -137,13 +151,19 @@ export function MatchResultForm({
             </>
           ) : (
             <>
-              La captura de {scoreLabel} y el cierre del partido se harán en la{" "}
-              <span className="font-medium text-foreground">cédula</span> del
-              árbitro (paso 5).{" "}
-              {/* TODO(step-5): enlazar a /matches/[id]/cedula cuando exista */}
-              <span className="text-muted-foreground">
-                Enlace a cédula: pendiente.
-              </span>
+              El árbitro asignado captura {scoreLabel} y cierra el partido
+              desde la{" "}
+              {sheetHref ? (
+                <Link
+                  href={sheetHref}
+                  className="font-medium text-foreground underline underline-offset-4"
+                >
+                  cédula
+                </Link>
+              ) : (
+                <span className="font-medium text-foreground">cédula</span>
+              )}
+              . Al cerrarla, el resultado se publica automáticamente.
             </>
           )}
         </p>
@@ -163,12 +183,11 @@ export function MatchResultForm({
           >
             <div className="grid gap-2">
               <Label htmlFor="referee_id">Árbitro</Label>
-              <select
+              <NativeSelect
                 id="referee_id"
                 name="referee_id"
                 defaultValue={refereeId ?? ""}
                 disabled={pending || locked}
-                className={selectClass}
               >
                 <option value="">Sin árbitro</option>
                 {referees.map((r) => (
@@ -176,13 +195,12 @@ export function MatchResultForm({
                     {r.label}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
             <div className="flex items-end">
               <Button
                 type="submit"
                 disabled={pending || locked}
-                className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
               >
                 {pending ? "Guardando…" : "Guardar árbitro"}
               </Button>
@@ -219,7 +237,6 @@ export function MatchResultForm({
                   type="datetime-local"
                   required
                   defaultValue={toDatetimeLocal(scheduledAt)}
-                  className="rounded-[4px]"
                   disabled={pending}
                 />
               </div>
@@ -229,7 +246,6 @@ export function MatchResultForm({
                   id="reschedule_venue"
                   name="venue"
                   defaultValue={venue ?? ""}
-                  className="rounded-[4px]"
                   disabled={pending}
                 />
               </div>
@@ -241,7 +257,6 @@ export function MatchResultForm({
                   required
                   maxLength={240}
                   placeholder="Ej. Lluvia en la cancha"
-                  className="rounded-[4px]"
                   disabled={pending}
                 />
               </div>
@@ -249,7 +264,6 @@ export function MatchResultForm({
                 <Button
                   type="submit"
                   disabled={pending}
-                  className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
                 >
                   {pending ? "Guardando…" : "Reprogramar"}
                 </Button>
@@ -276,7 +290,6 @@ export function MatchResultForm({
                     name="reason"
                     required
                     maxLength={240}
-                    className="rounded-[4px]"
                     disabled={pending}
                   />
                 </div>
@@ -284,7 +297,6 @@ export function MatchResultForm({
                   type="submit"
                   variant="outline"
                   disabled={pending || status === "aplazado"}
-                  className="rounded-[2px]"
                 >
                   {pending ? "Guardando…" : "Aplazar partido"}
                 </Button>
@@ -309,7 +321,6 @@ export function MatchResultForm({
                     name="reason"
                     required
                     maxLength={240}
-                    className="rounded-[4px]"
                     disabled={pending}
                   />
                 </div>
@@ -317,7 +328,6 @@ export function MatchResultForm({
                   type="submit"
                   variant="destructive"
                   disabled={pending}
-                  className="rounded-[2px]"
                 >
                   {pending ? "Guardando…" : "Cancelar partido"}
                 </Button>
@@ -342,14 +352,14 @@ export function MatchResultForm({
                 <Button
                   type="button"
                   variant="destructive"
-                  className="mt-4 rounded-[2px]"
+                  className="mt-4"
                   disabled={pending}
                 />
               }
             >
               Eliminar partido
             </DialogTrigger>
-            <DialogContent className="rounded-[4px] sm:max-w-md">
+            <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>¿Eliminar este partido?</DialogTitle>
                 <DialogDescription>
@@ -357,11 +367,10 @@ export function MatchResultForm({
                   No se puede deshacer.
                 </DialogDescription>
               </DialogHeader>
-              <DialogFooter className="rounded-b-[4px]">
+              <DialogFooter>
                 <Button
                   type="button"
                   variant="outline"
-                  className="rounded-[2px]"
                   disabled={pending}
                   onClick={() => setConfirmingDelete(false)}
                 >
@@ -370,7 +379,6 @@ export function MatchResultForm({
                 <Button
                   type="button"
                   variant="destructive"
-                  className="rounded-[2px]"
                   disabled={pending}
                   onClick={onDelete}
                 >
@@ -383,7 +391,7 @@ export function MatchResultForm({
       ) : null}
 
       {error ? (
-        <p className="text-sm text-[#DC2626]" role="alert">
+        <p className="text-sm text-destructive" role="alert">
           {error}
         </p>
       ) : null}

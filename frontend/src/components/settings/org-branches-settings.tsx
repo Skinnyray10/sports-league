@@ -6,6 +6,7 @@ import { updateOrgSportBranch } from "@/app/(app)/[orgSlug]/settings/actions";
 import { Button } from "@/components/ui/button";
 import { BRANCH_LABELS, sportLabel } from "@/lib/labels";
 import type { Branch } from "@/types/database";
+import { toast } from "sonner";
 
 export type OrgBranchRow = {
   id: string;
@@ -38,6 +39,7 @@ function BranchRow({
         setError(result.error);
         return;
       }
+      toast.success("Rama actualizada.");
       router.refresh();
     });
   }
@@ -60,7 +62,7 @@ function BranchRow({
             name="active"
             defaultChecked={row.active}
             disabled={pending}
-            className="size-4 rounded-[2px] border-border accent-primary"
+            className="size-4 border-border accent-primary"
           />
           Activa
         </label>
@@ -68,7 +70,6 @@ function BranchRow({
           type="submit"
           variant="outline"
           size="sm"
-          className="rounded-[2px]"
           disabled={pending}
         >
           {pending ? "…" : "Guardar"}

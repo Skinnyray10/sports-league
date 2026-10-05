@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 type CreateClubDialogProps = {
   orgSlug: string;
@@ -35,6 +36,7 @@ export function CreateClubDialog({ orgSlug }: CreateClubDialogProps) {
         setError(result.error);
         return;
       }
+      toast.success("Club creado.");
       setOpen(false);
       router.refresh();
     });
@@ -44,13 +46,13 @@ export function CreateClubDialog({ orgSlug }: CreateClubDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background" />
+          <Button />
         }
       >
         <PlusIcon data-icon="inline-start" />
         Agregar club
       </DialogTrigger>
-      <DialogContent className="rounded-[4px] sm:max-w-md" showCloseButton>
+      <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle>Agregar club</DialogTitle>
           <DialogDescription>
@@ -67,7 +69,6 @@ export function CreateClubDialog({ orgSlug }: CreateClubDialogProps) {
               required
               maxLength={80}
               placeholder="Ej. Club Norte"
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
@@ -78,7 +79,6 @@ export function CreateClubDialog({ orgSlug }: CreateClubDialogProps) {
               name="logo_url"
               type="url"
               placeholder="https://"
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
@@ -87,11 +87,10 @@ export function CreateClubDialog({ orgSlug }: CreateClubDialogProps) {
               {error}
             </p>
           ) : null}
-          <DialogFooter className="rounded-b-[4px]">
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
-              className="rounded-[2px]"
               disabled={pending}
               onClick={() => setOpen(false)}
             >
@@ -99,7 +98,6 @@ export function CreateClubDialog({ orgSlug }: CreateClubDialogProps) {
             </Button>
             <Button
               type="submit"
-              className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
               disabled={pending}
             >
               {pending ? "Guardando…" : "Crear club"}

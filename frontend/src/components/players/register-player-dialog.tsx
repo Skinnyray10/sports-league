@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 type RegisterPlayerDialogProps = {
   orgSlug: string;
@@ -35,6 +36,7 @@ export function RegisterPlayerDialog({ orgSlug }: RegisterPlayerDialogProps) {
         setError(result.error);
         return;
       }
+      toast.success("Jugador registrado. Queda pendiente de aprobación.");
       setOpen(false);
       router.refresh();
     });
@@ -44,13 +46,13 @@ export function RegisterPlayerDialog({ orgSlug }: RegisterPlayerDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background" />
+          <Button />
         }
       >
         <PlusIcon data-icon="inline-start" />
         Registrar jugador
       </DialogTrigger>
-      <DialogContent className="rounded-[4px] sm:max-w-md" showCloseButton>
+      <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
           <DialogTitle>Registrar jugador</DialogTitle>
           <DialogDescription>
@@ -66,7 +68,6 @@ export function RegisterPlayerDialog({ orgSlug }: RegisterPlayerDialogProps) {
                 name="first_names"
                 required
                 maxLength={80}
-                className="rounded-[4px]"
                 disabled={pending}
               />
             </div>
@@ -77,7 +78,6 @@ export function RegisterPlayerDialog({ orgSlug }: RegisterPlayerDialogProps) {
                 name="last_names"
                 required
                 maxLength={80}
-                className="rounded-[4px]"
                 disabled={pending}
               />
             </div>
@@ -89,7 +89,6 @@ export function RegisterPlayerDialog({ orgSlug }: RegisterPlayerDialogProps) {
               name="id_number"
               maxLength={40}
               placeholder="CURP o documento"
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
@@ -101,7 +100,6 @@ export function RegisterPlayerDialog({ orgSlug }: RegisterPlayerDialogProps) {
                 name="classification"
                 maxLength={40}
                 placeholder="Ej. libre"
-                className="rounded-[4px]"
                 disabled={pending}
               />
             </div>
@@ -112,7 +110,7 @@ export function RegisterPlayerDialog({ orgSlug }: RegisterPlayerDialogProps) {
                 name="jersey_number"
                 type="number"
                 min={1}
-                className="rounded-[4px] font-mono tabular-nums"
+                className="font-mono tabular-nums"
                 disabled={pending}
               />
             </div>
@@ -124,20 +122,18 @@ export function RegisterPlayerDialog({ orgSlug }: RegisterPlayerDialogProps) {
               name="photo_url"
               type="url"
               placeholder="https://"
-              className="rounded-[4px]"
               disabled={pending}
             />
           </div>
           {error ? (
-            <p className="text-sm text-[#DC2626]" role="alert">
+            <p className="text-sm text-destructive" role="alert">
               {error}
             </p>
           ) : null}
-          <DialogFooter className="rounded-b-[4px]">
+          <DialogFooter>
             <Button
               type="button"
               variant="outline"
-              className="rounded-[2px]"
               disabled={pending}
               onClick={() => setOpen(false)}
             >
@@ -145,7 +141,6 @@ export function RegisterPlayerDialog({ orgSlug }: RegisterPlayerDialogProps) {
             </Button>
             <Button
               type="submit"
-              className="rounded-[2px] bg-primary text-foreground hover:bg-foreground hover:text-background"
               disabled={pending}
             >
               {pending ? "Guardando…" : "Registrar"}
