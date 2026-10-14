@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IdCardIcon } from "lucide-react";
 import type { ApprovalStatus, EligibilityStatus } from "@/types/database";
 import { EditPlayerDialog } from "@/components/players/edit-player-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -110,15 +111,17 @@ export function PlayersTable({ orgSlug, rows }: PlayersTableProps) {
                     />
                   ) : null}
                   <Button
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
+                    nativeButton={false}
                     render={
                       <Link
                         href={`/${orgSlug}/players/${row.id}/credential`}
                       />
                     }
                   >
-                    Credencial
+                    <IdCardIcon data-icon="inline-start" />
+                    Ver credencial
                   </Button>
                 </div>
               </TableCell>

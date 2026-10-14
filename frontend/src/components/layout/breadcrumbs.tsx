@@ -13,6 +13,7 @@ type BreadcrumbsProps = {
 
 const DETAIL_LABELS: Record<string, string> = {
   credential: "Credencial",
+  credentials: "Imprimir credenciales",
 };
 
 export function Breadcrumbs({ orgSlug, modules }: BreadcrumbsProps) {

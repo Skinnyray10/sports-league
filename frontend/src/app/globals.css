@@ -200,26 +200,30 @@
   }
 }
 
-/* Impresión de credencial: solo la ficha, sin shell ni fondo. */
+/* Impresión de credenciales: solo las fichas de .print-area, sin shell ni fondo. */
 @media print {
   @page {
-    margin: 12mm;
+    margin: 10mm;
   }
   body {
     background: #fff !important;
   }
-  body:has(.credential-print) * {
+  body:has(.print-area) * {
     visibility: hidden;
   }
-  body:has(.credential-print) .credential-print,
-  body:has(.credential-print) .credential-print * {
+  body:has(.print-area) .print-area,
+  body:has(.print-area) .print-area * {
     visibility: visible;
   }
-  body:has(.credential-print) .credential-print {
+  body:has(.print-area) .print-area {
     position: absolute;
-    inset: 0 auto auto 0;
+    inset: 0 0 auto 0;
+    margin: 0;
+  }
+  .credential-print {
     margin: 0;
     box-shadow: none;
+    break-inside: avoid;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

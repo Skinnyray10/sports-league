@@ -1,8 +1,11 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { PrinterIcon } from "lucide-react";
 import { getOrgAccess } from "@/components/ops/access";
 import { ModulePageHeader } from "@/components/ops/module-page-header";
 import { PlayersTable } from "@/components/players/players-table";
 import { RegisterPlayerDialog } from "@/components/players/register-player-dialog";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import type { ApprovalStatus, EligibilityStatus } from "@/types/database";
 import { unwrapOne } from "@/lib/utils";
@@ -90,8 +93,22 @@ export default async function PlayersPage({ params }: PageProps) {
             : "Todavía no tienes un equipo asignado como delegado."
         }
         actions={
-          teamId && access.isDelegado ? (
-            <RegisterPlayerDialog orgSlug={orgSlug} />
+          teamId ? (
+            <div className="flex flex-wrap gap-2">
+              {rows.length > 0 ? (
+                <Button
+                  variant="outline"
+                  nativeButton={false}
+                  render={<Link href={`/${orgSlug}/players/credentials`} />}
+                >
+                  <PrinterIcon data-icon="inline-start" />
+                  Imprimir todas las credenciales
+                </Button>
+              ) : null}
+              {access.isDelegado ? (
+                <RegisterPlayerDialog orgSlug={orgSlug} />
+              ) : null}
+            </div>
           ) : null
         }
       />

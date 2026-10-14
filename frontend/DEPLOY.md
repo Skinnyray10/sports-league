@@ -13,11 +13,16 @@ Esta app es **Next.js en modo servidor**. No uses sitio estático ni `output: 'e
 | --- | --- |
 | Carpeta de la aplicación | `frontend` |
 | Framework | Next.js |
-| Versión de Node | 22 |
-| Comando de build | `npm run build` |
+| Versión de Node | 22 (Supabase JS exige Node 22+) |
+| Comando de build | `npm run build:hostinger` |
 | Directorio de salida | `.next` |
 | Entry file | *(dejar vacío)* |
 | Comando de arranque | `npm run start` (si el panel lo pide) |
+
+El servidor compartido no tiene `GLIBC_2.29`, así que Next.js no carga su SWC
+nativo y usa la versión WebAssembly. Con eso Turbopack no funciona y tampoco se
+puede transpilar un `next.config.ts`; por eso el config es `next.config.mjs` y
+`build:hostinger` ejecuta `next build --webpack`.
 
 ## Variables de entorno
 
@@ -35,7 +40,7 @@ Hostinger debe servir con `next start` contra la carpeta `.next` generada. Si el
 
 ## Seguridad (Supabase Auth y cabeceras)
 
-`next.config.ts` envía CSP, HSTS (solo en producción), `X-Frame-Options: DENY` y oculta `X-Powered-By`. La CSP solo permite imágenes del propio sitio y del host de Supabase: por eso los logos y fotos deben estar en Supabase Storage (las acciones rechazan otras URLs).
+`next.config.mjs` envía CSP, HSTS (solo en producción), `X-Frame-Options: DENY` y oculta `X-Powered-By`. La CSP solo permite imágenes del propio sitio y del host de Supabase: por eso los logos y fotos deben estar en Supabase Storage (las acciones rechazan otras URLs).
 
 En el panel de Supabase (Authentication), aplica lo mismo que declara `supabase/config.toml`:
 

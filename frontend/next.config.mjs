@@ -1,8 +1,6 @@
-import type { NextConfig } from "next";
-
 const isDev = process.env.NODE_ENV !== "production";
 
-function supabaseOrigin(): string | null {
+function supabaseOrigin() {
   try {
     return process.env.NEXT_PUBLIC_SUPABASE_URL
       ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
@@ -51,7 +49,9 @@ const securityHeaders = [
       ]),
 ];
 
-const nextConfig: NextConfig = {
+// .mjs en vez de .ts: el hosting compartido no carga el SWC nativo y no puede transpilar el config.
+/** @type {import("next").NextConfig} */
+const nextConfig = {
   poweredByHeader: false,
   async headers() {
     return [

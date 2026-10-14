@@ -11,7 +11,8 @@ function isPublicPath(pathname: string): boolean {
     pathname === "/login" ||
     pathname === "/signup" ||
     pathname === "/forgot-password" ||
-    pathname === "/reset-password"
+    pathname === "/reset-password" ||
+    pathname === "/icon"
   ) {
     return true;
   }
