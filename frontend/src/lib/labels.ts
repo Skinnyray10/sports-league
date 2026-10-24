@@ -32,6 +32,7 @@ export const MATCH_STAGE_LABELS: Record<string, string> = {
   regular: "Regular",
   cuartos: "Cuartos",
   semifinal: "Semifinal",
+  tercer_lugar: "Tercer lugar",
   final: "Final",
 };
 

@@ -22,6 +22,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { BRANCH_LABELS, sportLabel } from "@/lib/labels";
+import {
+  DivisionFixtures,
+  type DivisionFixtureSummary,
+} from "@/components/tournaments/division-fixtures";
 import type { Branch } from "@/types/database";
 
 export type DivisionView = {
@@ -31,6 +35,7 @@ export type DivisionView = {
   sport: { id: string; key: string; name: string };
   category: { id: string; name: string };
   groups: { id: string; name: string }[];
+  fixtures: DivisionFixtureSummary;
 };
 
 type SportOption = { id: string; key: string; name: string };
@@ -308,6 +313,14 @@ export function TournamentDivisions({
                     </ul>
                   )}
                 </div>
+                {canManageStaff ? (
+                  <DivisionFixtures
+                    orgSlug={orgSlug}
+                    tournamentId={tournamentId}
+                    divisionId={division.id}
+                    summary={division.fixtures}
+                  />
+                ) : null}
               </div>
             );
           })}

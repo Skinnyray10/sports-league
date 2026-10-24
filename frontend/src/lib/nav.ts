@@ -19,6 +19,7 @@ const ADMIN_MODULES: ModuleDef[] = [
   { key: "teams", label: "Equipos", description: "Equipos por club, deporte, rama y categoría.", bandClass: "bg-band-teams" },
   { key: "matches", label: "Partidos", description: "Programa la jornada, asigna árbitros y gestiona aplazos.", bandClass: "bg-band-matches" },
   { key: "standings", label: "Posiciones", description: "Tabla calculada por división.", bandClass: "bg-band-standings" },
+  { key: "sanctions", label: "Castigados", description: "Jugadores castigados y cuántos juegos se pierden.", bandClass: "bg-band-matches" },
   { key: "approvals", label: "Credenciales", description: "Aprueba jugadores y marca elegibilidad.", bandClass: "bg-band-matches" },
   { key: "members", label: "Solicitudes", description: "Aprueba Delegados y Árbitros que se registraron.", bandClass: "bg-muted-foreground" },
   { key: "settings", label: "Configuración", description: "Marca, deportes, ramas y categorías.", bandClass: "bg-muted-foreground" },
