@@ -221,3 +221,12 @@ left join public.matches m
 group by
   o.slug, t.organization_id, t.division_id, t.group_id, d.tournament_id,
   d.sport_id, sp.key, d.branch, d.category_id, cat.name, g.name, t.id, t.name;
+
+-- Un equipo juega una sola vez por fase de liguilla: evita duplicar una
+-- ronda si se genera dos veces al mismo tiempo.
+create unique index uq_matches_playoff_home
+  on public.matches (division_id, stage, home_team_id)
+  where stage <> 'regular';
+create unique index uq_matches_playoff_away
+  on public.matches (division_id, stage, away_team_id)
+  where stage <> 'regular';

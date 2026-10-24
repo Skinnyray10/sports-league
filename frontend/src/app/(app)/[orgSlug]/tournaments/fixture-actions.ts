@@ -217,7 +217,11 @@ export async function generatePlayoffs(
 
     const { error } = await supabase.from("matches").insert(rows);
     if (error) {
-      return actionError(error, "No pudimos generar la liguilla.");
+      return actionError(
+        error,
+        "No pudimos generar la liguilla.",
+        "Esa ronda de liguilla ya existe. Recarga la página."
+      );
     }
 
     revalidateFixtures(orgSlug, tournamentId);
@@ -263,9 +267,8 @@ export async function advancePlayoffs(
       return { ok: false, error: "La final ya está programada." };
     }
     const current = stages.has("semifinal") ? "semifinal" : "cuartos";
-    const round = (matches ?? []).filter(
-      (m) => m.stage === current && m.status !== "cancelado"
-    );
+    // Un partido cancelado no tiene ganador: hay que reprogramarlo antes.
+    const round = (matches ?? []).filter((m) => m.stage === current);
 
     const winners: string[] = [];
     const losers: string[] = [];
@@ -316,7 +319,11 @@ export async function advancePlayoffs(
 
     const { error } = await supabase.from("matches").insert(rows);
     if (error) {
-      return actionError(error, "No pudimos generar la siguiente ronda.");
+      return actionError(
+        error,
+        "No pudimos generar la siguiente ronda.",
+        "Esa ronda de liguilla ya existe. Recarga la página."
+      );
     }
 
     revalidateFixtures(orgSlug, tournamentId);
@@ -360,7 +367,9 @@ export async function deleteRoundRobin(
       .eq("organization_id", orgId)
       .eq("tournament_id", tournamentId)
       .eq("division_id", divisionId)
-      .eq("stage", "regular");
+      .eq("stage", "regular")
+      // Aunque alguien cierre un partido justo ahora, ese no se borra.
+      .not("status", "in", "(en_vivo,finalizado)");
     if (error) {
       return actionError(error, "No pudimos borrar el rol de juegos.");
     }

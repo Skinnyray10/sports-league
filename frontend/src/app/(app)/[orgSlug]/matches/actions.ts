@@ -561,16 +561,19 @@ export async function saveJornadaSchedule(
         (p.scheduledAt ? new Date(p.scheduledAt).getTime() : null);
       if (sameTime && (match.venue ?? null) === p.venue) continue;
 
+      // Un aplazado con nuevo horario vuelve a programado, como al reprogramar.
+      const newStatus: MatchStatus =
+        match.status === "aplazado" && p.scheduledAt ? "programado" : match.status;
       const { error } = await supabase
         .from("matches")
-        .update({ scheduled_at: p.scheduledAt, venue: p.venue })
+        .update({ scheduled_at: p.scheduledAt, venue: p.venue, status: newStatus })
         .eq("id", p.matchId)
         .eq("organization_id", orgId);
       if (error) {
         return actionError(error, "No pudimos guardar los horarios.");
       }
 
-      if (match.scheduled_at && !sameTime) {
+      if (match.scheduled_at || newStatus !== match.status) {
         const changeError = await insertScheduleChange({
           supabase,
           organizationId: orgId,
@@ -582,7 +585,7 @@ export async function saveJornadaSchedule(
           previousVenue: match.venue,
           newVenue: p.venue,
           previousStatus: match.status,
-          newStatus: match.status,
+          newStatus,
           changedBy: membership.user_id,
         });
         if (changeError) return changeError;
