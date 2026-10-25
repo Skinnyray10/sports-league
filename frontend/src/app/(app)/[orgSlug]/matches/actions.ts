@@ -8,9 +8,16 @@ import {
   actionError,
   type ActionResult,
 } from "@/components/matches/access";
+import { fromMxParts } from "@/lib/mx-time";
 import type { MatchStatus, ScheduleChangeType } from "@/types/database";
 
-const MATCH_STAGES = ["regular", "cuartos", "semifinal", "final"] as const;
+const MATCH_STAGES = [
+  "regular",
+  "cuartos",
+  "semifinal",
+  "tercer_lugar",
+  "final",
+] as const;
 
 function parseOptionalInt(value: FormDataEntryValue | null): number | null {
   const raw = String(value ?? "").trim();
@@ -485,6 +492,111 @@ export async function rescheduleMatch(
     return { ok: true };
   } catch (error) {
     return actionError(error, "No pudimos reprogramar el partido.");
+  }
+}
+
+export type JornadaScheduleEntry = {
+  matchId: string;
+  date: string;
+  time: string;
+  venue: string;
+};
+
+/**
+ * Guarda de una vez fecha, hora y cancha de los partidos de una jornada
+ * (lo que se acuerda en la junta semanal). Si un partido ya tenía horario y
+ * cambia, queda en el historial como reprogramación.
+ */
+export async function saveJornadaSchedule(
+  orgSlug: string,
+  entries: JornadaScheduleEntry[]
+): Promise<ActionResult> {
+  try {
+    const membership = await requireOrgRole(orgSlug, ["admin"]);
+    const orgId = membership.organization_id;
+
+    const parsed: { matchId: string; scheduledAt: string | null; venue: string | null }[] = [];
+    for (const [i, entry] of entries.entries()) {
+      const date = entry.date.trim();
+      const time = entry.time.trim();
+      const venue = entry.venue.trim() || null;
+      const venueTooLong = lengthError([[venue, 160]]);
+      if (venueTooLong) return venueTooLong;
+      if (!date && !time) {
+        parsed.push({ matchId: entry.matchId, scheduledAt: null, venue });
+        continue;
+      }
+      const scheduledAt = fromMxParts(date, time);
+      if (!scheduledAt) {
+        return {
+          ok: false,
+          error: `Al partido ${i + 1} le falta la fecha o la hora.`,
+        };
+      }
+      parsed.push({ matchId: entry.matchId, scheduledAt, venue });
+    }
+    if (parsed.length === 0) return { ok: true };
+
+    const supabase = await createClient();
+    const { data: current, error: readError } = await supabase
+      .from("matches")
+      .select("id, status, scheduled_at, venue")
+      .eq("organization_id", orgId)
+      .in(
+        "id",
+        parsed.map((p) => p.matchId)
+      );
+    if (readError) {
+      return actionError(readError, "No pudimos leer los partidos.");
+    }
+    const byId = new Map((current ?? []).map((m) => [m.id, m]));
+
+    for (const p of parsed) {
+      const match = byId.get(p.matchId);
+      if (!match || match.status === "finalizado" || match.status === "cancelado") {
+        continue;
+      }
+      const sameTime =
+        (match.scheduled_at ? new Date(match.scheduled_at).getTime() : null) ===
+        (p.scheduledAt ? new Date(p.scheduledAt).getTime() : null);
+      if (sameTime && (match.venue ?? null) === p.venue) continue;
+
+      // Un aplazado con nuevo horario vuelve a programado, como al reprogramar.
+      const newStatus: MatchStatus =
+        match.status === "aplazado" && p.scheduledAt ? "programado" : match.status;
+      const { error } = await supabase
+        .from("matches")
+        .update({ scheduled_at: p.scheduledAt, venue: p.venue, status: newStatus })
+        .eq("id", p.matchId)
+        .eq("organization_id", orgId);
+      if (error) {
+        return actionError(error, "No pudimos guardar los horarios.");
+      }
+
+      if (match.scheduled_at || newStatus !== match.status) {
+        const changeError = await insertScheduleChange({
+          supabase,
+          organizationId: orgId,
+          matchId: p.matchId,
+          changeType: "reprogramar",
+          reason: "Ajuste en el armado de la jornada",
+          previousScheduledAt: match.scheduled_at,
+          newScheduledAt: p.scheduledAt,
+          previousVenue: match.venue,
+          newVenue: p.venue,
+          previousStatus: match.status,
+          newStatus,
+          changedBy: membership.user_id,
+        });
+        if (changeError) return changeError;
+      }
+    }
+
+    revalidateMatchPaths(orgSlug);
+    revalidatePath(`/${orgSlug}/matches/jornada`);
+    return { ok: true };
+  } catch (error) {
+    return actionError(error, "No pudimos guardar los horarios.");
   }
 }
 

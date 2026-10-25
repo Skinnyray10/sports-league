@@ -10,6 +10,7 @@ import {
   TournamentDivisions,
   type DivisionView,
 } from "@/components/tournaments/tournament-divisions";
+import type { DivisionFixtureSummary } from "@/components/tournaments/division-fixtures";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Branch, TournamentStatus } from "@/types/database";
@@ -19,6 +20,8 @@ import {
   legsLabel,
 } from "@/lib/labels";
 import { unwrapOne } from "@/lib/utils";
+
+const PLAYOFF_STAGE_ORDER = ["cuartos", "semifinal", "tercer_lugar", "final"];
 
 type TournamentDetailPageProps = {
   params: Promise<{ orgSlug: string; tournamentId: string }>;
@@ -39,6 +42,8 @@ export default async function TournamentDetailPage({
     { data: orgSportsRaw, error: orgSportsError },
     { data: branchesRaw, error: branchesError },
     { data: categories, error: categoriesError },
+    { data: teamsRaw, error: teamsError },
+    { data: matchesRaw, error: matchesError },
   ] = await Promise.all([
     supabase
       .from("tournaments")
@@ -74,6 +79,15 @@ export default async function TournamentDetailPage({
       .select("id, name")
       .eq("organization_id", orgId)
       .order("sort_order", { ascending: true }),
+    supabase
+      .from("teams")
+      .select("division_id")
+      .eq("organization_id", orgId),
+    supabase
+      .from("matches")
+      .select("division_id, stage, status, jornada")
+      .eq("organization_id", orgId)
+      .eq("tournament_id", tournamentId),
   ]);
 
   if (tournamentError) throw tournamentError;
@@ -82,6 +96,8 @@ export default async function TournamentDetailPage({
   if (orgSportsError) throw orgSportsError;
   if (branchesError) throw branchesError;
   if (categoriesError) throw categoriesError;
+  if (teamsError) throw teamsError;
+  if (matchesError) throw matchesError;
   if (!tournament) notFound();
 
   const groupsByDivision = new Map<string, { id: string; name: string }[]>();
@@ -90,6 +106,24 @@ export default async function TournamentDetailPage({
     list.push({ id: g.id, name: g.name });
     groupsByDivision.set(g.division_id, list);
   }
+
+  const fixtureSummary = (divisionId: string): DivisionFixtureSummary => {
+    const matches = (matchesRaw ?? []).filter(
+      (m) => m.division_id === divisionId
+    );
+    const regular = matches.filter((m) => m.stage === "regular");
+    const stages = new Set(matches.map((m) => m.stage));
+    return {
+      teamCount: (teamsRaw ?? []).filter((t) => t.division_id === divisionId)
+        .length,
+      regularMatches: regular.length,
+      regularPlayed: regular.filter(
+        (m) => m.status === "finalizado" || m.status === "en_vivo"
+      ).length,
+      jornadas: new Set(regular.map((m) => m.jornada)).size,
+      playoffStages: PLAYOFF_STAGE_ORDER.filter((s) => stages.has(s)),
+    };
+  };
 
   const divisions: DivisionView[] = (divisionsRaw ?? []).flatMap((row) => {
     const sport = unwrapOne(
@@ -113,6 +147,7 @@ export default async function TournamentDetailPage({
         sport,
         category,
         groups: groupsByDivision.get(row.id) ?? [],
+        fixtures: fixtureSummary(row.id),
       },
     ];
   });

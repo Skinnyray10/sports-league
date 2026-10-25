@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalendarClockIcon } from "lucide-react";
 import { getMatchAccess } from "@/components/matches/access";
 import {
   CreateMatchDialog,
@@ -11,6 +12,7 @@ import {
   type MatchFilterOption,
   type MatchFiltersState,
 } from "@/components/matches/matches-filters";
+import { Button } from "@/components/ui/button";
 import { ModulePageHeader } from "@/components/ops/module-page-header";
 import { Pagination, pageRange, parsePage } from "@/components/ops/pagination";
 import {
@@ -254,12 +256,21 @@ export default async function MatchesPage({ params, searchParams }: PageProps) {
         actions={
           access.canCreateMatch ? (
             divisions.length > 0 ? (
-              <CreateMatchDialog
-                orgSlug={orgSlug}
-                divisions={divisions}
-                teams={teams}
-                groups={groups}
-              />
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  render={<Link href={`/${orgSlug}/matches/jornada`} />}
+                >
+                  <CalendarClockIcon data-icon="inline-start" />
+                  Armar jornada
+                </Button>
+                <CreateMatchDialog
+                  orgSlug={orgSlug}
+                  divisions={divisions}
+                  teams={teams}
+                  groups={groups}
+                />
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground">
                 <Link
