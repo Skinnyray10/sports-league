@@ -47,6 +47,8 @@ type CreateTeamDialogProps = {
   clubs: ClubOption[];
   divisions: DivisionOption[];
   groups: GroupOption[];
+  /** Texto del botón; por defecto «Agregar …». */
+  label?: string;
 };
 
 export function CreateTeamDialog({
@@ -54,6 +56,7 @@ export function CreateTeamDialog({
   clubs,
   divisions,
   groups,
+  label,
 }: CreateTeamDialogProps) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
@@ -92,12 +95,13 @@ export function CreateTeamDialog({
       <DialogTrigger
         render={
           <Button
+            data-guia="equipo"
             disabled={!canCreate}
           />
         }
       >
         <PlusIcon data-icon="inline-start" />
-        Agregar equipo
+        {label ?? "Agregar equipo"}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>

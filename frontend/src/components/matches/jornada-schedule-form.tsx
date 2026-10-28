@@ -77,7 +77,7 @@ export function JornadaScheduleForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-3">
+    <form data-guia="jornada" onSubmit={onSubmit} className="space-y-3">
       <datalist id="jornada-venues">
         {venues.map((v) => (
           <option key={v} value={v} />

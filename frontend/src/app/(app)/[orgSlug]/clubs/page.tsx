@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ModulePageHeader } from "@/components/ops/module-page-header";
 import { CreateClubDialog } from "@/components/clubs/create-club-dialog";
 import { ClubsTable } from "@/components/clubs/clubs-table";
+import { EmptyState } from "@/components/states/empty-state";
 
 type ClubsPageProps = {
   params: Promise<{ orgSlug: string }>;
@@ -29,9 +30,17 @@ export default async function ClubsPage({ params }: ClubsPageProps) {
         band="clubs"
         title="Clubes"
         description="Los clubes agrupan equipos. Cada equipo pertenece a un club y a una división."
-        actions={<CreateClubDialog orgSlug={orgSlug} />}
+        actions={clubs?.length ? <CreateClubDialog orgSlug={orgSlug} /> : null}
       />
-      <ClubsTable orgSlug={orgSlug} clubs={clubs ?? []} />
+      {clubs?.length ? (
+        <ClubsTable orgSlug={orgSlug} clubs={clubs} />
+      ) : (
+        <EmptyState
+          title="Todavía no hay clubes"
+          description="Un club es la institución o empresa que inscribe equipos. Empieza por aquí."
+          action={<CreateClubDialog orgSlug={orgSlug} label="Agregar tu primer club" />}
+        />
+      )}
     </section>
   );
 }

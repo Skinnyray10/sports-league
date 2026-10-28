@@ -20,9 +20,11 @@ import { toast } from "sonner";
 
 type CreateClubDialogProps = {
   orgSlug: string;
+  /** Texto del botón; por defecto «Agregar …». */
+  label?: string;
 };
 
-export function CreateClubDialog({ orgSlug }: CreateClubDialogProps) {
+export function CreateClubDialog({ orgSlug, label }: CreateClubDialogProps) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
@@ -46,11 +48,11 @@ export function CreateClubDialog({ orgSlug }: CreateClubDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button />
+          <Button data-guia="club" />
         }
       >
         <PlusIcon data-icon="inline-start" />
-        Agregar club
+        {label ?? "Agregar club"}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>

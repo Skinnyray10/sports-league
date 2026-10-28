@@ -244,3 +244,24 @@
     print-color-adjust: exact;
   }
 }
+
+/* Foco del tutorial (driver.js) con los colores de la app. */
+.guia-popover.driver-popover {
+  font-family: var(--font-tablero-sans), sans-serif;
+  background-color: var(--popover);
+  color: var(--popover-foreground);
+  border-radius: 12px;
+  padding: 16px;
+}
+.guia-popover .driver-popover-title {
+  font-family: var(--font-tablero-display), sans-serif;
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+.guia-popover .driver-popover-description {
+  color: var(--muted-foreground);
+  font-size: 0.9375rem;
+}
+.guia-popover .driver-popover-arrow {
+  display: none;
+}

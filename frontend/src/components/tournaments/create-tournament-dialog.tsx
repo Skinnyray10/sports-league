@@ -27,10 +27,13 @@ import { toast } from "sonner";
 
 type CreateTournamentDialogProps = {
   orgSlug: string;
+  /** Texto del botón; por defecto «Agregar …». */
+  label?: string;
 };
 
 export function CreateTournamentDialog({
   orgSlug,
+  label,
 }: CreateTournamentDialogProps) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
@@ -62,11 +65,11 @@ export function CreateTournamentDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button />
+          <Button data-guia="torneo" />
         }
       >
         <PlusIcon data-icon="inline-start" />
-        Agregar torneo
+        {label ?? "Agregar torneo"}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>
