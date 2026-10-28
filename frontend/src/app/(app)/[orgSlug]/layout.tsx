@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { AppHeader } from "@/components/layout/app-header";
 import { OrgSidebar } from "@/components/layout/org-sidebar";
+import { GuideSpotlight } from "@/components/tutorial/guide-spotlight";
 import { requireUser } from "@/lib/auth";
 import { modulesForRoles } from "@/lib/nav";
 import { getMembership, listUserOrganizations } from "@/lib/org";
@@ -45,6 +47,7 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
           organizations={organizations}
           currentSlug={orgSlug}
           modules={modules}
+          isAdmin={roles.includes("admin")}
         />
         <main
           id="contenido"
@@ -53,6 +56,9 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
         >
           {children}
         </main>
+        <Suspense>
+          <GuideSpotlight />
+        </Suspense>
       </div>
     </div>
   );

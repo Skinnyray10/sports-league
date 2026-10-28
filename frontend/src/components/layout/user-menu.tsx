@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { ChevronDownIcon, UserIcon } from "lucide-react";
 import { signOut } from "@/app/(auth)/actions";
+import { setAdminTutorial } from "@/app/(app)/tutorial-actions";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,9 +20,15 @@ type UserMenuProps = {
   email: string | undefined;
   organizations: Organization[];
   currentSlug: string;
+  isAdmin: boolean;
 };
 
-export function UserMenu({ email, organizations, currentSlug }: UserMenuProps) {
+export function UserMenu({
+  email,
+  organizations,
+  currentSlug,
+  isAdmin,
+}: UserMenuProps) {
   const router = useRouter();
 
   return (
@@ -70,6 +77,19 @@ export function UserMenu({ email, organizations, currentSlug }: UserMenuProps) {
         <DropdownMenuItem onClick={() => router.push(`/p/${currentSlug}`)}>
           Vista pública
         </DropdownMenuItem>
+        {isAdmin ? (
+          <DropdownMenuItem
+            onClick={async () => {
+              const result = await setAdminTutorial(null);
+              if (result.ok) {
+                router.push(`/${currentSlug}`);
+                router.refresh();
+              }
+            }}
+          >
+            Ver tutorial de nuevo
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => router.push("/onboarding")}>
           Crear organización

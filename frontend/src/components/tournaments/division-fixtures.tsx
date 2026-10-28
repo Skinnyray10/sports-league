@@ -95,7 +95,12 @@ export function DivisionFixtures({
           </p>
           <ConfirmDialog
             trigger={
-              <Button type="button" size="sm" disabled={summary.teamCount < 2} />
+              <Button
+                type="button"
+                size="sm"
+                data-guia="rol"
+                disabled={summary.teamCount < 2}
+              />
             }
             triggerContent={
               <>

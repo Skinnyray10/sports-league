@@ -24,11 +24,14 @@ export type PlayerOption = { id: string; name: string; teamName: string };
 type CreateSanctionDialogProps = {
   orgSlug: string;
   players: PlayerOption[];
+  /** Texto del botón; por defecto «Agregar …». */
+  label?: string;
 };
 
 export function CreateSanctionDialog({
   orgSlug,
   players,
+  label,
 }: CreateSanctionDialogProps) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
@@ -53,9 +56,9 @@ export function CreateSanctionDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button disabled={players.length === 0} />}>
+      <DialogTrigger render={<Button data-guia="castigo" disabled={players.length === 0} />}>
         <PlusIcon data-icon="inline-start" />
-        Agregar castigo
+        {label ?? "Agregar castigo"}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" showCloseButton>
         <DialogHeader>

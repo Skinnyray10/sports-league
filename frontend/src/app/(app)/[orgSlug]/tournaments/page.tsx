@@ -3,6 +3,7 @@ import { getOrgAccess } from "@/components/ops/access";
 import { ModulePageHeader } from "@/components/ops/module-page-header";
 import { CreateTournamentDialog } from "@/components/tournaments/create-tournament-dialog";
 import { TournamentsList } from "@/components/tournaments/tournaments-list";
+import { EmptyState } from "@/components/states/empty-state";
 import type { TournamentStatus } from "@/types/database";
 
 type TournamentsPageProps = {
@@ -60,16 +61,26 @@ export default async function TournamentsPage({
         title="Torneos"
         description="Las competencias de tu organización. Dentro de cada torneo defines divisiones por deporte, rama y categoría."
         actions={
-          access.canManageStaff ? (
+          access.canManageStaff && rows.length > 0 ? (
             <CreateTournamentDialog orgSlug={orgSlug} />
           ) : null
         }
       />
-      <TournamentsList
-        orgSlug={orgSlug}
-        tournaments={rows}
-        canManageStaff={access.canManageStaff}
-      />
+      {access.canManageStaff && rows.length === 0 ? (
+        <EmptyState
+          title="Todavía no hay torneos"
+          description="Crea tu torneo y después agrega sus divisiones (deporte, rama y categoría)."
+          action={
+            <CreateTournamentDialog orgSlug={orgSlug} label="Crear tu primer torneo" />
+          }
+        />
+      ) : (
+        <TournamentsList
+          orgSlug={orgSlug}
+          tournaments={rows}
+          canManageStaff={access.canManageStaff}
+        />
+      )}
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import { requireOrgRole } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
 import { ModulePageHeader } from "@/components/ops/module-page-header";
+import { EmptyState } from "@/components/states/empty-state";
 import {
   CreateSanctionDialog,
   type PlayerOption,
@@ -77,9 +78,32 @@ export default async function SanctionsPage({ params }: PageProps) {
         band="approvals"
         title="Castigados"
         description="Jugadores castigados: la falta, en qué jornada fue y cuántos juegos se pierde."
-        actions={<CreateSanctionDialog orgSlug={orgSlug} players={players} />}
+        actions={
+          sanctions.length > 0 ? (
+            <CreateSanctionDialog orgSlug={orgSlug} players={players} />
+          ) : null
+        }
       />
-      <SanctionsTable orgSlug={orgSlug} sanctions={sanctions} />
+      {sanctions.length > 0 ? (
+        <SanctionsTable orgSlug={orgSlug} sanctions={sanctions} />
+      ) : players.length === 0 ? (
+        <EmptyState
+          title="No hay castigados"
+          description="Cuando los delegados registren a sus jugadores, aquí podrás anotar los castigos."
+        />
+      ) : (
+        <EmptyState
+          title="No hay castigados"
+          description="Si un jugador recibe un castigo, anota la falta y cuántos juegos se pierde."
+          action={
+            <CreateSanctionDialog
+              orgSlug={orgSlug}
+              players={players}
+              label="Agregar un castigo"
+            />
+          }
+        />
+      )}
     </section>
   );
 }

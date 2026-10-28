@@ -9,6 +9,7 @@ type AppHeaderProps = {
   organizations: Organization[];
   currentSlug: string;
   modules: NavItem[];
+  isAdmin: boolean;
 };
 
 export function AppHeader({
@@ -16,6 +17,7 @@ export function AppHeader({
   organizations,
   currentSlug,
   modules,
+  isAdmin,
 }: AppHeaderProps) {
   return (
     <header className="flex items-center justify-between gap-3 border-b border-border bg-card/80 px-4 py-2 backdrop-blur-[2px] md:px-6 md:py-3">
@@ -39,6 +41,7 @@ export function AppHeader({
           email={email}
           organizations={organizations}
           currentSlug={currentSlug}
+          isAdmin={isAdmin}
         />
       </div>
     </header>

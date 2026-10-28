@@ -117,6 +117,7 @@ export function TournamentDivisions({
     <div className="space-y-6">
       {canManageStaff ? (
         <form
+          data-guia="division"
           action={onCreateDivision}
           className="grid gap-3 border border-border bg-card p-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end"
         >
